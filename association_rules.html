@@ -1,0 +1,1549 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ARM — Association Rule Mining Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f6f5f2;--bg2:#ffffff;--surface:#ffffff;--surface2:#f0eef9;
+  --border:#e2dff0;--border2:#ccc9e0;
+  --pink:#e040a0;--pink2:#c2185b;--pink3:rgba(224,64,160,.1);
+  --purple:#6c47ff;--purple2:#5835d4;--purple3:#4a28b8;--purple4:rgba(108,71,255,.1);
+  --cyan:#0ea5e9;--cyan2:rgba(14,165,233,.1);
+  --gold:#f59e0b;--gold2:rgba(245,158,11,.1);
+  --green:#10b981;--green2:rgba(16,185,129,.1);
+  --text:#18181b;--text2:#52525b;--text3:#a1a1aa;
+  --shadow:0 2px 16px rgba(0,0,0,.06);
+  --shadow2:0 8px 40px rgba(108,71,255,.12);
+  --radius:16px;
+  --grid-color:rgba(108,71,255,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── GRID BG ── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(var(--grid-color) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid-color) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:56px 20px 36px;position:relative;z-index:1;}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;padding:6px 16px;
+  border-radius:999px;border:1px solid var(--border2);background:var(--bg2);
+  font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--text3);
+  text-transform:uppercase;margin-bottom:24px;}
+.hero-badge::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--purple);flex-shrink:0;}
+.hero-title{font-size:clamp(52px,8vw,96px);line-height:1;margin-bottom:20px;letter-spacing:-2px;}
+.hero-title .reg{font-family:'DM Serif Display',serif;font-style:italic;color:var(--text);font-weight:400;}
+.hero-title .pred{font-family:'DM Serif Display',serif;color:var(--purple);font-weight:400;}
+.hero-sub{font-size:16px;color:var(--text2);max-width:520px;margin:0 auto 28px;line-height:1.7;font-weight:500;}
+.hero-pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:0;}
+.hero-pill{padding:7px 16px;border-radius:999px;border:1px solid var(--border2);background:var(--bg2);
+  font-size:11px;color:var(--text2);font-weight:500;}
+.hero-pill span{font-family:'JetBrains Mono',monospace;color:var(--purple);font-weight:700;}
+
+/* ── MAIN NAV ── */
+.main-nav{position:sticky;top:0;z-index:100;background:rgba(246,245,242,.95);
+  backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 20px;}
+.main-nav-inner{max-width:900px;margin:0 auto;display:flex;gap:4px;padding:8px 0;}
+.nav-section-label{font-size:9px;font-weight:800;letter-spacing:.14em;color:var(--text3);
+  text-transform:uppercase;align-self:center;padding:0 8px;white-space:nowrap;}
+.nav-divider{width:1px;background:var(--border2);margin:4px 8px;align-self:stretch;}
+.nav-tab{display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;
+  font-size:12px;font-weight:700;cursor:pointer;border:none;background:transparent;
+  color:var(--text3);transition:all .18s;white-space:nowrap;font-family:'Sora',sans-serif;}
+.nav-tab:hover{background:var(--surface2);color:var(--purple);}
+.nav-tab.active{background:var(--purple);color:#fff;box-shadow:0 4px 16px rgba(108,71,255,.35);}
+.nav-tab .tab-icon{font-size:14px;}
+
+/* ── CONTENT ── */
+.content-wrap{max-width:1100px;margin:0 auto;padding:28px 20px;position:relative;z-index:1;}
+
+/* ── THEORY HERO CARD ── */
+.theory-hero-card{border-radius:20px;padding:32px 36px;margin-bottom:24px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--purple) 0%,#9b59d4 50%,var(--pink) 100%);color:#fff;}
+.theory-hero-card::after{content:'';position:absolute;right:-60px;top:-60px;width:280px;height:280px;
+  border-radius:50%;background:rgba(255,255,255,.08);pointer-events:none;}
+.theory-hero-card::before{content:'';position:absolute;right:80px;bottom:-40px;width:160px;height:160px;
+  border-radius:50%;background:rgba(255,255,255,.05);pointer-events:none;}
+.thc-badge{display:inline-block;padding:4px 12px;border-radius:999px;background:rgba(255,255,255,.2);
+  font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px;}
+.thc-title{font-family:'DM Serif Display',serif;font-size:clamp(26px,4vw,36px);margin-bottom:12px;font-weight:400;position:relative;z-index:1;}
+.thc-desc{font-size:14px;line-height:1.8;opacity:.92;max-width:600px;font-weight:500;position:relative;z-index:1;}
+
+/* ── THEORY CONTENT ── */
+.th-section{margin-bottom:28px;}
+.th-section-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);
+  margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.th-section-title::before{content:'';width:3px;height:20px;background:linear-gradient(var(--purple),var(--pink));border-radius:2px;flex-shrink:0;}
+.th-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:14px;}
+.th-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;
+  transition:border-color .18s,transform .18s,box-shadow .18s;}
+.th-card:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:var(--shadow2);}
+.th-card-icon{font-size:24px;margin-bottom:10px;}
+.th-card-title{font-size:13px;font-weight:700;color:var(--purple);margin-bottom:7px;}
+.th-card-text{font-size:12.5px;color:var(--text2);line-height:1.65;font-weight:500;}
+.formula-box{background:var(--text);border-radius:12px;
+  padding:18px 20px;font-family:'JetBrains Mono',monospace;font-size:12.5px;
+  color:#a78bfa;font-weight:600;margin:14px 0;line-height:2;border-left:4px solid var(--purple);}
+.example-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  padding:16px 18px;margin:14px 0;border-left:4px solid var(--gold);}
+.example-box .ex-label{font-size:9px;font-weight:800;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.example-box .ex-text{font-size:13px;color:var(--text2);line-height:1.85;font-weight:500;}
+.example-box code{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:5px;color:var(--purple);}
+
+/* ── APRIORI STEPS ── */
+.apriori-steps{display:flex;flex-direction:column;gap:0;}
+.apriori-step{display:flex;gap:18px;position:relative;}
+.apriori-step:not(:last-child)::after{content:'';position:absolute;left:20px;top:42px;width:2px;bottom:-6px;background:linear-gradient(var(--border2),transparent);}
+.step-num{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;
+  color:#fff;flex-shrink:0;box-shadow:0 4px 16px rgba(108,71,255,.3);}
+.step-body{flex:1;padding-bottom:24px;}
+.step-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.step-text{font-size:13px;color:var(--text2);line-height:1.7;font-weight:500;}
+.step-code{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--text);
+  border-radius:8px;padding:10px 14px;margin-top:8px;color:#a78bfa;border:none;}
+
+/* ── COMPARE GRID ── */
+.compare-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:14px 0;}
+.compare-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;transition:border-color .18s;}
+.compare-card:hover{border-color:var(--purple);}
+.compare-card.highlight{border-color:var(--purple2);background:var(--purple4);}
+.compare-title{font-size:11px;font-weight:800;color:var(--purple);margin-bottom:10px;letter-spacing:.07em;text-transform:uppercase;}
+.compare-list{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.compare-list li{font-size:12.5px;color:var(--text2);padding-left:16px;position:relative;line-height:1.55;font-weight:500;}
+.compare-list li::before{content:'→';position:absolute;left:0;color:var(--cyan);font-weight:700;}
+
+/* ── LIFT CARDS ── */
+.lift-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
+.lift-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
+.lift-val{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px;font-weight:400;}
+.lift-text{font-size:11.5px;color:var(--text2);line-height:1.5;font-weight:500;}
+
+/* ── METRICS TABLE ── */
+.metrics-table{width:100%;border-collapse:collapse;font-size:12.5px;margin:14px 0;}
+.metrics-table th{background:var(--surface2);color:var(--purple);padding:10px 14px;
+  text-align:left;font-size:9.5px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;border-bottom:1px solid var(--border);}
+.metrics-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);font-weight:500;}
+.metrics-table tr:last-child td{border-bottom:none;}
+.metrics-table tr:hover td{background:var(--surface2);}
+.code-inline{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:5px;color:var(--purple);}
+
+/* ── LAB UPLOAD ── */
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:36px 20px;
+  text-align:center;cursor:pointer;transition:all .3s;margin-bottom:16px;
+  background:var(--bg2);position:relative;overflow:hidden;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--purple);background:var(--purple4);box-shadow:var(--shadow2);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2;}
+.uicon{font-size:44px;margin-bottom:12px;}
+.utitle{font-size:16px;font-weight:700;color:var(--text);margin-bottom:7px;}
+.usub{color:var(--text3);font-size:12.5px;font-weight:500;}
+.uinfo{margin-top:14px;font-size:11px;font-family:'JetBrains Mono',monospace;
+  color:var(--green);background:var(--green2);display:none;padding:7px 16px;
+  border-radius:8px;font-weight:700;border:1px solid rgba(16,185,129,.2);display:inline-block;}
+
+/* ── SAMPLE ROW ── */
+.sample-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center;}
+.sample-row span{color:var(--text3);font-size:12px;font-weight:600;}
+
+/* ── KEY CARD ── */
+.key-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px 20px;margin-bottom:16px;box-shadow:var(--shadow);}
+.key-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.key-input{flex:1;min-width:160px;padding:10px 16px;background:var(--bg);
+  border:1.5px solid var(--border);border-radius:10px;color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color .2s;}
+.key-input:focus{border-color:var(--purple);}
+.key-note{font-size:10.5px;color:var(--text3);margin-top:8px;font-weight:500;}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:20px 16px;transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;box-shadow:var(--shadow);}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow2);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gc,linear-gradient(90deg,var(--purple),var(--pink)));}
+.sicon{font-size:22px;margin-bottom:9px;}
+.sval{font-family:'DM Serif Display',serif;font-size:32px;font-weight:400;
+  background:var(--gc,linear-gradient(135deg,var(--purple),var(--pink)));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+.slbl{color:var(--text3);font-size:10px;font-weight:700;margin-top:7px;letter-spacing:.06em;text-transform:uppercase;}
+
+/* ── LAB TABS ── */
+.lab-tabs{display:flex;gap:4px;margin-bottom:20px;flex-wrap:wrap;
+  background:var(--bg2);padding:5px;border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);}
+.lab-tab{padding:8px 14px;border-radius:10px;font-size:11.5px;font-weight:700;cursor:pointer;
+  color:var(--text3);transition:all .18s;border:none;background:transparent;white-space:nowrap;flex:1 0 auto;
+  font-family:'Sora',sans-serif;}
+.lab-tab:hover{color:var(--purple);background:var(--purple4);}
+.lab-tab.active{background:linear-gradient(135deg,var(--purple),var(--pink2));color:#fff;box-shadow:0 4px 16px rgba(108,71,255,.3);}
+.lab-panel{display:none;}
+.lab-panel.active{display:block;animation:fadeUp .3s ease both;}
+
+/* ── CARD ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px 18px;margin-bottom:16px;box-shadow:var(--shadow);}
+.card-title{font-family:'DM Serif Display',serif;font-size:19px;color:var(--text);
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.pill{padding:4px 12px;border-radius:999px;font-size:9.5px;font-weight:700;
+  background:var(--purple4);color:var(--purple);border:1px solid var(--border2);
+  letter-spacing:.07em;text-transform:uppercase;}
+.pill-cyan{background:var(--cyan2);color:var(--cyan);border-color:rgba(14,165,233,.2);}
+.pill-pink{background:var(--pink3);color:var(--pink);border-color:rgba(224,64,160,.2);}
+.pill-gold{background:var(--gold2);color:var(--gold);border-color:rgba(245,158,11,.2);}
+.pill-green{background:var(--green2);color:var(--green);border-color:rgba(16,185,129,.2);}
+
+/* ── CHARTS ── */
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:16px;}
+.chart-wrap canvas{max-height:220px;}
+
+/* ── TABLE ── */
+.table-scroll{overflow-x:auto;border-radius:12px;border:1px solid var(--border);}
+.data-table{width:100%;border-collapse:collapse;font-size:12px;}
+.data-table th{background:var(--surface2);color:var(--purple);padding:11px 14px;
+  text-align:left;font-size:9.5px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+.data-table td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text2);font-weight:500;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:var(--surface2);}
+.search-inp{width:100%;padding:10px 16px;background:var(--bg2);border:1.5px solid var(--border);
+  border-radius:10px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;
+  font-weight:500;outline:none;transition:border-color .2s;}
+.search-inp:focus{border-color:var(--purple);}
+
+/* ── QUANT ── */
+.quant-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.quant-item{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--shadow);}
+.quant-label{font-size:10px;font-weight:800;color:var(--purple);letter-spacing:.1em;
+  text-transform:uppercase;margin-bottom:12px;}
+.quant-bars{display:flex;flex-direction:column;gap:8px;}
+.qb-row{display:flex;align-items:center;gap:8px;}
+.qb-name{width:78px;color:var(--text3);font-weight:600;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;font-size:11px;}
+.qb-bar{flex:1;height:7px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+.qb-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.qb-val{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text3);min-width:26px;text-align:right;font-weight:700;}
+
+/* ── TREE ── */
+.tree-root{list-style:none;}
+.tree-root li{margin:4px 0;}
+.tree-node{display:flex;align-items:center;gap:8px;padding:10px 16px;
+  background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+  cursor:pointer;user-select:none;transition:all .15s;font-size:12.5px;font-weight:600;}
+.tree-node:hover{border-color:var(--purple);background:var(--purple4);}
+.tree-toggle{font-size:10px;color:var(--purple);width:13px;flex-shrink:0;}
+.tree-children{display:none;margin-left:26px;margin-top:4px;list-style:none;}
+.tree-children.open{display:block;}
+.tree-count{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;
+  padding:2px 9px;background:var(--purple4);color:var(--purple);border-radius:6px;font-weight:700;}
+.tree-pct{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text3);margin-left:4px;font-weight:600;}
+
+/* ── RULES ── */
+.rules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;}
+.rule-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;
+  transition:border-color .15s,box-shadow .15s,transform .15s;box-shadow:var(--shadow);}
+.rule-card:hover{border-color:var(--pink);box-shadow:0 6px 24px rgba(224,64,160,.1);transform:translateY(-2px);}
+.rule-a{color:var(--cyan);font-weight:700;}
+.rule-arrow{color:var(--pink);font-weight:800;margin:0 5px;}
+.rule-b{color:var(--text);font-weight:700;}
+.rule-metrics{display:flex;gap:6px;margin-top:12px;}
+.metric-box{flex:1;background:var(--surface2);border-radius:8px;padding:8px;text-align:center;}
+.metric-val{font-size:14px;font-weight:700;color:var(--purple);}
+.metric-lbl{font-size:8px;color:var(--text3);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-top:2px;}
+.conf-bar{margin-top:10px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.conf-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--pink));border-radius:2px;}
+
+/* ── FREQ ITEMSETS ── */
+.freq-section{margin-bottom:26px;}
+.freq-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);
+  margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.freq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.freq-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  padding:16px;transition:border-color .15s,transform .15s;position:relative;overflow:hidden;box-shadow:var(--shadow);}
+.freq-card:hover{border-color:var(--cyan);transform:translateY(-2px);}
+.freq-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--fgc,var(--cyan));}
+.freq-size{position:absolute;top:12px;right:13px;font-size:9px;font-weight:800;
+  padding:2px 9px;border-radius:6px;background:var(--purple4);color:var(--purple);letter-spacing:.07em;text-transform:uppercase;}
+.freq-items{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--cyan);
+  font-weight:700;margin-bottom:12px;line-height:1.65;word-break:break-word;padding-right:52px;}
+.freq-sup-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:7px;}
+.freq-sup-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--cyan),var(--purple));}
+.freq-sup-val{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text3);
+  display:flex;justify-content:space-between;font-weight:700;}
+
+/* ── HEATMAP ── */
+.heatmap-wrap{overflow-x:auto;margin-bottom:16px;}
+.heatmap-table{border-collapse:separate;border-spacing:3px;min-width:300px;}
+.heatmap-table th{font-size:9.5px;font-weight:700;color:var(--text2);padding:7px 12px;text-align:center;white-space:nowrap;letter-spacing:.07em;}
+.heatmap-table th.row-header{text-align:left;color:var(--purple);}
+.heatmap-cell{min-width:50px;height:42px;border-radius:8px;font-size:12px;font-weight:700;
+  text-align:center;vertical-align:middle;transition:transform .15s;cursor:default;}
+.heatmap-cell:hover{transform:scale(1.08);z-index:2;position:relative;}
+.heatmap-total{font-weight:800;font-size:13px;}
+
+/* ── PARAM CONTROLS ── */
+.param-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px;margin-bottom:18px;padding:16px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:14px;}
+.param-item{display:flex;flex-direction:column;gap:5px;}
+.param-label{font-size:9.5px;font-weight:800;color:var(--purple);letter-spacing:.1em;text-transform:uppercase;}
+.param-input{padding:10px 14px;background:var(--bg2);border:1.5px solid var(--border);
+  border-radius:9px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;transition:border-color .2s;}
+.param-input:focus{border-color:var(--purple);}
+.param-value{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);font-weight:700;}
+
+/* ── DIM CONTROLS ── */
+.dim-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;
+  padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;}
+.dim-label{font-size:9.5px;font-weight:800;color:var(--purple);letter-spacing:.09em;text-transform:uppercase;margin-bottom:5px;display:block;}
+.dim-select{padding:9px 14px;background:var(--bg2);border:1.5px solid var(--border);border-radius:9px;
+  color:var(--text);font-family:'Sora',sans-serif;font-size:13px;font-weight:600;outline:none;cursor:pointer;}
+.dim-select:focus{border-color:var(--purple);}
+
+/* ── HIERARCHY BUILDER ── */
+.hierarchy-builder{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:18px;}
+.hb-title{font-size:11.5px;font-weight:800;color:var(--purple);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;}
+.hb-slots{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;min-height:42px;
+  background:var(--bg2);border-radius:10px;padding:9px;border:1.5px dashed var(--border2);}
+.hb-slot{display:flex;align-items:center;gap:6px;padding:6px 12px;
+  background:linear-gradient(135deg,var(--purple4),var(--cyan2));
+  border:1px solid var(--border2);border-radius:8px;font-size:12px;font-weight:700;color:var(--purple);}
+.hb-slot-num{width:18px;height:18px;background:var(--purple);color:#fff;
+  border-radius:50%;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.hb-remove{cursor:pointer;color:var(--text3);font-size:14px;margin-left:4px;line-height:1;}
+.hb-remove:hover{color:var(--pink);}
+.hb-available{display:flex;flex-wrap:wrap;gap:6px;}
+.hb-avail-chip{padding:6px 12px;background:var(--bg2);border:1.5px solid var(--border);
+  border-radius:8px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;}
+.hb-avail-chip:hover{border-color:var(--purple);color:var(--purple);background:var(--purple4);}
+.hb-avail-chip.used{opacity:.3;cursor:not-allowed;}
+.hb-actions{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;}
+
+/* ── MATRIX LEGEND ── */
+.matrix-legend{display:flex;align-items:center;gap:16px;margin-bottom:12px;flex-wrap:wrap;}
+.ml-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text3);font-weight:600;}
+.ml-dot{width:14px;height:14px;border-radius:4px;}
+
+/* ── AI ── */
+.ai-loading{display:flex;align-items:center;gap:16px;color:var(--text3);font-size:13px;padding:36px;font-weight:600;justify-content:center;}
+.spinner{width:24px;height:24px;border:2.5px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0;}
+.ai-error{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.25);border-radius:12px;padding:18px;color:#dc2626;font-size:13px;font-weight:600;line-height:1.8;}
+.ai-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:20px;}
+.ai-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;transition:border-color .2s,transform .2s;box-shadow:var(--shadow);}
+.ai-card:hover{border-color:var(--purple2);transform:translateY(-2px);}
+.ai-card-num{font-family:'DM Serif Display',serif;font-size:40px;color:var(--border2);line-height:1;margin-bottom:10px;font-weight:400;}
+.ai-card-title{font-size:14px;font-weight:700;color:var(--purple);margin-bottom:7px;}
+.ai-card-text{font-size:12.5px;line-height:1.7;color:var(--text2);font-weight:500;}
+.ai-tag{display:inline-block;margin-top:9px;padding:3px 10px;border-radius:6px;font-size:9px;font-weight:700;background:var(--cyan2);color:var(--cyan);border:1px solid rgba(14,165,233,.2);text-transform:uppercase;letter-spacing:.07em;}
+.ai-section-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.ai-rec{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:9px;box-shadow:var(--shadow);}
+.ai-rec-icon{font-size:20px;flex-shrink:0;margin-top:2px;}
+.ai-rec-text{font-size:13px;line-height:1.7;color:var(--text2);font-weight:500;}
+.ai-rule-explain{background:var(--bg2);border-left:4px solid var(--cyan);border-radius:0 12px 12px 0;padding:14px 16px;margin-bottom:12px;border:1px solid var(--border);border-left-width:4px;box-shadow:var(--shadow);}
+.ai-rule-explain .rule-str{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--cyan);font-weight:700;margin-bottom:6px;}
+.ai-rule-explain .rule-plain{font-size:13px;color:var(--text2);line-height:1.7;font-weight:500;}
+.ai-rule-explain .rule-impl{font-size:11.5px;color:var(--pink);margin-top:6px;font-weight:700;}
+.ai-summary{background:linear-gradient(135deg,var(--purple4),rgba(14,165,233,.05));border:1px solid var(--border2);border-radius:14px;padding:18px 20px;margin-bottom:20px;font-size:13.5px;line-height:1.85;color:var(--text2);font-weight:500;}
+.ai-stat-row{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:20px;}
+.ai-stat-chip{padding:10px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);font-size:12px;font-weight:700;color:var(--purple);box-shadow:var(--shadow);}
+.col-insight{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;transition:border-color .2s;box-shadow:var(--shadow);}
+.col-insight:hover{border-color:var(--cyan);}
+.col-insight .col-name{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--cyan);font-weight:700;margin-bottom:6px;}
+.col-insight .col-text{font-size:12.5px;color:var(--text2);line-height:1.65;font-weight:500;}
+
+/* ── BUTTONS ── */
+.btn-sm{padding:9px 16px;border-radius:10px;cursor:pointer;font-family:'Sora',sans-serif;
+  font-size:12px;font-weight:700;background:linear-gradient(135deg,var(--purple),var(--pink2));
+  color:#fff;border:none;box-shadow:0 3px 14px rgba(108,71,255,.3);transition:all .2s;white-space:nowrap;}
+.btn-sm:hover{opacity:.9;transform:translateY(-1px);}
+.btn-ghost{padding:9px 16px;border-radius:10px;cursor:pointer;font-family:'Sora',sans-serif;
+  font-size:12px;font-weight:700;background:var(--bg2);color:var(--text2);
+  border:1.5px solid var(--border);transition:all .2s;white-space:nowrap;}
+.btn-ghost:hover{border-color:var(--purple);color:var(--purple);}
+
+/* ── SECTION SWITCHER ── */
+.section-divider{text-align:center;padding:12px 0 0;position:relative;}
+.section-divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border);}
+
+/* ── WORKED TABLE ── */
+.worked-table{width:100%;border-collapse:collapse;font-size:12.5px;margin:14px 0;}
+.worked-table th{background:var(--surface2);color:var(--purple);padding:10px 14px;text-align:left;font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;border-bottom:1px solid var(--border);}
+.worked-table td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text2);font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:500;}
+.worked-table tr:last-child td{border-bottom:none;}
+.hl-yes{color:var(--green);font-weight:800;}
+.hl-no{color:var(--text3);}
+.hl-rule{color:var(--pink);font-weight:800;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+.fadeUp{animation:fadeUp .4s ease both;}
+
+/* ── RESPONSIVE ── */
+/* ── RESPONSIVE ── */
+@media(max-width:700px){
+  .hero{padding:36px 16px 24px;}
+  .hero-title{font-size:48px;letter-spacing:-1px;}
+  .hero-sub{font-size:14px;padding:0 8px;}
+  .hero-pills{gap:6px;}
+  .hero-pill{padding:6px 12px;font-size:10px;}
+  
+  .content-wrap{padding:18px 14px;}
+  
+  .main-nav{padding:0 12px;}
+  .main-nav-inner{gap:2px;padding:6px 0;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;}
+  .nav-tab{padding:7px 10px;font-size:10.5px;flex-shrink:0;}
+  .nav-section-label{display:none;}
+  .nav-divider{display:none;}
+  
+  .card{padding:14px;border-radius:12px;}
+  .card-title{font-size:16px;flex-direction:column;align-items:flex-start;gap:6px;}
+  
+  .theory-hero-card{padding:20px;border-radius:16px;}
+  .thc-title{font-size:24px;}
+  .thc-desc{font-size:13px;}
+  
+  .th-section-title{font-size:17px;}
+  .th-cards{grid-template-columns:1fr;gap:10px;}
+  .th-card{padding:14px;}
+  
+  .compare-grid{grid-template-columns:1fr;}
+  .lift-cards{grid-template-columns:1fr;}
+  
+  .apriori-steps{gap:0;}
+  .apriori-step{flex-direction:column;align-items:flex-start;}
+  .apriori-step::after{display:none;}
+  .step-num{margin-bottom:8px;}
+  
+  .formula-box{font-size:11px;padding:12px 14px;overflow-x:auto;}
+  .example-box{padding:12px 14px;}
+  
+  .metrics-table{font-size:11px;display:block;overflow-x:auto;}
+  .worked-table{font-size:11px;display:block;overflow-x:auto;}
+  
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .stat-card{padding:14px 12px;}
+  .sval{font-size:28px;}
+  
+  .charts-grid{grid-template-columns:1fr;}
+  
+  .lab-tabs{gap:3px;padding:4px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .lab-tab{padding:7px 11px;font-size:10.5px;flex:0 0 auto;white-space:nowrap;}
+  
+  .upload-zone{padding:24px 16px;}
+  .uicon{font-size:36px;}
+  .utitle{font-size:14px;}
+  .usub{font-size:11px;}
+  
+  .sample-row{flex-direction:column;align-items:stretch;}
+  .sample-row .btn-sm{width:100%;justify-content:center;}
+  
+  .key-card{padding:14px;}
+  .key-row{flex-direction:column;}
+  .key-input{min-width:100%;}
+  
+  .param-controls{grid-template-columns:1fr;gap:10px;padding:12px;}
+  .param-item button{width:100%;}
+  
+  .dim-controls{flex-direction:column;align-items:stretch;padding:12px;}
+  .dim-controls>div{width:100%;}
+  .dim-select{width:100%;}
+  
+  .quant-grid{grid-template-columns:1fr;}
+  .qb-name{width:60px;font-size:10px;}
+  
+  .hierarchy-builder{padding:14px;}
+  .hb-slots{min-height:auto;padding:8px;flex-wrap:wrap;}
+  .hb-slot{font-size:11px;padding:5px 10px;}
+  .hb-available{gap:5px;}
+  .hb-avail-chip{font-size:11px;padding:5px 10px;}
+  .hb-actions{flex-direction:column;}
+  .hb-actions button{width:100%;}
+  
+  .tree-node{padding:8px 12px;font-size:11.5px;}
+  .tree-children{margin-left:18px;}
+  
+  .heatmap-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .heatmap-table{font-size:10px;min-width:100%;}
+  .heatmap-table th{padding:6px 8px;}
+  .heatmap-cell{min-width:40px;height:36px;font-size:11px;}
+  
+  .matrix-legend{gap:10px;font-size:10px;}
+  .ml-dot{width:12px;height:12px;}
+  
+  .freq-section{margin-bottom:20px;}
+  .freq-title{font-size:17px;flex-wrap:wrap;gap:6px;}
+  .freq-title .pill{font-size:9px;padding:3px 9px;}
+  .freq-grid{grid-template-columns:1fr;}
+  .freq-card{padding:12px;}
+  .freq-items{font-size:11px;padding-right:46px;}
+  .freq-size{font-size:8.5px;padding:2px 7px;}
+  
+  .rules-grid{grid-template-columns:1fr;}
+  .rule-card{padding:14px;font-size:11px;}
+  .rule-metrics{gap:5px;}
+  .metric-box{padding:6px;}
+  .metric-val{font-size:13px;}
+  .metric-lbl{font-size:7.5px;}
+  
+  .ai-grid{grid-template-columns:1fr;}
+  .ai-card{padding:14px;}
+  .ai-card-num{font-size:32px;}
+  .ai-section-title{font-size:17px;}
+  .ai-stat-row{flex-direction:column;}
+  .ai-stat-chip{width:100%;text-align:center;}
+  
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .data-table{font-size:11px;min-width:100%;}
+  .data-table th{padding:8px 10px;font-size:9px;}
+  .data-table td{padding:7px 10px;}
+  
+  .search-inp{font-size:12px;padding:9px 14px;}
+  
+  .btn-sm,.btn-ghost{padding:8px 14px;font-size:11px;width:100%;justify-content:center;}
+  
+  /* Touch-friendly spacing */
+  button,select,input[type="number"],input[type="text"],input[type="password"]{min-height:40px;}
+  
+  /* Prevent horizontal scroll */
+  body{overflow-x:hidden;}
+  .content-wrap{overflow-x:hidden;}
+}
+
+/* Extra small devices */
+@media(max-width:400px){
+  .hero-title{font-size:38px;}
+  .hero-sub{font-size:13px;}
+  
+  .stats-grid{grid-template-columns:1fr;}
+  
+  .th-card-icon{font-size:20px;}
+  .th-card-title{font-size:12px;}
+  .th-card-text{font-size:11.5px;}
+  
+  .sval{font-size:24px;}
+  .slbl{font-size:9px;}
+  
+  .nav-tab .tab-icon{font-size:12px;}
+  
+  .pill{font-size:8.5px;padding:3px 9px;}
+}
+
+/* Landscape mobile */
+@media(max-width:900px) and (orientation:landscape){
+  .hero{padding:24px 16px 16px;}
+  .hero-title{font-size:42px;}
+  
+  .main-nav-inner{overflow-x:auto;}
+  
+  .stats-grid{grid-template-columns:repeat(3,1fr);}
+  .charts-grid{grid-template-columns:repeat(2,1fr);}
+}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HERO ═══════════ -->
+<div class="hero">
+  <div class="hero-badge">Association Rule Mining Platform</div>
+  <h1 class="hero-title"><span class="reg">ARM</span><span class="pred">Platform</span></h1>
+  <p class="hero-sub">Understand the theory, explore concept hierarchies, and mine association rules from any dataset — all in one place.</p>
+  <div class="hero-pills">
+    <div class="hero-pill">Algorithm <span>Apriori · FP-Growth</span></div>
+    <div class="hero-pill">Metrics <span>Support · Confidence · Lift</span></div>
+    <div class="hero-pill">Mining <span>Multilevel · Multidim</span></div>
+    <div class="hero-pill">Input <span>Any CSV / XLSX</span></div>
+  </div>
+</div>
+
+<!-- ═══════════ STICKY NAV ═══════════ -->
+<nav class="main-nav">
+  <div class="main-nav-inner">
+    <span class="nav-section-label">📚 Theory</span>
+    <button class="nav-tab active" onclick="switchSection('assoc')"><span class="tab-icon">🔗</span> Association</button>
+    <button class="nav-tab" onclick="switchSection('apriori')"><span class="tab-icon">⚙️</span> Apriori</button>
+    <button class="nav-tab" onclick="switchSection('multilevel-theory')"><span class="tab-icon">🌳</span> Multilevel</button>
+    <button class="nav-tab" onclick="switchSection('multidim-theory')"><span class="tab-icon">🔷</span> Multidim</button>
+    <button class="nav-tab" onclick="switchSection('metrics')"><span class="tab-icon">📐</span> Metrics</button>
+    <div class="nav-divider"></div>
+    <span class="nav-section-label">🔬 Lab</span>
+    <button class="nav-tab" onclick="switchSection('lab')"><span class="tab-icon">🔬</span> Open Lab</button>
+  </div>
+</nav>
+
+<!-- ═══════════ CONTENT ═══════════ -->
+<div class="content-wrap">
+
+  <!-- ── ASSOCIATION ── -->
+  <div id="sec-assoc" class="section-panel fadeUp">
+    <div class="theory-hero-card">
+      <div class="thc-badge">📖 Fundamentals</div>
+      <div class="thc-title">Association Rule Mining</div>
+      <div class="thc-desc">Association Rule Mining (ARM) discovers interesting relations between variables in large datasets. It identifies frequent if-then patterns and quantifies their strength using support, confidence, and lift — enabling powerful data-driven decisions.</div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Core Concepts</div>
+      <div class="th-cards">
+        <div class="th-card"><div class="th-card-icon">📦</div><div class="th-card-title">Itemset</div><div class="th-card-text">A collection of one or more items. e.g. {HighMarks, HighAttendance} — any subset of all possible items in the dataset.</div></div>
+        <div class="th-card"><div class="th-card-icon">📏</div><div class="th-card-title">Frequent Itemset</div><div class="th-card-text">An itemset whose support ≥ minimum support threshold. Only frequent itemsets are used to generate valid association rules.</div></div>
+        <div class="th-card"><div class="th-card-icon">➡️</div><div class="th-card-title">Association Rule</div><div class="th-card-text">An implication X → Y where X (antecedent) and Y (consequent) are disjoint itemsets. "If X, then Y."</div></div>
+        <div class="th-card"><div class="th-card-icon">🔍</div><div class="th-card-title">Strong Rule</div><div class="th-card-text">A rule satisfying both minimum support AND minimum confidence thresholds simultaneously.</div></div>
+        <div class="th-card"><div class="th-card-icon">🛒</div><div class="th-card-title">Transaction</div><div class="th-card-text">A single record in the database — e.g. one customer purchase, one student's profile — containing a set of items.</div></div>
+        <div class="th-card"><div class="th-card-icon">🗄️</div><div class="th-card-title">Transaction DB</div><div class="th-card-text">The full collection of all transactions. Denoted as T with N transactions total, used to compute all supports.</div></div>
+      </div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Key Metrics</div>
+      <div class="formula-box">Support(X→Y)     = count(X∪Y) / N<br>Confidence(X→Y)  = count(X∪Y) / count(X)<br>Lift(X→Y)        = Confidence(X→Y) / Support(Y)<br>Conviction       = (1 − Support(Y)) / (1 − Confidence(X→Y))<br>Leverage(X→Y)    = Support(X∪Y) − Support(X) · Support(Y)</div>
+      <div class="lift-cards">
+        <div class="lift-card"><div class="lift-val" style="color:var(--green)">Lift &gt; 1</div><div class="lift-text">Positive correlation — X and Y appear together more often than by chance. Rule is useful.</div></div>
+        <div class="lift-card"><div class="lift-val" style="color:var(--text3)">Lift = 1</div><div class="lift-text">X and Y are statistically independent — the rule has no predictive power.</div></div>
+        <div class="lift-card"><div class="lift-val" style="color:var(--pink)">Lift &lt; 1</div><div class="lift-text">Negative correlation — X and Y appear together less than expected by chance.</div></div>
+      </div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Types of Association Rules</div>
+      <div class="compare-grid">
+        <div class="compare-card"><div class="compare-title">Single-Dimensional</div><ul class="compare-list"><li>Rules involve only one attribute dimension</li><li>Example: buys(bread) → buys(butter)</li><li>Simple and fast to mine from market data</li><li>Limited expressiveness for rich datasets</li></ul></div>
+        <div class="compare-card highlight"><div class="compare-title">Multi-Dimensional</div><ul class="compare-list"><li>Rules span two or more attributes at once</li><li>Example: age=young ∧ dept=CS → marks=high</li><li>Richer, more actionable cross-attribute patterns</li><li>Requires discretization of numeric attributes</li></ul></div>
+        <div class="compare-card"><div class="compare-title">Multilevel</div><ul class="compare-list"><li>Rules mined at different abstraction levels</li><li>General rules: high support, less specific</li><li>Specific rules: low support, very detailed</li><li>Uses concept hierarchies to navigate levels</li></ul></div>
+      </div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Real-World Applications</div>
+      <div class="th-cards">
+        <div class="th-card"><div class="th-card-icon">🛒</div><div class="th-card-title">Market Basket</div><div class="th-card-text">Discover product co-purchase patterns to optimize shelf placement and cross-sell promotions.</div></div>
+        <div class="th-card"><div class="th-card-icon">🏥</div><div class="th-card-title">Healthcare</div><div class="th-card-text">Find co-occurring symptoms or diagnoses to aid clinical decision-making and treatment plans.</div></div>
+        <div class="th-card"><div class="th-card-icon">🎓</div><div class="th-card-title">Education</div><div class="th-card-text">Identify student behavior patterns — e.g. high attendance + lab work → high grades.</div></div>
+        <div class="th-card"><div class="th-card-icon">🌐</div><div class="th-card-title">Web Mining</div><div class="th-card-text">Uncover browsing patterns to build recommendation engines and optimize content delivery.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── APRIORI ── -->
+  <div id="sec-apriori" class="section-panel fadeUp" style="display:none;">
+    <div class="theory-hero-card" style="background:linear-gradient(135deg,#1e3a5f 0%,#2d4a8a 50%,#3d6bc4 100%);">
+      <div class="thc-badge">⚙️ Algorithm</div>
+      <div class="thc-title">The Apriori Algorithm</div>
+      <div class="thc-desc">Apriori (1994, Agrawal &amp; Srikant) mines frequent itemsets using the anti-monotonicity principle: any subset of a frequent itemset must also be frequent — enabling massive pruning of the candidate search space.</div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">The Apriori Property</div>
+      <div class="example-box">
+        <div class="ex-label">Anti-Monotonicity Principle</div>
+        <div class="ex-text">If itemset <code>{A, B}</code> is infrequent, then <strong>every superset</strong> containing it — <code>{A, B, C}</code>, <code>{A, B, D}</code> — is also infrequent and can be pruned without scanning the database. This dramatically reduces the search space at each level.</div>
+      </div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Step-by-Step Process</div>
+      <div class="apriori-steps">
+        <div class="apriori-step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Scan DB → Find Frequent 1-Itemsets (L₁)</div><div class="step-text">Scan the entire database once. Count occurrences of each individual item. Remove items whose count falls below min_support × N.</div><div class="step-code">min_sup=40%, N=10 → min_count=4<br>Item A:8✓ B:6✓ C:3✗ D:5✓ → L₁={A,B,D}</div></div></div>
+        <div class="apriori-step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Generate Candidates C₂ from L₁</div><div class="step-text">Join L₁ with itself to generate all 2-item candidate pairs. Then prune any candidate whose subset is not in L₁.</div><div class="step-code">C₂ = {A,B}, {A,D}, {B,D} → scan DB → count each</div></div></div>
+        <div class="apriori-step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Prune → Get L₂</div><div class="step-text">Compare each candidate count against min_count. Remove those below threshold — these are infrequent 2-itemsets.</div><div class="step-code">{A,B}:5✓ {A,D}:4✓ {B,D}:2✗ → L₂={{A,B},{A,D}}</div></div></div>
+        <div class="apriori-step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Generate C₃ from L₂ and Repeat</div><div class="step-text">Continue generating Cₖ candidates, scanning the DB, filtering to Lₖ. Repeat until Lₖ is empty.</div><div class="step-code">C₃={A,B,D} → subset {B,D}∉L₂ → PRUNED → L₃=∅ → STOP</div></div></div>
+        <div class="apriori-step"><div class="step-num">5</div><div class="step-body"><div class="step-title">Generate Association Rules</div><div class="step-text">For each frequent itemset I where |I|≥2, generate all non-empty subsets X. Create rule X→(I−X). Keep rule if confidence ≥ min_conf.</div><div class="step-code">From {A,B}: A→B conf=5/8=62.5%✓ | B→A conf=5/6=83%✓<br>From {A,D}: A→D conf=4/8=50% | D→A conf=4/5=80%✓</div></div></div>
+      </div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Worked Example — Student Dataset</div>
+      <table class="worked-table">
+        <thead><tr><th>TID</th><th>High Attend</th><th>Lab Work</th><th>High Marks</th><th>Project Done</th></tr></thead>
+        <tbody>
+          <tr><td>T1</td><td class="hl-yes">✓</td><td class="hl-yes">✓</td><td class="hl-yes">✓</td><td class="hl-no">✗</td></tr>
+          <tr><td>T2</td><td class="hl-yes">✓</td><td class="hl-no">✗</td><td class="hl-yes">✓</td><td class="hl-yes">✓</td></tr>
+          <tr><td>T3</td><td class="hl-no">✗</td><td class="hl-yes">✓</td><td class="hl-no">✗</td><td class="hl-yes">✓</td></tr>
+          <tr><td>T4</td><td class="hl-yes">✓</td><td class="hl-yes">✓</td><td class="hl-yes">✓</td><td class="hl-yes">✓</td></tr>
+          <tr><td>T5</td><td class="hl-yes">✓</td><td class="hl-yes">✓</td><td class="hl-no">✗</td><td class="hl-no">✗</td></tr>
+        </tbody>
+      </table>
+      <div class="example-box" style="margin-top:8px;">
+        <div class="ex-label">Extracted Rule (min_sup=40%, min_conf=70%)</div>
+        <div class="ex-text"><span class="hl-rule">High Attendance ∧ Lab Work → High Marks</span><br>Support = 2/5 = 40% ✓ &nbsp;|&nbsp; Confidence = 2/3 = 66.7% ✗ (just misses)<br>With min_conf=60%: <span class="hl-rule">High Attendance → High Marks</span> — Supp=60%, Conf=75% ✓</div>
+      </div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Limitations &amp; Alternatives</div>
+      <div class="compare-grid">
+        <div class="compare-card"><div class="compare-title" style="color:var(--pink)">Apriori Weaknesses</div><ul class="compare-list"><li>Requires multiple full database scans</li><li>Generates huge numbers of candidates</li><li>Memory-intensive on dense datasets</li><li>Slow on very large transaction databases</li></ul></div>
+        <div class="compare-card"><div class="compare-title" style="color:var(--green)">FP-Growth (Better)</div><ul class="compare-list"><li>Only 2 database scans needed</li><li>Uses a compressed FP-tree structure</li><li>No explicit candidate generation</li><li>Much faster on large sparse datasets</li></ul></div>
+        <div class="compare-card"><div class="compare-title" style="color:var(--cyan)">ECLAT Algorithm</div><ul class="compare-list"><li>Uses vertical data format (TID-lists)</li><li>Intersection-based counting</li><li>Better memory locality on some data</li><li>Good for moderate-size databases</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MULTILEVEL THEORY ── -->
+  <div id="sec-multilevel-theory" class="section-panel fadeUp" style="display:none;">
+    <div class="theory-hero-card" style="background:linear-gradient(135deg,#1a4731 0%,#166534 50%,#16a34a 100%);">
+      <div class="thc-badge">🌳 Concept</div>
+      <div class="thc-title">Multilevel Association Mining</div>
+      <div class="thc-desc">Mining at various levels of a concept hierarchy. Higher levels yield general rules with stronger support; lower levels yield specific rules with richer context and actionable detail.</div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">What is a Concept Hierarchy?</div>
+      <div class="th-cards">
+        <div class="th-card"><div class="th-card-icon">🏫</div><div class="th-card-title">Level 0 — Root</div><div class="th-card-text">The most general level: all records together. e.g. "All Students" or "All Products."</div></div>
+        <div class="th-card"><div class="th-card-icon">📂</div><div class="th-card-title">Level 1 — Category</div><div class="th-card-text">Broad groupings: Department (CS, ECE, MECH) or Product Category (Electronics, Food).</div></div>
+        <div class="th-card"><div class="th-card-icon">🏷️</div><div class="th-card-title">Level 2 — Subcategory</div><div class="th-card-text">Finer breakdowns: CS → {Male, Female} or Electronics → {Phones, Laptops}.</div></div>
+        <div class="th-card"><div class="th-card-icon">🔬</div><div class="th-card-title">Level 3 — Leaf</div><div class="th-card-text">Most specific: CS ∧ Female ∧ Hostel → individual record groups or specific products.</div></div>
+      </div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Concept Hierarchy Examples</div>
+      <div class="example-box">
+        <div class="ex-label">Education Dataset Hierarchy</div>
+        <div class="ex-text">
+          Level 0: All Students<br>
+          Level 1 (Dept): <code>CS</code> · <code>ECE</code> · <code>MECH</code><br>
+          Level 2 (Gender): <code>CS ∧ Male</code> · <code>CS ∧ Female</code><br>
+          Level 3 (Residence): <code>CS ∧ Female ∧ Hostel</code><br><br>
+          L1 rule: <code>CS → HighMarks</code> (sup=45%, conf=72%)<br>
+          L2 rule: <code>CS ∧ Female → HighMarks</code> (sup=28%, conf=84%)<br>
+          L3 rule: <code>CS ∧ Female ∧ Hostel → HighMarks</code> (sup=14%, conf=91%)
+        </div>
+      </div>
+      <div class="example-box">
+        <div class="ex-label">Retail Dataset Hierarchy</div>
+        <div class="ex-text">
+          Level 0: All Transactions<br>
+          Level 1 (Category): <code>Food</code> · <code>Electronics</code> · <code>Clothing</code><br>
+          Level 2 (Subcategory): <code>Food ∧ Beverage</code> · <code>Food ∧ Dairy</code><br>
+          Level 3 (Brand): <code>Food ∧ Dairy ∧ Amul</code><br><br>
+          L1: <code>Food → Beverage</code> (sup=55%) — very general<br>
+          L3: <code>Dairy ∧ Bread → Butter</code> (sup=12%) — highly specific
+        </div>
+      </div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Support Threshold Strategies</div>
+      <div class="compare-grid">
+        <div class="compare-card"><div class="compare-title">Uniform Support</div><ul class="compare-list"><li>Same threshold across all levels</li><li>Simple and easy to implement</li><li>May miss specific rare rules at deep levels</li><li>Works well when data is evenly distributed</li></ul></div>
+        <div class="compare-card highlight"><div class="compare-title">Reduced Support</div><ul class="compare-list"><li>Lower threshold at deeper hierarchy levels</li><li>Captures rare but meaningful patterns</li><li>Compensates for sparser data at leaf nodes</li><li>Best for most real-world hierarchical mining</li></ul></div>
+        <div class="compare-card"><div class="compare-title">Group-Based Support</div><ul class="compare-list"><li>Different thresholds per category group</li><li>Most flexible and adaptive approach</li><li>Requires domain knowledge to set thresholds</li><li>Used in advanced commercial systems</li></ul></div>
+      </div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Cross-Level Rule Mining</div>
+      <div class="example-box">
+        <div class="ex-label">Mining Across Levels Simultaneously</div>
+        <div class="ex-text">Rules can span multiple hierarchy levels simultaneously:<br><br>
+          <code>CS (L1) ∧ Hostel (L2) → HighMarks (L0)</code><br><br>
+          This "cross-level" approach is more expressive but computationally costlier. The support threshold is typically set to the minimum among the levels involved.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MULTIDIM THEORY ── -->
+  <div id="sec-multidim-theory" class="section-panel fadeUp" style="display:none;">
+    <div class="theory-hero-card" style="background:linear-gradient(135deg,#1e3a5f 0%,#0e4d6e 50%,#0891b2 100%);">
+      <div class="thc-badge">🔷 Concept</div>
+      <div class="thc-title">Multidimensional Association Mining</div>
+      <div class="thc-desc">Rules spanning two or more attributes simultaneously — revealing cross-attribute patterns invisible in single-column analysis. Enables discovery of complex conditional relationships.</div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Types of Multidimensional Rules</div>
+      <div class="th-cards">
+        <div class="th-card"><div class="th-card-icon">↔️</div><div class="th-card-title">Inter-Dimension</div><div class="th-card-text">Each attribute appears exactly once in the rule. Example: <br><code>age=young ∧ dept=CS → marks=high</code></div></div>
+        <div class="th-card"><div class="th-card-icon">🔁</div><div class="th-card-title">Hybrid Rules</div><div class="th-card-text">Some attributes appear multiple times at different levels within the same rule, crossing hierarchies.</div></div>
+        <div class="th-card"><div class="th-card-icon">📐</div><div class="th-card-title">Quantitative</div><div class="th-card-text">Involves discretized numeric attributes. Values binned into ranges: <code>marks=[80-100]</code> or <code>age=[18-22]</code>.</div></div>
+        <div class="th-card"><div class="th-card-icon">🏷️</div><div class="th-card-title">Categorical</div><div class="th-card-text">Nominal attributes with no inherent order: <code>gender=Female</code>, <code>dept=CS</code>, <code>city=Chennai</code>.</div></div>
+      </div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Cross-Tabulation (Heatmap) Analysis</div>
+      <div class="example-box">
+        <div class="ex-label">Reading the Cross-Tabulation Matrix</div>
+        <div class="ex-text">
+          Cell(row, col) = count of records where both dimension values co-occur simultaneously.<br><br>
+          <code>Darker cells</code> = more records = stronger co-occurrence frequency.<br>
+          <strong style="color:var(--green)">Hot spots</strong> (high values) reveal ideal rule candidates — pairs worth mining further.<br><br>
+          Example: Cell(CS, HighMarks)=45 out of 100 CS students → 45% support for CS∧HighMarks pattern.
+        </div>
+      </div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Handling Quantitative Attributes</div>
+      <div class="compare-grid">
+        <div class="compare-card"><div class="compare-title">Equal-Width Binning</div><ul class="compare-list"><li>Divide range into N equal-width intervals</li><li>Easy to implement, interpretable</li><li>Can misrepresent skewed distributions</li></ul></div>
+        <div class="compare-card highlight"><div class="compare-title">Equal-Depth Binning</div><ul class="compare-list"><li>Each bin contains equal number of records</li><li>Better for skewed data distributions</li><li>Used in quantitative ARM systems</li></ul></div>
+        <div class="compare-card"><div class="compare-title">Clustering-Based</div><ul class="compare-list"><li>Natural groupings from the data itself</li><li>Most statistically sound approach</li><li>Computationally expensive to compute</li></ul></div>
+      </div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Example Multidimensional Rules</div>
+      <div class="example-box">
+        <div class="ex-label">Student Performance Dataset</div>
+        <div class="ex-text">
+          <code>dept=CS ∧ attendance=High ∧ gender=Female → marks=High</code><br>
+          Support: 22%, Confidence: 87%, Lift: 1.9×<br><br>
+          <code>age=[18-20] ∧ residence=Hostel → cgpa=[8-10]</code><br>
+          Support: 18%, Confidence: 74%, Lift: 1.6×<br><br>
+          These rules span 3 dimensions simultaneously — impossible to discover with single-attribute analysis.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── METRICS ── -->
+  <div id="sec-metrics" class="section-panel fadeUp" style="display:none;">
+    <div class="theory-hero-card" style="background:linear-gradient(135deg,#3b1f6e 0%,#5b21b6 50%,#7c3aed 100%);">
+      <div class="thc-badge">📐 Reference</div>
+      <div class="thc-title">Complete Metrics Reference</div>
+      <div class="thc-desc">All metrics used in association rule mining with precise formulas, value ranges, and interpretation guidelines for choosing the right threshold for your dataset.</div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Formulas &amp; Ranges</div>
+      <div class="formula-box">Support(X→Y)     = |X∪Y| / N                    range: [0, 1]<br>Confidence(X→Y)  = |X∪Y| / |X|                  range: [0, 1]<br>Lift(X→Y)        = Confidence / Support(Y)        range: [0, ∞)<br>Leverage(X→Y)    = Supp(X∪Y) − Supp(X)·Supp(Y)  range: [−1, 1]<br>Conviction(X→Y)  = (1−Supp(Y)) / (1−Conf)        range: [0, ∞)<br>Jaccard(X,Y)     = Supp(X∪Y) / (Supp(X)+Supp(Y)−Supp(X∪Y)) range: [0, 1]</div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Metric Comparison Table</div>
+      <table class="metrics-table">
+        <thead><tr><th>Metric</th><th>Formula</th><th>Range</th><th>Good Value</th><th>Interpretation</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Support</strong></td><td><span class="code-inline">|X∪Y|/N</span></td><td>[0,1]</td><td>> 0.1</td><td>How frequent the pattern is overall</td></tr>
+          <tr><td><strong>Confidence</strong></td><td><span class="code-inline">|X∪Y|/|X|</span></td><td>[0,1]</td><td>> 0.5</td><td>How reliable the rule's prediction is</td></tr>
+          <tr><td><strong>Lift</strong></td><td><span class="code-inline">Conf/Supp(Y)</span></td><td>[0,∞)</td><td>> 1</td><td>Strength of association vs. random chance</td></tr>
+          <tr><td><strong>Leverage</strong></td><td><span class="code-inline">Supp(X∪Y)−Supp(X)·Supp(Y)</span></td><td>[−1,1]</td><td>> 0</td><td>Surplus co-occurrence over independence</td></tr>
+          <tr><td><strong>Conviction</strong></td><td><span class="code-inline">(1−Supp(Y))/(1−Conf)</span></td><td>[0,∞)</td><td>> 1</td><td>Degree to which X implies Y (directional)</td></tr>
+          <tr><td><strong>Jaccard</strong></td><td><span class="code-inline">Supp(X∪Y)/(Supp(X)+Supp(Y)−Supp(X∪Y))</span></td><td>[0,1]</td><td>> 0.3</td><td>Symmetric similarity between X and Y</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Choosing Thresholds</div>
+      <div class="th-cards">
+        <div class="th-card"><div class="th-card-title" style="color:var(--cyan)">High Support (&gt;50%)</div><div class="th-card-text">Very common patterns. Few rules generated. Extremely high quality — only the most dominant associations survive.</div></div>
+        <div class="th-card"><div class="th-card-title" style="color:var(--purple)">Medium Support (20–50%)</div><div class="th-card-text">Balanced discovery. Best starting point for most datasets. Good variety of rules at reasonable quality.</div></div>
+        <div class="th-card"><div class="th-card-title" style="color:var(--gold)">Low Support (&lt;20%)</div><div class="th-card-text">Rare pattern discovery. Combine with high confidence (>80%) to avoid noise. Used for niche segments.</div></div>
+        <div class="th-card"><div class="th-card-title" style="color:var(--pink)">High Confidence (&gt;80%)</div><div class="th-card-text">Only very reliable rules survive. Best for prediction tasks. Fewer rules, higher actionability.</div></div>
+      </div>
+    </div>
+
+    <div class="th-section">
+      <div class="th-section-title">Common Pitfalls</div>
+      <div class="compare-grid">
+        <div class="compare-card"><div class="compare-title" style="color:var(--pink)">Simpson's Paradox</div><ul class="compare-list"><li>A trend appears in groups but reverses overall</li><li>Always check subgroup rules separately</li><li>Combine with stratified analysis</li></ul></div>
+        <div class="compare-card"><div class="compare-title" style="color:var(--gold)">Too Many Rules</div><ul class="compare-list"><li>Lower support → exponential rule explosion</li><li>Use post-processing: rank by lift or leverage</li><li>Apply closed/maximal itemset constraints</li></ul></div>
+        <div class="compare-card"><div class="compare-title" style="color:var(--purple)">Spurious Rules</div><ul class="compare-list"><li>High confidence but low lift = misleading</li><li>Always check lift > 1 for true association</li><li>Use conviction for directional validation</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LAB ── -->
+  <div id="sec-lab" class="section-panel fadeUp" style="display:none;">
+
+    <!-- Upload -->
+    <div class="card">
+      <div class="card-title">🔬 Mining Lab <span class="pill pill-green">Interactive</span></div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+        <div class="uicon">📂</div>
+        <div class="utitle">Drop Dataset Here</div>
+        <div class="usub">.xlsx · .xls · .csv · Auto-detects numeric &amp; categorical columns</div>
+        <div class="uinfo" id="uploadInfo" style="display:none;"></div>
+      </div>
+      <div class="sample-row">
+        <span>Sample files:</span>
+        <a href="amazon_sales_10000.xlsx" download class="btn-sm">🛒 Amazon</a>
+        <a href="hospital_1000_records.xlsx" download class="btn-sm">🏥 Hospital</a>
+        <a href="supermarket_1000_records.xlsx" download class="btn-sm">🛍️ Supermarket</a>
+        <a href="100_students_dataset.xlsx" download class="btn-sm">🎓 Students</a>
+      </div>
+    </div>
+
+    <!-- API Key -->
+    <div class="key-card">
+      <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
+        <span style="font-size:16px;">🔑</span>
+        <span style="font-weight:700;color:var(--text);font-size:14px;">Groq API Key</span>
+        <span style="font-size:11px;color:var(--text3);font-weight:500;">— for AI Insights tab</span>
+      </div>
+      <div class="key-row">
+        <input class="key-input" id="groqKey" type="password" placeholder="gsk_...">
+        <button class="btn-sm" onclick="saveKey()">💾 Save &amp; Run AI</button>
+      </div>
+      <div class="key-note">🔒 Memory only · console.groq.com · llama-3.3-70b-versatile</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid" style="display:none;"></div>
+
+    <!-- Charts -->
+    <div class="charts-grid" id="chartsSection" style="display:none;"></div>
+
+    <!-- Lab tabs -->
+    <div id="labSection" style="display:none;">
+      <div class="card">
+        <div class="lab-tabs">
+          <button class="lab-tab active" onclick="switchLab('quant')">⚖️ Quantitative</button>
+          <button class="lab-tab" onclick="switchLab('multilevel')">🌳 Multilevel</button>
+          <button class="lab-tab" onclick="switchLab('multidim')">🔷 Multi-Dim</button>
+          <button class="lab-tab" onclick="switchLab('apriori')">🔗 Rules</button>
+          <button class="lab-tab" onclick="switchLab('compare')">📊 Compare</button>
+          <button class="lab-tab" onclick="switchLab('table')">📋 Data</button>
+          <button class="lab-tab" onclick="switchLab('ai')">🤖 AI</button>
+        </div>
+
+        <!-- QUANT -->
+        <div class="lab-panel active" id="lab-quant">
+          <div style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:16px;">⚖️ Quantitative Breakdown <span class="pill" style="font-family:'Sora',sans-serif;">All Columns</span></div>
+          <div class="quant-grid" id="quantGrid"></div>
+        </div>
+
+        <!-- MULTILEVEL -->
+        <div class="lab-panel" id="lab-multilevel">
+          <div style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:16px;">🌳 Multilevel Hierarchy <span class="pill" style="font-family:'Sora',sans-serif;">User-Defined</span></div>
+          <div class="hierarchy-builder">
+            <div class="hb-title">🏗️ Build Hierarchy — click columns to add levels</div>
+            <div style="font-size:10.5px;color:var(--text3);margin-bottom:9px;font-weight:600;">Selected order:</div>
+            <div class="hb-slots" id="hbSlots"><span style="color:var(--text3);font-size:12px;padding:2px;">Click columns below →</span></div>
+            <div style="font-size:10.5px;color:var(--text3);margin-bottom:7px;font-weight:600;margin-top:9px;">Available categorical columns:</div>
+            <div class="hb-available" id="hbAvailable"></div>
+            <div class="hb-actions">
+              <button class="btn-sm" onclick="generateTree()">🌳 Generate</button>
+              <button class="btn-ghost" onclick="clearHierarchy()">🗑 Clear</button>
+            </div>
+          </div>
+          <ul class="tree-root" id="treeRoot"></ul>
+        </div>
+
+        <!-- MULTIDIM -->
+        <div class="lab-panel" id="lab-multidim">
+          <div style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:16px;">🔷 Multidimensional <span class="pill pill-cyan" style="font-family:'Sora',sans-serif;">Cross-Tabulation</span></div>
+          <div class="dim-controls">
+            <div><label class="dim-label">Row Dimension</label><select class="dim-select" id="dimRow" onchange="rebuildHeatmap()"></select></div>
+            <div><label class="dim-label">Column Dimension</label><select class="dim-select" id="dimCol" onchange="rebuildHeatmap()"></select></div>
+            <button class="btn-sm" onclick="rebuildHeatmap()">🔄 Refresh</button>
+          </div>
+          <div class="matrix-legend">
+            <div class="ml-item"><div class="ml-dot" style="background:rgba(108,71,255,0.1);border:1px solid var(--border)"></div>Low</div>
+            <div class="ml-item"><div class="ml-dot" style="background:rgba(108,71,255,0.5)"></div>Medium</div>
+            <div class="ml-item"><div class="ml-dot" style="background:rgba(108,71,255,0.9)"></div>High</div>
+          </div>
+          <div id="heatmapWrap" class="heatmap-wrap"></div>
+          <div id="topPairs"></div>
+          <div id="dimCharts" style="margin-top:18px;"></div>
+        </div>
+
+        <!-- RULES -->
+        <div class="lab-panel" id="lab-apriori">
+          <div style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:16px;">🔗 Association Rules <span class="pill pill-cyan" id="ruleCountBadge" style="font-family:'Sora',sans-serif;">0 rules</span></div>
+          <div class="param-controls">
+            <div class="param-item">
+              <label class="param-label">Min Support (%)</label>
+              <input type="number" class="param-input" id="minSupport" value="20" min="1" max="100" step="1">
+              <span class="param-value" id="supportDisplay">20%</span>
+            </div>
+            <div class="param-item">
+              <label class="param-label">Min Confidence (%)</label>
+              <input type="number" class="param-input" id="minConfidence" value="50" min="1" max="100" step="1">
+              <span class="param-value" id="confidenceDisplay">50%</span>
+            </div>
+            <div class="param-item">
+              <label class="param-label">Max Rules</label>
+              <input type="number" class="param-input" id="maxRules" value="40" min="5" max="200" step="5">
+              <span class="param-value" id="rulesDisplay">40</span>
+            </div>
+            <div class="param-item" style="justify-content:flex-end;">
+              <button class="btn-sm" onclick="rebuildRules()" style="width:100%;">🔄 Regenerate</button>
+            </div>
+          </div>
+
+          <div class="freq-section" id="freqSection">
+            <div class="freq-title">
+              📦 Frequent Itemsets
+              <span class="pill pill-green" id="freqCountBadge" style="font-family:'Sora',sans-serif;">0 itemsets</span>
+              <span class="pill" id="freqK1Badge" style="cursor:pointer;font-family:'Sora',sans-serif;" onclick="filterFreq(1)">1-itemsets</span>
+              <span class="pill pill-cyan" id="freqK2Badge" style="cursor:pointer;font-family:'Sora',sans-serif;" onclick="filterFreq(2)">2-itemsets</span>
+              <span class="pill pill-pink" id="freqK3Badge" style="cursor:pointer;font-family:'Sora',sans-serif;" onclick="filterFreq(3)">3-itemsets</span>
+              <span class="pill pill-gold" id="freqKAllBadge" style="cursor:pointer;font-family:'Sora',sans-serif;" onclick="filterFreq(0)">All</span>
+            </div>
+            <div class="freq-grid" id="freqGrid"></div>
+          </div>
+
+          <div style="font-family:'DM Serif Display',serif;font-size:20px;margin:20px 0 14px;display:flex;align-items:center;gap:10px;">
+            ➡️ Rules <span class="pill pill-cyan" id="ruleCountBadge2" style="font-family:'Sora',sans-serif;">0 rules</span>
+          </div>
+          <div class="rules-grid" id="rulesGrid"></div>
+        </div>
+
+        <!-- COMPARE -->
+        <div class="lab-panel" id="lab-compare">
+          <div style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:16px;">📊 Group Comparison <span class="pill pill-gold" style="font-family:'Sora',sans-serif;">Bonus</span></div>
+          <div class="dim-controls" style="margin-bottom:14px;">
+            <div><label class="dim-label">Compare Groups By</label><select class="dim-select" id="compareCol" onchange="buildCompare()"></select></div>
+            <div><label class="dim-label">Measure (Numeric)</label><select class="dim-select" id="compareNum" onchange="buildCompare()"></select></div>
+          </div>
+          <div id="compareOut"></div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="lab-panel" id="lab-table">
+          <div style="margin-bottom:14px;display:flex;gap:9px;align-items:center;flex-wrap:wrap;">
+            <input class="search-inp" id="searchBox" placeholder="🔍 Search all columns…" style="flex:1;min-width:160px;">
+            <span id="tableCount" class="pill" style="white-space:nowrap;font-family:'Sora',sans-serif;"></span>
+          </div>
+          <div class="table-scroll"><table class="data-table" id="dataTable"></table></div>
+        </div>
+
+        <!-- AI -->
+        <div class="lab-panel" id="lab-ai">
+          <div id="aiBox">
+            <div class="ai-loading"><div class="spinner"></div>&nbsp;Enter Groq API key above and click Save &amp; Run AI</div>
+          </div>
+        </div>
+
+      </div><!-- /card -->
+    </div><!-- /labSection -->
+  </div><!-- /sec-lab -->
+
+</div><!-- /content-wrap -->
+
+<script>
+/* ═══════════ GLOBALS ═══════════ */
+const PAL=['#6c47ff','#e040a0','#0ea5e9','#10b981','#f59e0b','#f87171','#818cf8','#38bdf8','#a3e635','#fb923c'];
+let globalData=[],groqKey='',charts={},detectedColumns={num:[],cat:[],all:[]},datasetProfile={};
+let hierarchyOrder=[],allFreqItemsets=[],currentFreqFilter=0;
+
+/* ─── SECTION SWITCHING ─── */
+const SECTIONS=['assoc','apriori','multilevel-theory','multidim-theory','metrics','lab'];
+function switchSection(id){
+  SECTIONS.forEach(s=>{
+    const el=document.getElementById('sec-'+s);
+    if(el)el.style.display=s===id?'block':'none';
+  });
+  document.querySelectorAll('.nav-tab').forEach(t=>{
+    t.classList.toggle('active',t.getAttribute('onclick')===`switchSection('${id}')`);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ─── LAB TAB SWITCHING ─── */
+const LAB_TABS=['quant','multilevel','multidim','apriori','compare','table','ai'];
+function switchLab(id){
+  LAB_TABS.forEach(t=>{
+    const el=document.getElementById('lab-'+t);
+    if(el)el.classList.toggle('active',t===id);
+  });
+  document.querySelectorAll('.lab-tab').forEach(t=>{
+    t.classList.toggle('active',t.getAttribute('onclick')===`switchLab('${id}')`);
+  });
+}
+
+/* ─── API KEY ─── */
+function saveKey(){
+  groqKey=document.getElementById('groqKey').value.trim();
+  document.getElementById('groqKey').style.borderColor=groqKey?'#10b981':'#f87171';
+  if(groqKey&&globalData.length)callGroqAI(globalData);
+  else if(groqKey)alert('✅ Key saved! Upload a dataset to run AI insights.');
+  else alert('⚠️ Enter a valid Groq key.');
+}
+
+/* ─── PARAM LISTENERS ─── */
+document.getElementById('minSupport').addEventListener('input',e=>document.getElementById('supportDisplay').innerText=e.target.value+'%');
+document.getElementById('minConfidence').addEventListener('input',e=>document.getElementById('confidenceDisplay').innerText=e.target.value+'%');
+document.getElementById('maxRules').addEventListener('input',e=>document.getElementById('rulesDisplay').innerText=e.target.value);
+
+/* ─── FILE UPLOAD ─── */
+const uploadZone=document.getElementById('uploadZone');
+const fileInput=document.getElementById('fileInput');
+uploadZone.addEventListener('dragover',e=>{e.preventDefault();uploadZone.classList.add('drag');});
+uploadZone.addEventListener('dragleave',()=>uploadZone.classList.remove('drag'));
+uploadZone.addEventListener('drop',e=>{e.preventDefault();uploadZone.classList.remove('drag');if(e.dataTransfer.files[0])readFile(e.dataTransfer.files[0]);});
+fileInput.addEventListener('change',e=>{if(e.target.files[0])readFile(e.target.files[0]);});
+
+function readFile(file){
+  const reader=new FileReader();
+  reader.onload=evt=>{
+    const wb=XLSX.read(new Uint8Array(evt.target.result),{type:'array'});
+    const data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    if(!data.length){alert('⚠️ Empty or unsupported file.');return;}
+    globalData=data;
+    const info=document.getElementById('uploadInfo');
+    info.innerText='✓ '+file.name+' · '+data.length+' rows · '+Object.keys(data[0]).length+' cols';
+    info.style.display='inline-block';
+    detectStructure(data);
+    process(data);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+/* ─── DETECT STRUCTURE ─── */
+function detectStructure(data){
+  const cols=Object.keys(data[0]);
+  detectedColumns={num:[],cat:[],all:cols};
+  datasetProfile={totalRecords:data.length,columns:{}};
+  cols.forEach(col=>{
+    const vals=data.map(d=>d[col]).filter(v=>v!=null&&v!=='');
+    const nums=vals.filter(v=>!isNaN(parseFloat(v))&&String(v).trim()!=='').map(v=>parseFloat(v));
+    const isNum=nums.length/vals.length>0.8;
+    if(isNum){
+      detectedColumns.num.push(col);
+      const min=Math.min(...nums),max=Math.max(...nums),avg=nums.reduce((a,b)=>a+b,0)/nums.length;
+      datasetProfile.columns[col]={type:'numeric',min,max,avg:+avg.toFixed(2)};
+    }else{
+      detectedColumns.cat.push(col);
+      const uniq=[...new Set(vals)];
+      datasetProfile.columns[col]={type:'categorical',uniqueCount:uniq.length,values:uniq.slice(0,30)};
+    }
+  });
+}
+
+function autoCat(val,col){
+  const p=datasetProfile.columns[col];
+  if(!p||p.type!=='numeric')return String(val);
+  const r=p.max-p.min,t=r/3;
+  if(val<p.min+t)return 'Low_'+col;
+  if(val<p.min+2*t)return 'Mid_'+col;
+  return 'High_'+col;
+}
+
+/* ─── PROCESS ─── */
+function process(data){
+  destroyCharts();
+  document.getElementById('statsGrid').style.display='grid';
+  document.getElementById('chartsSection').style.display='grid';
+  document.getElementById('labSection').style.display='block';
+  fillStats(data);
+  populateSelectors();
+  buildHierarchyUI();
+  setTimeout(()=>{
+    drawCharts(data);
+    buildQuantitative(data);
+    buildHeatmap(data);
+    buildRules(data);
+    buildTable(data);
+    buildCompare();
+    if(groqKey)callGroqAI(data);
+  },80);
+}
+
+/* ─── POPULATE SELECTORS ─── */
+function populateSelectors(){
+  const cats=detectedColumns.cat,nums=detectedColumns.num;
+  ['dimRow','dimCol','compareCol'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el){el.innerHTML=cats.map(c=>`<option value="${c}">${c}</option>`).join('');if(i===1&&cats.length>1)el.selectedIndex=1;}
+  });
+  const cn=document.getElementById('compareNum');
+  if(cn)cn.innerHTML=nums.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+
+/* ─── STATS ─── */
+function fillStats(data){
+  const g=document.getElementById('statsGrid');g.innerHTML='';
+  const cards=[
+    {icon:'📊',val:data.length,lbl:'Records',gc:'linear-gradient(135deg,#6c47ff,#5835d4)'},
+    {icon:'🔢',val:detectedColumns.num.length,lbl:'Numeric',gc:'linear-gradient(135deg,#0ea5e9,#0284c7)'},
+    {icon:'🏷️',val:detectedColumns.cat.length,lbl:'Categorical',gc:'linear-gradient(135deg,#e040a0,#c2185b)'},
+    {icon:'📐',val:detectedColumns.all.length,lbl:'Total Cols',gc:'linear-gradient(135deg,#10b981,#059669)'},
+  ];
+  detectedColumns.num.slice(0,2).forEach(col=>{
+    const p=datasetProfile.columns[col];
+    cards.push({icon:'⭐',val:p.avg,lbl:'Avg '+col,gc:'linear-gradient(135deg,#f59e0b,#d97706)'});
+  });
+  cards.forEach(c=>g.innerHTML+=`<div class="stat-card fadeUp" style="--gc:${c.gc}"><div class="sicon">${c.icon}</div><div class="sval">${c.val}</div><div class="slbl">${c.lbl}</div></div>`);
+}
+
+/* ─── CHARTS ─── */
+function destroyCharts(){Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};}
+function setDef(){Chart.defaults.color='#a1a1aa';Chart.defaults.borderColor='rgba(226,223,240,.8)';Chart.defaults.font.family="'Sora',sans-serif";Chart.defaults.font.size=11;Chart.defaults.font.weight='600';}
+
+function drawCharts(data){
+  setDef();const cs=document.getElementById('chartsSection');cs.innerHTML='';
+  if(detectedColumns.num.length>=2){
+    const x=detectedColumns.num[0],y=detectedColumns.num[1];
+    cs.innerHTML+=`<div class="card fadeUp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;"><span style="font-family:'DM Serif Display',serif;font-size:17px;">📈 ${x} vs ${y}</span><span class="pill">Scatter</span></div><div class="chart-wrap"><canvas id="ch0"></canvas></div></div>`;
+    setTimeout(()=>{const pts=data.map(d=>({x:parseFloat(d[x])||0,y:parseFloat(d[y])||0}));charts.ch0=new Chart(document.getElementById('ch0'),{type:'scatter',data:{datasets:[{label:x+' vs '+y,data:pts,borderColor:'#6c47ff',backgroundColor:'rgba(108,71,255,.25)',pointRadius:4,pointHoverRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:x}},y:{title:{display:true,text:y}}},animation:{duration:700}}});},100);
+  }
+  if(detectedColumns.cat.length>=1&&detectedColumns.num.length>=1){
+    const cat=detectedColumns.cat[0],num=detectedColumns.num[0];
+    cs.innerHTML+=`<div class="card fadeUp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;"><span style="font-family:'DM Serif Display',serif;font-size:17px;">📊 ${cat} Avg ${num}</span><span class="pill">Bar</span></div><div class="chart-wrap"><canvas id="ch1"></canvas></div></div>`;
+    setTimeout(()=>{const cats=[...new Set(data.map(d=>d[cat]))].filter(Boolean).slice(0,10);const vals=cats.map(c=>{const s=data.filter(d=>d[cat]===c);return+(s.reduce((sum,d)=>(sum+(parseFloat(d[num])||0)),0)/s.length).toFixed(2);});charts.ch1=new Chart(document.getElementById('ch1'),{type:'bar',data:{labels:cats,datasets:[{data:vals,backgroundColor:PAL.map(c=>c+'99'),borderColor:PAL,borderWidth:1,borderRadius:8,borderSkipped:false}]},options:{plugins:{legend:{display:false}},animation:{duration:700}}});},150);
+  }
+  if(detectedColumns.cat.length>=1){
+    const cat=detectedColumns.cat[0];
+    cs.innerHTML+=`<div class="card fadeUp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;"><span style="font-family:'DM Serif Display',serif;font-size:17px;">🍩 ${cat} Split</span><span class="pill pill-pink">Doughnut</span></div><div class="chart-wrap"><canvas id="ch2"></canvas></div></div>`;
+    setTimeout(()=>{const cats=[...new Set(data.map(d=>d[cat]))].filter(Boolean).slice(0,8);charts.ch2=new Chart(document.getElementById('ch2'),{type:'doughnut',data:{labels:cats,datasets:[{data:cats.map(c=>data.filter(d=>d[cat]===c).length),backgroundColor:PAL.map(c=>c+'88'),borderWidth:0}]},options:{plugins:{legend:{position:'bottom',labels:{color:'#a1a1aa',boxWidth:10,font:{size:11}}}},cutout:'64%',animation:{duration:900}}});},200);
+  }
+  if(detectedColumns.num.length>=1){
+    const num=detectedColumns.num[0];
+    cs.innerHTML+=`<div class="card fadeUp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;"><span style="font-family:'DM Serif Display',serif;font-size:17px;">📉 ${num} Distribution</span><span class="pill pill-cyan">Histogram</span></div><div class="chart-wrap"><canvas id="ch3"></canvas></div></div>`;
+    setTimeout(()=>{const vals=data.map(d=>parseFloat(d[num])||0).filter(v=>!isNaN(v));const min=Math.min(...vals),max=Math.max(...vals),bc=10,bs=(max-min)/bc;const bins=Array(bc).fill(0);vals.forEach(v=>{const i=Math.min(Math.floor((v-min)/bs),bc-1);bins[i]++;});charts.ch3=new Chart(document.getElementById('ch3'),{type:'bar',data:{labels:bins.map((_,i)=>`${(min+i*bs).toFixed(1)}`),datasets:[{data:bins,backgroundColor:PAL.map(c=>c+'88'),borderColor:PAL,borderWidth:1,borderRadius:7,borderSkipped:false}]},options:{plugins:{legend:{display:false}},animation:{duration:700}}});},250);
+  }
+}
+
+/* ─── QUANTITATIVE ─── */
+function buildQuantitative(data){
+  const grid=document.getElementById('quantGrid');grid.innerHTML='';
+  detectedColumns.num.forEach(col=>{
+    const vals=data.map(d=>parseFloat(d[col])||0).filter(v=>!isNaN(v));
+    const p=datasetProfile.columns[col];
+    const t=(p.max-p.min)/3;
+    const bands=[
+      {n:`Low (<${(p.min+t).toFixed(1)})`,c:vals.filter(v=>v<p.min+t).length,cl:PAL[2]},
+      {n:'Mid',c:vals.filter(v=>v>=p.min+t&&v<p.min+2*t).length,cl:PAL[0]},
+      {n:`High (>${(p.min+2*t).toFixed(1)})`,c:vals.filter(v=>v>=p.min+2*t).length,cl:PAL[1]}
+    ];
+    grid.innerHTML+=`<div class="quant-item fadeUp"><div class="quant-label">🔢 ${col}</div><div class="quant-bars">${bands.map(b=>{const pct=Math.round(b.c/data.length*100);return`<div class="qb-row"><div class="qb-name" title="${b.n}">${b.n.split(' ')[0]}</div><div class="qb-bar"><div class="qb-fill" style="width:${pct}%;background:${b.cl}"></div></div><div class="qb-val">${b.c}</div></div>`}).join('')}</div></div>`;
+  });
+  detectedColumns.cat.forEach(col=>{
+    const vals=[...new Set(data.map(d=>d[col]))].filter(Boolean);
+    const sorted=vals.map(v=>({v,c:data.filter(d=>d[col]===v).length})).sort((a,b)=>b.c-a.c).slice(0,8);
+    grid.innerHTML+=`<div class="quant-item fadeUp"><div class="quant-label">🏷️ ${col}</div><div class="quant-bars">${sorted.map(({v,c},i)=>{const pct=Math.round(c/data.length*100);return`<div class="qb-row"><div class="qb-name" title="${v}">${String(v).slice(0,10)}</div><div class="qb-bar"><div class="qb-fill" style="width:${pct}%;background:${PAL[i%PAL.length]}"></div></div><div class="qb-val">${c}</div></div>`}).join('')}</div></div>`;
+  });
+}
+
+/* ─── HIERARCHY ─── */
+function buildHierarchyUI(){
+  hierarchyOrder=[];
+  document.getElementById('hbAvailable').innerHTML=detectedColumns.cat.map(c=>`<div class="hb-avail-chip" id="hc_${cssId(c)}" onclick="addHierarchyLevel('${c}')">${c}</div>`).join('');
+  document.getElementById('hbSlots').innerHTML='<span style="color:var(--text3);font-size:12px;padding:2px;">Click columns below →</span>';
+}
+function cssId(s){return s.replace(/[^a-zA-Z0-9]/g,'_');}
+function addHierarchyLevel(col){if(hierarchyOrder.includes(col))return;hierarchyOrder.push(col);renderHierarchySlots();}
+function removeHierarchyLevel(col){hierarchyOrder=hierarchyOrder.filter(c=>c!==col);renderHierarchySlots();}
+function renderHierarchySlots(){
+  const slots=document.getElementById('hbSlots');
+  slots.innerHTML=hierarchyOrder.length?hierarchyOrder.map((c,i)=>`<div class="hb-slot"><div class="hb-slot-num">${i+1}</div>${c}<span class="hb-remove" onclick="removeHierarchyLevel('${c}')">✕</span></div>`).join(''):'<span style="color:var(--text3);font-size:12px;padding:2px;">Click columns below →</span>';
+  detectedColumns.cat.forEach(c=>{const el=document.getElementById('hc_'+cssId(c));if(el)el.classList.toggle('used',hierarchyOrder.includes(c));});
+}
+function clearHierarchy(){hierarchyOrder=[];renderHierarchySlots();document.getElementById('treeRoot').innerHTML='';}
+function generateTree(){if(!globalData.length){alert('Upload a dataset first.');return;}if(!hierarchyOrder.length){alert('Add at least one hierarchy level.');return;}buildTree(globalData,hierarchyOrder);}
+
+function buildTree(data,order){
+  const root=document.getElementById('treeRoot');root.innerHTML='';
+  if(!order.length){root.innerHTML='<li><div style="color:var(--text3);font-size:12px;padding:10px;">Select hierarchy levels above.</div></li>';return;}
+  function makeLevel(subset,depth,parentEl){
+    if(depth>=order.length)return;
+    const col=order[depth];
+    const vals=[...new Set(subset.map(d=>d[col]))].filter(v=>v!=null&&v!=='').sort((a,b)=>String(a).localeCompare(String(b)));
+    vals.forEach(val=>{
+      const sub=subset.filter(d=>String(d[col])===String(val));
+      const pct=(sub.length/data.length*100).toFixed(1);
+      const hasChildren=depth+1<order.length;
+      const li=document.createElement('li');
+      const colorIdx=depth%PAL.length;
+      li.innerHTML=`<div class="tree-node" style="border-left:3px solid ${PAL[colorIdx]};" onclick="toggleTreeNode(this)"><span class="tree-toggle">${hasChildren?'▶':'·'}</span><span style="color:${PAL[colorIdx]};font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-right:4px;">${col}</span><span style="color:var(--text);font-weight:700;">${val}</span><span class="tree-pct">${pct}%</span><span class="tree-count">${sub.length}</span></div>`;
+      if(hasChildren){const ul=document.createElement('ul');ul.className='tree-children';makeLevel(sub,depth+1,ul);li.appendChild(ul);}
+      parentEl.appendChild(li);
+    });
+  }
+  const rootLi=document.createElement('li');
+  rootLi.innerHTML=`<div class="tree-node" style="border-left:3px solid var(--pink);background:linear-gradient(135deg,rgba(224,64,160,.04),rgba(108,71,255,.04));" onclick="toggleTreeNode(this)"><span class="tree-toggle">▼</span><span style="font-size:13px;font-weight:800;color:var(--text);">📊 All Records</span><span class="tree-pct">100%</span><span class="tree-count">${data.length}</span></div>`;
+  const rootUl=document.createElement('ul');rootUl.className='tree-children open';
+  makeLevel(data,0,rootUl);
+  rootLi.appendChild(rootUl);
+  root.appendChild(rootLi);
+}
+function toggleTreeNode(el){const ch=el.nextElementSibling;if(!ch)return;const o=ch.classList.toggle('open');const tog=el.querySelector('.tree-toggle');if(tog)tog.innerText=o?'▼':'▶';}
+
+/* ─── HEATMAP ─── */
+function buildHeatmap(data){
+  const cats=detectedColumns.cat;
+  if(cats.length<2){document.getElementById('heatmapWrap').innerHTML='<p style="color:var(--text3);padding:16px;font-size:13px;">Need ≥ 2 categorical columns.</p>';return;}
+  const dim1=document.getElementById('dimRow')?.value||cats[0];
+  const dim2=document.getElementById('dimCol')?.value||(cats.length>1?cats[1]:cats[0]);
+  if(dim1===dim2){document.getElementById('heatmapWrap').innerHTML='<p style="color:var(--text3);padding:16px;font-size:13px;">⚠️ Select two different dimensions.</p>';return;}
+  const rows=[...new Set(data.map(d=>String(d[dim1])))].filter(v=>v&&v!=='undefined').sort().slice(0,15);
+  const cols=[...new Set(data.map(d=>String(d[dim2])))].filter(v=>v&&v!=='undefined').sort().slice(0,15);
+  if(!rows.length||!cols.length){document.getElementById('heatmapWrap').innerHTML='<p style="color:var(--text3);padding:16px;font-size:13px;">⚠️ No valid values.</p>';return;}
+  const matrix={};
+  rows.forEach(r=>{matrix[r]={};cols.forEach(c=>{matrix[r][c]=0;});});
+  data.forEach(d=>{const r=String(d[dim1]),c=String(d[dim2]);if(matrix[r]&&matrix[r][c]!==undefined)matrix[r][c]++;});
+  const maxVal=Math.max(...rows.flatMap(r=>cols.map(c=>matrix[r][c])));
+  let html=`<table class="heatmap-table"><thead><tr><th class="row-header">${dim1} \\ ${dim2}</th>${cols.map(c=>`<th title="${c}">${c.length>9?c.slice(0,9)+'…':c}</th>`).join('')}<th style="color:var(--pink)">Σ</th></tr></thead><tbody>`;
+  rows.forEach(r=>{
+    const rowTotal=cols.reduce((s,c)=>s+matrix[r][c],0);
+    html+=`<tr><td style="padding:7px 14px;font-weight:700;color:var(--text2);white-space:nowrap;font-size:12px;">${r}</td>`;
+    cols.forEach(c=>{
+      const v=matrix[r][c];const intensity=maxVal>0?v/maxVal:0;
+      const alpha=0.07+intensity*0.8;const bg=`rgba(108,71,255,${alpha.toFixed(2)})`;
+      const textCol=intensity>0.55?'#ffffff':'#6c47ff';
+      html+=`<td class="heatmap-cell" style="background:${bg};color:${textCol};" title="${dim1}=${r}, ${dim2}=${c}: ${v}">${v>0?v:'—'}</td>`;
+    });
+    html+=`<td class="heatmap-cell heatmap-total" style="background:rgba(224,64,160,.12);color:var(--pink);">${rowTotal}</td></tr>`;
+  });
+  html+=`<tr><td style="padding:7px 14px;font-weight:800;color:var(--pink);font-size:12px;">COL Σ</td>`;
+  cols.forEach(c=>{const ct=rows.reduce((s,r)=>s+matrix[r][c],0);html+=`<td class="heatmap-cell heatmap-total" style="background:rgba(224,64,160,.08);color:var(--pink);">${ct}</td>`;});
+  html+=`<td class="heatmap-cell heatmap-total" style="background:linear-gradient(135deg,rgba(224,64,160,.18),rgba(108,71,255,.18));color:var(--text);font-size:13px;">${data.length}</td></tr></tbody></table>`;
+  document.getElementById('heatmapWrap').innerHTML=html;
+
+  const pairs=[];
+  rows.forEach(r=>cols.forEach(c=>{if(matrix[r][c]>0)pairs.push({r,c,v:matrix[r][c],pct:(matrix[r][c]/data.length*100).toFixed(1)});}));
+  pairs.sort((a,b)=>b.v-a.v);
+  let topHtml=`<div style="margin-top:18px;margin-bottom:10px;font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);">🔝 Top Combinations</div><div style="display:flex;flex-wrap:wrap;gap:10px;">`;
+  pairs.slice(0,6).forEach((p,i)=>{
+    topHtml+=`<div style="flex:1;min-width:140px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:var(--shadow);"><div style="font-size:9.5px;color:var(--text3);font-weight:800;text-transform:uppercase;margin-bottom:6px;">#${i+1}</div><div style="font-size:12px;font-weight:700;color:var(--purple);">${p.r}</div><div style="font-size:9px;color:var(--text3);">+</div><div style="font-size:12px;font-weight:700;color:var(--cyan);">${p.c}</div><div style="font-family:'DM Serif Display',serif;font-size:28px;color:var(--pink);margin-top:7px;">${p.v}</div><div style="font-size:11px;color:var(--text3);">${p.pct}%</div></div>`;
+  });
+  topHtml+=`</div>`;
+  document.getElementById('topPairs').innerHTML=topHtml;
+
+  const dc=document.getElementById('dimCharts');dc.innerHTML='';
+  if(detectedColumns.num.length>0){
+    const numCol=detectedColumns.num[0];
+    dc.innerHTML=`<div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);margin-bottom:12px;">📊 ${dim1} × Avg ${numCol}</div><div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--shadow);"><canvas id="dimBarChart" style="max-height:220px;"></canvas></div>`;
+    setTimeout(()=>{
+      setDef();const rowAvgs=rows.map(r=>{const sub=data.filter(d=>String(d[dim1])===r);const vals=sub.map(d=>parseFloat(d[numCol])||0).filter(v=>!isNaN(v));return vals.length?+(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2):0;});
+      if(charts.dimBar)try{charts.dimBar.destroy();}catch(e){}
+      charts.dimBar=new Chart(document.getElementById('dimBarChart'),{type:'bar',data:{labels:rows,datasets:[{label:'Avg '+numCol,data:rowAvgs,backgroundColor:PAL.map(c=>c+'88'),borderColor:PAL,borderWidth:1,borderRadius:8,borderSkipped:false}]},options:{plugins:{legend:{display:false}},animation:{duration:700}}});
+    },100);
+  }
+}
+function rebuildHeatmap(){if(globalData.length)buildHeatmap(globalData);}
+
+/* ═══════ APRIORI ═══════ */
+function getTransactions(data){
+  return data.map(d=>{
+    const items=[];
+    detectedColumns.cat.forEach(col=>{if(d[col]!=null&&d[col]!=='')items.push(col+'='+String(d[col]));});
+    detectedColumns.num.forEach(col=>{items.push(autoCat(parseFloat(d[col])||0,col));});
+    return[...new Set(items)];
+  });
+}
+
+function mineFrequentItemsets(data,minSup){
+  const txns=getTransactions(data);
+  const total=txns.length;
+  const minCount=Math.ceil(minSup*total);
+  const frequentSets=[];
+  const itemCounts={};
+  txns.forEach(t=>t.forEach(item=>{itemCounts[item]=(itemCounts[item]||0)+1;}));
+  const freq1=Object.entries(itemCounts).filter(([,c])=>c>=minCount).map(([item,c])=>({items:[item],count:c,support:+(c/total).toFixed(4)})).sort((a,b)=>b.count-a.count);
+  freq1.forEach(fs=>frequentSets.push(fs));
+  const freq1Items=freq1.map(fs=>fs.items[0]);
+  const counts2={};
+  txns.forEach(t=>{
+    const validItems=t.filter(i=>freq1Items.includes(i));
+    for(let i=0;i<validItems.length;i++){for(let j=i+1;j<validItems.length;j++){const k=[validItems[i],validItems[j]].sort().join('|||');counts2[k]=(counts2[k]||0)+1;}}
+  });
+  const freq2=Object.entries(counts2).filter(([,c])=>c>=minCount).map(([k,c])=>({items:k.split('|||'),count:c,support:+(c/total).toFixed(4)})).sort((a,b)=>b.count-a.count);
+  freq2.forEach(fs=>frequentSets.push(fs));
+  if(freq2.length>0){
+    const freq2Sets=freq2.map(fs=>fs.items);
+    const counts3={};
+    txns.forEach(t=>{
+      freq2Sets.forEach(pair=>{
+        if(pair.every(p=>t.includes(p))){
+          const extItems=t.filter(i=>freq1Items.includes(i)&&!pair.includes(i));
+          extItems.forEach(ext=>{const triple=[...pair,ext].sort();const k=triple.join('|||');counts3[k]=(counts3[k]||0)+1;});
+        }
+      });
+    });
+    const freq3=Object.entries(counts3).filter(([,c])=>c>=minCount).map(([k,c])=>({items:k.split('|||'),count:c,support:+(c/total).toFixed(4)})).sort((a,b)=>b.count-a.count);
+    freq3.forEach(fs=>frequentSets.push(fs));
+  }
+  return frequentSets;
+}
+
+function buildRules(data){
+  const minSup=parseFloat(document.getElementById('minSupport').value)/100;
+  const minConf=parseFloat(document.getElementById('minConfidence').value)/100;
+  const maxR=parseInt(document.getElementById('maxRules').value);
+  const txns=getTransactions(data);
+  const total=txns.length;
+  allFreqItemsets=mineFrequentItemsets(data,minSup);
+  currentFreqFilter=0;
+  renderFreqItemsets();
+  const rules=[];
+  allFreqItemsets.filter(fs=>fs.items.length>=2).forEach(fs=>{
+    const{items,support}=fs;
+    if(items.length===2){
+      const[a,b]=items;
+      const sA=txns.filter(t=>t.includes(a)).length/total;
+      const sB=txns.filter(t=>t.includes(b)).length/total;
+      const confAB=sA>0?+(support/sA).toFixed(3):0;
+      const confBA=sB>0?+(support/sB).toFixed(3):0;
+      const liftAB=sB>0?+(confAB/sB).toFixed(2):0;
+      const liftBA=sA>0?+(confBA/sA).toFixed(2):0;
+      if(confAB>=minConf)rules.push({a,b,support,confidence:confAB,lift:liftAB});
+      if(confBA>=minConf)rules.push({a:b,b:a,support,confidence:confBA,lift:liftBA});
+    }
+    if(items.length===3){
+      items.forEach((consequent,idx)=>{
+        const antecedents=items.filter((_,i)=>i!==idx);
+        const sAnt=txns.filter(t=>antecedents.every(a=>t.includes(a))).length/total;
+        const sCon=txns.filter(t=>t.includes(consequent)).length/total;
+        const conf=sAnt>0?+(support/sAnt).toFixed(3):0;
+        const lift=sCon>0?+(conf/sCon).toFixed(2):0;
+        if(conf>=minConf)rules.push({a:antecedents.join(' ∧ '),b:consequent,support,confidence:conf,lift});
+      });
+    }
+  });
+  rules.sort((x,y)=>y.support-x.support||y.confidence-x.confidence);
+  document.getElementById('ruleCountBadge').innerText=rules.length+' rules';
+  document.getElementById('ruleCountBadge2').innerText=rules.length+' rules';
+  const grid=document.getElementById('rulesGrid');
+  if(!rules.length){
+    grid.innerHTML='<div style="color:var(--text3);font-size:13px;font-weight:600;padding:18px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);grid-column:1/-1;">No rules found. Try lowering Min Support or Min Confidence.</div>';
+    return;
+  }
+  grid.innerHTML=rules.slice(0,maxR).map(r=>{
+    const liftColor=r.lift>1.2?'var(--green)':r.lift<0.8?'var(--pink)':'var(--text3)';
+    return`<div class="rule-card"><div style="margin-bottom:10px;"><span class="rule-a">${r.a}</span><span class="rule-arrow">→</span><span class="rule-b">${r.b}</span></div><div class="rule-metrics"><div class="metric-box"><div class="metric-val" style="color:var(--purple)">${(r.support*100).toFixed(1)}%</div><div class="metric-lbl">Support</div></div><div class="metric-box"><div class="metric-val" style="color:var(--cyan)">${(r.confidence*100).toFixed(1)}%</div><div class="metric-lbl">Conf</div></div><div class="metric-box"><div class="metric-val" style="color:${liftColor}">${r.lift}x</div><div class="metric-lbl">Lift</div></div></div><div class="conf-bar"><div class="conf-fill" style="width:${r.confidence*100}%"></div></div></div>`;
+  }).join('');
+}
+
+function renderFreqItemsets(){
+  const k1=allFreqItemsets.filter(fs=>fs.items.length===1);
+  const k2=allFreqItemsets.filter(fs=>fs.items.length===2);
+  const k3=allFreqItemsets.filter(fs=>fs.items.length===3);
+  document.getElementById('freqCountBadge').innerText=allFreqItemsets.length+' itemsets';
+  document.getElementById('freqK1Badge').innerText=k1.length+' 1-itemsets';
+  document.getElementById('freqK2Badge').innerText=k2.length+' 2-itemsets';
+  document.getElementById('freqK3Badge').innerText=k3.length+' 3-itemsets';
+  const filtered=currentFreqFilter===0?allFreqItemsets:allFreqItemsets.filter(fs=>fs.items.length===currentFreqFilter);
+  const maxSup=Math.max(...allFreqItemsets.map(fs=>fs.support),0.01);
+  const sizeColors=['','--cyan','--purple','--gold'];
+  document.getElementById('freqGrid').innerHTML=filtered.slice(0,80).map(fs=>{
+    const k=fs.items.length;
+    const supPct=(fs.support*100).toFixed(1);
+    const barW=Math.round(fs.support/maxSup*100);
+    const col=k<sizeColors.length?`var(${sizeColors[k]})`:PAL[(k-1)%PAL.length];
+    return`<div class="freq-card" style="--fgc:${col};"><div class="freq-size">${k}-itemset</div><div class="freq-items">{${fs.items.join(', ')}}</div><div class="freq-sup-bar"><div class="freq-sup-fill" style="width:${barW}%;background:${col}"></div></div><div class="freq-sup-val"><span>support</span><span>${supPct}% (${fs.count})</span></div></div>`;
+  }).join('');
+  if(!filtered.length){
+    document.getElementById('freqGrid').innerHTML=`<div style="color:var(--text3);font-size:13px;font-weight:600;padding:18px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);grid-column:1/-1;">No frequent itemsets found. Try lowering the min support threshold.</div>`;
+  }
+}
+
+function filterFreq(k){
+  currentFreqFilter=k;
+  const pills=[document.getElementById('freqKAllBadge'),document.getElementById('freqK1Badge'),document.getElementById('freqK2Badge'),document.getElementById('freqK3Badge')];
+  pills.forEach((p,i)=>{if(!p)return;p.style.opacity=((k===0&&i===0)||(k===i))?'1':'0.5';});
+  renderFreqItemsets();
+}
+function rebuildRules(){if(!globalData.length){alert('Upload a dataset first.');return;}buildRules(globalData);}
+
+/* ─── COMPARE ─── */
+function buildCompare(){
+  if(!globalData.length)return;
+  const col=document.getElementById('compareCol')?.value;
+  const num=document.getElementById('compareNum')?.value;
+  if(!col||!num){document.getElementById('compareOut').innerHTML='';return;}
+  const groups=[...new Set(globalData.map(d=>d[col]))].filter(Boolean).sort();
+  const stats=groups.map(g=>{
+    const sub=globalData.filter(d=>d[col]===g);
+    const vals=sub.map(d=>parseFloat(d[num])||0).filter(v=>!isNaN(v));
+    if(!vals.length)return null;
+    const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
+    const sorted=[...vals].sort((a,b)=>a-b);
+    const median=sorted.length%2===0?(sorted[sorted.length/2-1]+sorted[sorted.length/2])/2:sorted[Math.floor(sorted.length/2)];
+    const std=Math.sqrt(vals.reduce((s,v)=>s+(v-avg)**2,0)/vals.length);
+    return{g,count:sub.length,avg:+avg.toFixed(2),median:+median.toFixed(2),std:+std.toFixed(2),min:Math.min(...vals),max:Math.max(...vals)};
+  }).filter(Boolean);
+  const maxAvg=Math.max(...stats.map(s=>s.avg));
+  let html=`<div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);margin-bottom:14px;">📊 ${col} Groups — ${num}</div>`;
+  html+=`<div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border);margin-bottom:14px;"><table class="data-table"><thead><tr><th>${col}</th><th>Count</th><th>Avg ${num}</th><th>Median</th><th>Std</th><th>Min</th><th>Max</th><th>Bar</th></tr></thead><tbody>`;
+  stats.forEach((s,i)=>{
+    const barW=maxAvg>0?Math.round(s.avg/maxAvg*100):0;
+    html+=`<tr><td style="font-weight:700;color:${PAL[i%PAL.length]}">${s.g}</td><td>${s.count}</td><td style="font-weight:700;color:var(--purple)">${s.avg}</td><td>${s.median}</td><td style="color:var(--text3)">${s.std}</td><td style="color:var(--text3)">${s.min}</td><td style="color:var(--text3)">${s.max}</td><td><div style="height:9px;background:var(--surface2);border-radius:5px;overflow:hidden;min-width:64px;"><div style="width:${barW}%;height:100%;background:${PAL[i%PAL.length]};border-radius:5px;"></div></div></td></tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  html+=`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--shadow);"><canvas id="compareChart" style="max-height:220px;"></canvas></div>`;
+  document.getElementById('compareOut').innerHTML=html;
+  setTimeout(()=>{
+    setDef();if(charts.compare)try{charts.compare.destroy();}catch(e){}
+    charts.compare=new Chart(document.getElementById('compareChart'),{type:'bar',data:{labels:stats.map(s=>s.g),datasets:[{label:'Avg '+num,data:stats.map(s=>s.avg),backgroundColor:PAL.map(c=>c+'88'),borderColor:PAL,borderWidth:1,borderRadius:8,borderSkipped:false},{label:'Median',data:stats.map(s=>s.median),type:'line',borderColor:PAL[1],backgroundColor:'transparent',borderWidth:2.5,pointRadius:4,pointBackgroundColor:PAL[1]}]},options:{plugins:{legend:{labels:{color:'#a1a1aa',font:{size:11}}}},scales:{x:{grid:{color:'rgba(226,223,240,.6)'}},y:{grid:{color:'rgba(226,223,240,.6)'}}}}});
+  },100);
+}
+
+/* ─── TABLE ─── */
+let tableData=[];
+function buildTable(data){
+  tableData=data;renderTable(data);
+  const sb=document.getElementById('searchBox');
+  sb.oninput=null;
+  sb.addEventListener('input',e=>{const q=e.target.value.toLowerCase();renderTable(tableData.filter(d=>Object.values(d).some(v=>String(v).toLowerCase().includes(q))));});
+}
+function renderTable(data){
+  document.getElementById('tableCount').innerText=data.length+' rows';
+  const t=document.getElementById('dataTable');
+  if(!data.length){t.innerHTML='<tbody><tr><td style="padding:18px;color:var(--text3)">No matching records</td></tr></tbody>';return;}
+  const cols=Object.keys(data[0]);
+  let html='<thead><tr>'+cols.map(c=>`<th>${c}</th>`).join('')+'</tr></thead><tbody>';
+  data.slice(0,500).forEach(d=>{html+=`<tr>${cols.map(c=>`<td>${d[c]!=null?d[c]:''}</td>`).join('')}</tr>`;});
+  t.innerHTML=html+'</tbody>';
+}
+
+/* ─── GROQ AI ─── */
+async function callGroqAI(data){
+  if(!groqKey)return;
+  switchLab('ai');
+  document.getElementById('aiBox').innerHTML='<div class="ai-loading"><div class="spinner"></div>&nbsp;Generating AI insights…</div>';
+  const minSup=parseFloat(document.getElementById('minSupport').value)/100;
+  const minConf=parseFloat(document.getElementById('minConfidence').value)/100;
+  const rules=allFreqItemsets.filter(fs=>fs.items.length>=2).slice(0,20).map(fs=>`{${fs.items.join(', ')}} sup=${(fs.support*100).toFixed(0)}%`).join('\n');
+  const colStats=detectedColumns.all.map(col=>{
+    const p=datasetProfile.columns[col];
+    if(p.type==='numeric')return`${col}[num]: min=${p.min},max=${p.max},avg=${p.avg}`;
+    const vals=data.map(d=>d[col]).filter(Boolean);
+    const dist=[...new Set(vals)].slice(0,5).map(v=>`${v}:${vals.filter(x=>x===v).length}`).join(',');
+    return`${col}[cat,${p.uniqueCount}uq]: ${dist}`;
+  }).join('\n');
+  const prompt=`You are an expert data analyst. Analyze this dataset. Return ONLY valid JSON, no markdown, no preamble.
+
+DATASET: ${data.length} records
+Numeric columns: ${detectedColumns.num.join(', ')||'none'}
+Categorical columns: ${detectedColumns.cat.join(', ')||'none'}
+COLUMN STATS:\n${colStats}
+FREQUENT ITEMSETS:\n${rules||'None found'}
+
+Return exactly this JSON:
+{"summary":"2-3 sentence overview","keyPatterns":[{"title":"","description":"","tag":""},{"title":"","description":"","tag":""},{"title":"","description":"","tag":""}],"ruleExplanations":[{"rule":"","plain":"","implication":""},{"rule":"","plain":"","implication":""},{"rule":"","plain":"","implication":""}],"segments":[{"name":"","description":"","size":"~X%"},{"name":"","description":"","size":""},{"name":"","description":"","size":""}],"recommendations":[{"icon":"🎯","text":""},{"icon":"📈","text":""},{"icon":"🔍","text":""},{"icon":"⚡","text":""},{"icon":"💡","text":""}],"columnInsights":${JSON.stringify(detectedColumns.all.slice(0,8).map(c=>({column:c,insight:""})))},"stats":[{"label":"Strongest Pattern","value":""},{"label":"Top Segment","value":""},{"label":"Data Quality","value":""},{"label":"Freq Itemsets","value":"${allFreqItemsets.length} found"}]}`;
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+groqKey},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2500,temperature:0.6})});
+    const json=await res.json();
+    if(!res.ok)throw new Error(json?.error?.message||'API Error '+res.status);
+    const text=json?.choices?.[0]?.message?.content||'';
+    let ins;
+    try{ins=JSON.parse(text.replace(/```json|```/g,'').trim());}
+    catch(e){document.getElementById('aiBox').innerHTML=`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:22px;font-size:13px;line-height:1.85;color:var(--text2);">${text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong style="color:var(--purple)">$1</strong>')}</div>`;return;}
+    renderAI(ins);
+  }catch(err){document.getElementById('aiBox').innerHTML=`<div class="ai-error">⚠️ ${err.message}</div>`;}
+}
+
+function renderAI(ins){
+  let html='';
+  if(ins.summary)html+=`<div class="ai-summary">💡 ${ins.summary}</div>`;
+  if(ins.stats?.length)html+=`<div class="ai-stat-row">${ins.stats.filter(s=>s.value).map(s=>`<div class="ai-stat-chip"><strong>${s.label}:</strong> ${s.value}</div>`).join('')}</div>`;
+  if(ins.keyPatterns?.length){html+=`<div style="margin-bottom:22px;"><div class="ai-section-title">🔍 Key Patterns</div><div class="ai-grid">`;ins.keyPatterns.filter(p=>p.title).forEach((p,i)=>{html+=`<div class="ai-card"><div class="ai-card-num">0${i+1}</div><div class="ai-card-title">${p.title}</div><div class="ai-card-text">${p.description}</div>${p.tag?`<span class="ai-tag">${p.tag}</span>`:''}</div>`;});html+=`</div></div>`;}
+  if(ins.ruleExplanations?.length){html+=`<div style="margin-bottom:22px;"><div class="ai-section-title">🔗 Rule Explanations</div>`;ins.ruleExplanations.filter(r=>r.rule).forEach(r=>{html+=`<div class="ai-rule-explain"><div class="rule-str">${r.rule}</div><div class="rule-plain">${r.plain}</div>${r.implication?`<div class="rule-impl">→ ${r.implication}</div>`:''}</div>`;});html+=`</div>`;}
+  if(ins.segments?.length){html+=`<div style="margin-bottom:22px;"><div class="ai-section-title">👥 Segments</div><div class="ai-grid">`;ins.segments.filter(s=>s.name).forEach((s,i)=>{html+=`<div class="ai-card"><div style="display:flex;justify-content:space-between;margin-bottom:9px;"><span class="ai-card-title">${s.name}</span><span style="font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:6px;background:${PAL[i%PAL.length]}18;color:${PAL[i%PAL.length]};">${s.size}</span></div><div class="ai-card-text">${s.description}</div></div>`;});html+=`</div></div>`;}
+  if(ins.recommendations?.length){html+=`<div style="margin-bottom:22px;"><div class="ai-section-title">🎯 Recommendations</div>`;ins.recommendations.filter(r=>r.text).forEach(r=>{html+=`<div class="ai-rec"><span class="ai-rec-icon">${r.icon||'✅'}</span><span class="ai-rec-text">${r.text}</span></div>`;});html+=`</div>`;}
+  if(ins.columnInsights?.length){html+=`<div><div class="ai-section-title">📊 Column Insights</div><div class="ai-grid">`;ins.columnInsights.filter(c=>c.insight).forEach(c=>{html+=`<div class="col-insight"><div class="col-name">${c.column}</div><div class="col-text">${c.insight}</div></div>`;});html+=`</div></div>`;}
+  document.getElementById('aiBox').innerHTML=html||'<div style="color:var(--text3);padding:18px;">No insights generated.</div>';
+}
+</script>
+</body>
+</html>

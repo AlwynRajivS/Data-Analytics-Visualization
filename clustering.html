@@ -1,0 +1,1525 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RegPredict — Clustering Analysis Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f2f0eb;
+  --bg2:#ebe9e3;
+  --white:#ffffff;
+  --ink:#111118;
+  --ink2:#3a3a4a;
+  --ink3:#7a7a8a;
+  --accent:#2d35e8;
+  --accent2:#1a21c4;
+  --accent-light:#eceeff;
+  --green:#0a8a5c;
+  --green-bg:#e6f7f1;
+  --red:#d63344;
+  --red-bg:#fdeaea;
+  --gold:#b87a10;
+  --gold-bg:#fef6e6;
+  --border:#dcdad3;
+  --border2:#c8c5bc;
+  --shadow:0 2px 16px rgba(0,0,0,0.07);
+  --shadow-lg:0 8px 40px rgba(0,0,0,0.12);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden}
+
+/* ── GRID BACKGROUND ── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size:48px 48px;
+  opacity:0.45;
+}
+.page-wrap{position:relative;z-index:1}
+
+/* ── HERO ── */
+.hero{
+  text-align:center;
+  padding:4rem 1.5rem 0;
+  max-width:900px;margin:0 auto;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  border:1.5px solid var(--border2);
+  background:var(--white);
+  color:var(--ink3);
+  font-size:0.65rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+  padding:0.35rem 1rem;border-radius:20px;margin-bottom:2rem;
+}
+.hero-badge::before{content:'●';color:var(--accent);font-size:0.6rem}
+.hero-title{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(3.5rem,10vw,7rem);
+  line-height:1;letter-spacing:-2px;
+  margin-bottom:1.5rem;
+}
+.hero-title .reg{color:var(--ink);font-style:normal}
+.hero-title .predict{color:var(--accent);font-style:italic}
+.hero-sub{
+  font-size:clamp(0.95rem,2vw,1.15rem);color:var(--ink2);
+  line-height:1.7;margin-bottom:2.5rem;max-width:520px;margin-left:auto;margin-right:auto;
+}
+.hero-tags{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:0.6rem;
+  margin-bottom:3rem;
+}
+.htag{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  border:1.5px solid var(--border2);background:var(--white);
+  border-radius:20px;padding:0.4rem 1rem;
+  font-size:0.78rem;color:var(--ink2);
+  white-space:nowrap;
+}
+.htag strong{color:var(--ink);font-weight:700}
+
+/* ── NAV TABS ── */
+.nav-wrap{
+  display:flex;justify-content:center;padding:0 1.5rem;
+  margin-bottom:0;position:sticky;top:0;z-index:100;
+}
+.nav-inner{
+  display:flex;align-items:center;
+  background:var(--white);
+  border:1.5px solid var(--border);
+  border-radius:50px;
+  padding:0.35rem;
+  gap:0.2rem;
+  box-shadow:var(--shadow);
+  overflow-x:auto;
+  max-width:700px;
+  width:100%;
+}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav-btn{
+  padding:0.6rem 1.25rem;
+  border:none;background:transparent;
+  font-family:'Manrope',sans-serif;font-size:0.8rem;font-weight:600;
+  color:var(--ink3);cursor:pointer;
+  border-radius:40px;transition:all .25s;
+  display:flex;align-items:center;gap:0.4rem;
+  white-space:nowrap;
+}
+.nav-btn:hover{color:var(--ink);background:var(--bg)}
+.nav-btn.active{background:var(--accent);color:#fff}
+.nav-btn .ni{font-size:0.85rem}
+
+/* ── SHELL ── */
+.shell{max-width:1200px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
+.tab-panel{display:none;animation:fadeUp .35s ease both}
+.tab-panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTION HEADERS ── */
+.sec{margin-bottom:3rem}
+.sec-tag{
+  display:inline-block;
+  font-size:0.62rem;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--accent);margin-bottom:0.6rem;
+}
+.sec-title{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(1.8rem,4vw,2.8rem);
+  color:var(--ink);line-height:1.15;margin-bottom:0.75rem;
+}
+.sec-title em{color:var(--accent);font-style:italic}
+.sec-desc{font-size:0.95rem;color:var(--ink2);line-height:1.75;max-width:680px}
+
+/* ── CARDS ── */
+.card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:18px;padding:1.75rem;
+  transition:box-shadow .2s,border-color .2s,transform .2s;
+}
+.card:hover{box-shadow:var(--shadow-lg);border-color:var(--border2);transform:translateY(-2px)}
+.card-icon{
+  width:44px;height:44px;border-radius:12px;
+  display:grid;place-items:center;font-size:1.25rem;
+  margin-bottom:1rem;
+}
+.ci-blue{background:var(--accent-light)} .ci-green{background:var(--green-bg)}
+.ci-red{background:var(--red-bg)} .ci-gold{background:var(--gold-bg)}
+.ci-purple{background:#f0ecff} .ci-teal{background:#e0f8f3}
+.card h3{font-size:0.98rem;font-weight:700;margin-bottom:0.4rem}
+.card p{font-size:0.85rem;color:var(--ink2);line-height:1.65}
+.card ul{padding-left:1.1rem;margin-top:0.5rem}
+.card li{font-size:0.85rem;color:var(--ink2);line-height:1.8}
+
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem}
+
+/* ── EQUATION BLOCK ── */
+.eq-wrap{margin:2rem 0}
+.eq-label{
+  font-size:0.65rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:0.75rem;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.eq-label::before{content:'';display:block;width:16px;height:2px;background:var(--accent)}
+.eq-box{
+  background:var(--ink);
+  border-radius:16px;padding:2rem 2.5rem;
+  position:relative;overflow:hidden;
+}
+.eq-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),#7c5cfc,#0a8a5c);
+}
+.eq-main{
+  font-family:'DM Mono',monospace;
+  font-size:clamp(1rem,2.5vw,1.45rem);
+  color:#f1f1ff;font-weight:500;line-height:1.7;
+}
+.eq-main .v{color:#93c5fd} /* variable */
+.eq-main .o{color:rgba(255,255,255,0.38)} /* operator */
+.eq-main .n{color:#6ee7b7} /* number/result */
+.eq-main .k{color:#fbbf24} /* keyword */
+.eq-vars{
+  display:flex;flex-wrap:wrap;gap:0.6rem;
+  margin-top:1.5rem;padding-top:1.5rem;
+  border-top:1px solid rgba(255,255,255,0.1);
+}
+.ev{
+  display:flex;align-items:center;gap:0.5rem;
+  background:rgba(255,255,255,0.07);border-radius:8px;
+  padding:0.35rem 0.75rem;
+}
+.ev .sym{font-family:'DM Mono',monospace;color:#93c5fd;font-size:0.82rem;font-weight:500}
+.ev .def{font-size:0.75rem;color:rgba(255,255,255,0.5)}
+
+/* ── EXAMPLE BLOCKS ── */
+.ex-block{
+  background:var(--white);border:1.5px solid #c8d8ff;
+  border-left:4px solid var(--accent);
+  border-radius:0 14px 14px 0;
+  padding:1.25rem 1.5rem;margin:1.5rem 0;
+}
+.ex-tag{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  background:var(--accent);color:#fff;
+  font-size:0.6rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  padding:0.2rem 0.65rem;border-radius:4px;margin-bottom:0.6rem;
+}
+.ex-title{font-size:0.9rem;font-weight:700;color:var(--accent2);margin-bottom:0.6rem}
+.ex-block p{font-size:0.87rem;color:var(--ink2);line-height:1.7}
+.ex-block ul{padding-left:1.1rem;margin-top:0.5rem}
+.ex-block li{font-size:0.85rem;color:var(--ink2);line-height:1.8}
+.ex-code{
+  font-family:'DM Mono',monospace;
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;padding:0.7rem 1rem;
+  font-size:0.85rem;color:var(--ink);margin:0.6rem 0;
+  display:block;
+}
+
+/* ── ALERT ── */
+.alert{
+  display:flex;gap:0.75rem;align-items:flex-start;
+  border-radius:12px;padding:1rem 1.25rem;margin:1.25rem 0;
+}
+.a-info{background:#eff3ff;border:1.5px solid #c0ccff}
+.a-warn{background:#fffbeb;border:1.5px solid #fde68a}
+.a-ok{background:#edfdf6;border:1.5px solid #a7f3d0}
+.alert-ico{font-size:1rem;margin-top:1px;flex-shrink:0}
+.alert-body{font-size:0.86rem;line-height:1.65;color:var(--ink2)}
+.alert-body strong{display:block;font-size:0.88rem;color:var(--ink);margin-bottom:0.2rem}
+
+/* ── STEPS ── */
+.steps-list{display:flex;flex-direction:column;gap:0.9rem;margin:1.5rem 0}
+.step{
+  display:flex;gap:1.1rem;align-items:flex-start;
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:14px;padding:1.1rem 1.4rem;
+  transition:border-color .2s;
+}
+.step:hover{border-color:var(--accent)}
+.step-n{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  background:var(--accent);color:#fff;
+  font-weight:800;font-size:0.85rem;display:grid;place-items:center;
+}
+.step h4{font-size:0.9rem;font-weight:700;margin-bottom:0.25rem}
+.step p{font-size:0.83rem;color:var(--ink2);line-height:1.6}
+
+/* ── DIVIDER ── */
+.div{height:1px;background:var(--border);margin:2.5rem 0}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;border-radius:16px;border:1.5px solid var(--border);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;background:var(--white)}
+thead tr{background:var(--ink)}
+th{padding:0.9rem 1.1rem;text-align:left;color:#fff;font-size:0.78rem;font-weight:700;letter-spacing:0.5px;white-space:nowrap}
+td{padding:0.85rem 1.1rem;font-size:0.84rem;color:var(--ink2);border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg)}
+.badge{display:inline-block;padding:0.18rem 0.6rem;border-radius:20px;font-size:0.73rem;font-weight:700}
+.b-g{background:var(--green-bg);color:var(--green)}
+.b-b{background:var(--accent-light);color:var(--accent)}
+.b-y{background:var(--gold-bg);color:var(--gold)}
+.b-r{background:var(--red-bg);color:var(--red)}
+
+/* ── LAB LAYOUT ── */
+.lab-layout{display:grid;grid-template-columns:300px 1fr;gap:1.5rem;align-items:start}
+.sidebar{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:18px;padding:1.5rem;
+  position:sticky;top:70px;
+}
+.sidebar h3{
+  font-family:'DM Serif Display',serif;font-size:1.15rem;
+  margin-bottom:1.25rem;padding-bottom:0.75rem;
+  border-bottom:2px solid var(--accent);color:var(--ink);
+}
+.fg{margin-bottom:1.1rem}
+.fl{display:block;font-size:0.75rem;font-weight:700;color:var(--ink);margin-bottom:0.4rem;letter-spacing:0.3px}
+.fi{
+  width:100%;padding:0.6rem 0.85rem;
+  border:1.5px solid var(--border);border-radius:10px;
+  font-family:'Manrope',sans-serif;font-size:0.84rem;color:var(--ink);
+  background:var(--bg);transition:all .2s;
+}
+.fi:focus{outline:none;border-color:var(--accent);background:var(--white);box-shadow:0 0 0 3px rgba(45,53,232,0.1)}
+select.fi{cursor:pointer}
+.run-btn{
+  width:100%;padding:0.78rem;border:none;
+  background:var(--accent);color:#fff;
+  font-family:'Manrope',sans-serif;font-size:0.88rem;font-weight:800;
+  border-radius:12px;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:0.5rem;
+  margin-top:1.25rem;letter-spacing:0.2px;
+}
+.run-btn:hover{background:var(--accent2);box-shadow:0 4px 20px rgba(45,53,232,0.3);transform:translateY(-1px)}
+.run-btn:active{transform:translateY(0)}
+.file-drop{
+  border:2px dashed var(--border2);border-radius:12px;
+  padding:1.1rem;text-align:center;cursor:pointer;
+  transition:all .2s;margin-top:0.75rem;background:var(--bg);
+}
+.file-drop:hover{border-color:var(--accent);background:var(--accent-light)}
+.file-drop p{font-size:0.78rem;color:var(--ink3);margin-top:0.3rem}
+.file-drop input{display:none}
+.dl-row{display:flex;gap:0.5rem;margin-top:0.75rem}
+.sm-btn{
+  flex:1;padding:0.48rem 0.6rem;border-radius:9px;
+  font-family:'Manrope',sans-serif;font-size:0.73rem;font-weight:700;cursor:pointer;
+  transition:all .2s;border:1.5px solid var(--border);
+  background:var(--bg);color:var(--ink3);
+  display:flex;align-items:center;justify-content:center;gap:0.3rem;
+}
+.sm-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+
+/* ── CANVAS CARDS ── */
+.cv-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:18px;padding:1.5rem;margin-bottom:1.25rem;
+}
+.cv-card h4{
+  font-size:0.72rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:1.25rem;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.cv-card h4::before{content:'';width:3px;height:13px;background:var(--accent);border-radius:2px;display:block}
+canvas{
+  display:block;width:100%;height:auto;
+  border-radius:10px;background:var(--bg);
+}
+.legend-row{display:flex;flex-wrap:wrap;gap:0.6rem;margin-top:1rem}
+.leg-item{display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;color:var(--ink2);font-weight:600}
+.leg-dot{width:12px;height:12px;border-radius:3px}
+
+/* ── RESULTS ── */
+.res-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:18px;padding:1.5rem;margin-top:1.25rem;
+}
+.res-card h4{font-size:0.95rem;font-weight:700;margin-bottom:1rem;color:var(--ink)}
+.res-item{
+  padding:0.9rem 1.1rem;background:var(--bg);
+  border-radius:10px;margin-bottom:0.65rem;
+  border-left:3px solid var(--green);font-size:0.84rem;color:var(--ink2);line-height:1.6;
+}
+.res-item:last-child{margin-bottom:0}
+.pill{
+  display:inline-block;padding:0.18rem 0.6rem;
+  border-radius:20px;font-size:0.75rem;font-weight:700;
+  margin:0.15rem;background:var(--accent);color:#fff;
+}
+.pill-noise{background:var(--red);color:#fff}
+
+/* ── UPLOAD PANEL ── */
+.upload-panel{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:18px;padding:1.75rem;margin-bottom:1.5rem;
+}
+.upload-panel h3{font-size:1rem;font-weight:700;margin-bottom:1.1rem;color:var(--ink)}
+.col-tags{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.5rem}
+.col-tag{
+  padding:0.25rem 0.7rem;border-radius:20px;
+  font-size:0.73rem;font-weight:700;
+  background:var(--accent-light);color:var(--accent);border:1px solid #c0ccff;
+  cursor:pointer;transition:all .2s;
+}
+.col-tag.sel{background:var(--accent);color:#fff}
+.col-tag:hover{background:var(--accent);color:#fff}
+
+/* ── ALGO CONCEPT PANELS ── */
+.concept-block{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:20px;overflow:hidden;margin-bottom:1.5rem;
+}
+.cb-header{
+  background:var(--ink);padding:1.75rem 2rem;
+  display:flex;align-items:flex-start;gap:1.25rem;
+}
+.cb-num{
+  width:48px;height:48px;border-radius:12px;flex-shrink:0;
+  background:var(--accent);color:#fff;
+  font-family:'DM Serif Display',serif;font-size:1.5rem;
+  display:grid;place-items:center;
+}
+.cb-header h3{font-family:'DM Serif Display',serif;font-size:1.5rem;color:#fff;margin-bottom:0.3rem}
+.cb-header p{font-size:0.84rem;color:rgba(255,255,255,0.55);line-height:1.6}
+.cb-body{padding:2rem}
+.cb-complexity{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  background:rgba(255,255,255,0.1);border-radius:8px;
+  padding:0.3rem 0.8rem;margin-top:0.5rem;
+}
+.cb-complexity span{font-family:'DM Mono',monospace;color:#93c5fd;font-size:0.8rem}
+
+/* ─ MOBILE ── */
+@media(max-width:900px){
+  .g2,.g3,.g4{grid-template-columns:1fr 1fr}
+  .lab-layout{grid-template-columns:1fr}
+  .sidebar{position:static}
+  .hero-title{font-size:clamp(2.8rem,15vw,5rem);letter-spacing:-1.5px}
+}
+@media(max-width:600px){
+  .shell{padding:1.5rem 1rem 4rem}
+  .hero{padding:2.5rem 1rem 0}
+  .hero-title{font-size:clamp(2.4rem,17vw,4rem)}
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .nav-inner{border-radius:14px;padding:0.25rem}
+  .nav-btn{padding:0.55rem 0.8rem;font-size:0.73rem}
+  .eq-box{padding:1.25rem 1.25rem}
+  .eq-main{font-size:0.88rem}
+  .lab-layout{grid-template-columns:1fr}
+  .sidebar{position:static;top:auto}
+  .cb-header{flex-direction:column;gap:0.75rem;padding:1.25rem}
+  .cb-body{padding:1.25rem}
+}
+@media(max-width:420px){
+  .hero-title{font-size:2.4rem}
+  .htag{font-size:0.7rem;padding:0.35rem 0.75rem}
+}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* misc */
+.mt{margin-top:1.5rem}.mt2{margin-top:2.5rem}
+.mb{margin-bottom:1.5rem}.mb2{margin-bottom:2.5rem}
+.mono{font-family:'DM Mono',monospace;font-size:0.85rem;background:var(--bg);padding:0.15rem 0.5rem;border-radius:5px;border:1px solid var(--border)}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:1.5rem 0}
+.stat{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:1.1rem 1.25rem;text-align:center}
+.stat-val{font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--accent)}
+.stat-lbl{font-size:0.73rem;color:var(--ink3);font-weight:600;margin-top:0.2rem}
+@media(max-width:600px){.stat-row{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+<!-- ───── HERO ───── -->
+<div class="hero">
+  <div class="hero-badge">Clustering Analysis Platform</div>
+  <div class="hero-title"><span class="reg">Clustering</span><span class="predict">Analysis</span></div>
+  <p class="hero-sub">Upload any dataset, understand the math, visualise clusters, and discover hidden patterns — all in one place.</p>
+  <div class="hero-tags">
+    <div class="htag">Models <strong>K-Means · Hierarchical · DBSCAN</strong></div>
+    <div class="htag">Engine <strong>Pure JS · Canvas API</strong></div>
+    <div class="htag">Metrics <strong>WCSS · Silhouette · Inertia</strong></div>
+    <div class="htag">Dynamic <strong>Any CSV Dataset</strong></div>
+  </div>
+</div>
+
+<!-- ───── NAV ───── -->
+<div class="nav-wrap">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="switchTab('content',this)"><span class="ni">📚</span> Concepts</button>
+    <button class="nav-btn" onclick="switchTab('algo',this)"><span class="ni">🧮</span> Algorithms</button>
+    <button class="nav-btn" onclick="switchTab('kmeans-lab',this)"><span class="ni">🔬</span> K-Means Lab</button>
+    <button class="nav-btn" onclick="switchTab('hier-lab',this)"><span class="ni">🌳</span> Hierarchical</button>
+    <button class="nav-btn" onclick="switchTab('dbscan-lab',this)"><span class="ni">📍</span> DBSCAN</button>
+    <button class="nav-btn" onclick="switchTab('compare',this)"><span class="ni">⚖️</span> Compare</button>
+  </div>
+</div>
+
+<div class="shell">
+
+<!-- ══════════════════════ CONCEPTS ══════════════════════ -->
+<div id="content" class="tab-panel active">
+
+  <div class="sec mt2">
+    <div class="sec-tag">Foundation</div>
+    <div class="sec-title">What is <em>Cluster Analysis?</em></div>
+    <p class="sec-desc">Cluster analysis groups objects so that members of the same cluster are more <strong>similar</strong> to each other than to those in other groups. It is a core <em>unsupervised learning</em> technique — no labelled training data required.</p>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat"><div class="stat-val">3</div><div class="stat-lbl">Core Algorithms</div></div>
+    <div class="stat"><div class="stat-val">6+</div><div class="stat-lbl">Variable Types</div></div>
+    <div class="stat"><div class="stat-val">O(nk)</div><div class="stat-lbl">K-Means Complexity</div></div>
+    <div class="stat"><div class="stat-val">∞</div><div class="stat-lbl">Real-World Uses</div></div>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-tag">🛒 Real World</div>
+    <div class="ex-title">E-Commerce Customer Segmentation</div>
+    <p>Amazon clusters millions of shoppers into groups — <em>budget hunters, brand loyalists, impulse buyers</em> — without any human labelling each customer. The algorithm discovers these patterns purely from purchase history and browsing data.</p>
+    <ul>
+      <li><strong>Budget hunters</strong> → receive discount coupons &amp; flash sale alerts</li>
+      <li><strong>Brand loyalists</strong> → receive premium new arrival launches</li>
+      <li><strong>Impulse buyers</strong> → shown high-margin trending items</li>
+    </ul>
+  </div>
+
+  <div class="alert a-info"><span class="alert-ico">💡</span><div class="alert-body"><strong>Key Insight</strong>Clustering is unsupervised — unlike classification (spam/not spam), there are no predefined labels. The algorithm discovers natural groupings entirely from the data.</div></div>
+
+  <div class="div"></div>
+
+  <!-- Distance Measures -->
+  <div class="sec">
+    <div class="sec-tag">Mathematics</div>
+    <div class="sec-title">Distance <em>Measures</em></div>
+    <p class="sec-desc">Every clustering algorithm depends on a <em>distance</em> or similarity function. Choosing the right measure is critical to getting meaningful clusters.</p>
+  </div>
+
+  <div class="g2">
+    <div>
+      <div class="eq-wrap">
+        <div class="eq-label">Euclidean Distance — Most Common</div>
+        <div class="eq-box">
+          <div class="eq-main">
+            <span class="v">d</span><span class="o">(</span><span class="v">p</span><span class="o">,</span><span class="v">q</span><span class="o">)</span> <span class="o">=</span> <span class="n">√</span><span class="o">[</span> <span class="o">(</span><span class="v">x₁</span><span class="o">−</span><span class="v">x₂</span><span class="o">)²</span> <span class="o">+</span> <span class="o">(</span><span class="v">y₁</span><span class="o">−</span><span class="v">y₂</span><span class="o">)²</span> <span class="o">]</span>
+          </div>
+          <div class="eq-vars">
+            <div class="ev"><span class="sym">p, q</span><span class="def">two data points</span></div>
+            <div class="ev"><span class="sym">x₁, x₂</span><span class="def">feature 1 values</span></div>
+            <div class="ev"><span class="sym">y₁, y₂</span><span class="def">feature 2 values</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="eq-wrap">
+        <div class="eq-label">Manhattan Distance — City Block</div>
+        <div class="eq-box">
+          <div class="eq-main">
+            <span class="v">d</span><span class="o">(</span><span class="v">p</span><span class="o">,</span><span class="v">q</span><span class="o">)</span> <span class="o">=</span> <span class="o">|</span><span class="v">x₁</span><span class="o">−</span><span class="v">x₂</span><span class="o">|</span> <span class="o">+</span> <span class="o">|</span><span class="v">y₁</span><span class="o">−</span><span class="v">y₂</span><span class="o">|</span>
+          </div>
+          <div class="eq-vars">
+            <div class="ev"><span class="sym">| · |</span><span class="def">absolute value</span></div>
+            <div class="ev"><span class="sym">grid path</span><span class="def">like city blocks</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-tag">🏠 Worked Example</div>
+    <div class="ex-title">Housing Prices — Are Two Houses Similar?</div>
+    <p>House A: 1200 sq ft, ₹50L &nbsp;|&nbsp; House B: 1800 sq ft, ₹80L</p>
+    <code class="ex-code">d = √[ (1200−1800)² + (50−80)² ] = √[ 360000 + 900 ] = √360900 ≈ 600.75</code>
+    <p>⚠️ Units differ wildly — must <strong>normalise</strong> features before computing distance or sq ft dominates entirely.</p>
+  </div>
+
+  <div class="div"></div>
+
+  <!-- Variable Types -->
+  <div class="sec">
+    <div class="sec-tag">Data Types</div>
+    <div class="sec-title">Types of <em>Variables</em></div>
+    <p class="sec-desc">Different variable types require different distance measures. Choosing wrong is a common cause of poor results.</p>
+  </div>
+  <div class="g3">
+    <div class="card"><div class="card-icon ci-blue">📏</div><h3>Interval-Scaled</h3><p>Continuous values with equal spacing.<br><strong>Examples:</strong> salary, temperature, height in cm.</p></div>
+    <div class="card"><div class="card-icon ci-green">🔢</div><h3>Binary</h3><p>Exactly two values: 0 or 1.<br><strong>Examples:</strong> gender (M/F), has_credit_card, churned.</p></div>
+    <div class="card"><div class="card-icon ci-purple">🏷️</div><h3>Nominal</h3><p>Named categories, no order.<br><strong>Examples:</strong> religion, city, payment_method.</p></div>
+    <div class="card"><div class="card-icon ci-gold">📊</div><h3>Ordinal</h3><p>Ordered categories, unequal intervals.<br><strong>Examples:</strong> military rank, satisfaction (Low/Med/High).</p></div>
+    <div class="card"><div class="card-icon ci-red">📐</div><h3>Ratio-Scaled</h3><p>Numeric with a true zero point.<br><strong>Examples:</strong> income (₹0 possible), population growth.</p></div>
+    <div class="card"><div class="card-icon ci-teal">🔀</div><h3>Mixed Types</h3><p>Combine several types. Requires Gower's distance.<br><strong>Example:</strong> patient records (age + gender + cost).</p></div>
+  </div>
+
+</div><!-- /concepts -->
+
+
+<!-- ══════════════════════ ALGORITHMS ══════════════════════ -->
+<div id="algo" class="tab-panel">
+  <div class="sec mt2">
+    <div class="sec-tag">Deep Dive</div>
+    <div class="sec-title">Algorithm <em>Explanations</em></div>
+    <p class="sec-desc">Full mathematical derivations, step-by-step logic, worked examples and complexity analysis for each algorithm.</p>
+  </div>
+
+  <!-- K-MEANS -->
+  <div class="concept-block">
+    <div class="cb-header">
+      <div class="cb-num">K</div>
+      <div>
+        <h3>K-Means Clustering</h3>
+        <p>Partitions n observations into K clusters. Each point belongs to the cluster with the nearest mean (centroid). Minimises Within-Cluster Sum of Squares (WCSS).</p>
+        <div class="cb-complexity"><span>Time: O(n·k·t·d)</span></div>
+      </div>
+    </div>
+    <div class="cb-body">
+
+      <div class="eq-wrap">
+        <div class="eq-label">Objective — Minimise Within-Cluster Sum of Squares</div>
+        <div class="eq-box">
+          <div class="eq-main">
+            <span class="v">J</span> <span class="o">=</span> <span class="o">Σ</span><span class="v">ₖ</span> <span class="o">Σ</span><span class="v">ᵢ∈Cₖ</span> <span class="o">‖</span><span class="v">xᵢ</span> <span class="o">−</span> <span class="v">μₖ</span><span class="o">‖²</span>
+          </div>
+          <div class="eq-vars">
+            <div class="ev"><span class="sym">J</span><span class="def">total inertia (lower = better clusters)</span></div>
+            <div class="ev"><span class="sym">Cₖ</span><span class="def">set of points in cluster k</span></div>
+            <div class="ev"><span class="sym">xᵢ</span><span class="def">data point i</span></div>
+            <div class="ev"><span class="sym">μₖ</span><span class="def">centroid of cluster k</span></div>
+            <div class="ev"><span class="sym">‖·‖²</span><span class="def">squared Euclidean distance</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="eq-wrap">
+        <div class="eq-label">Centroid Update Rule (E-Step → M-Step)</div>
+        <div class="eq-box">
+          <div class="eq-main">
+            <span class="v">μₖ</span> <span class="o">=</span> <span class="o">(</span><span class="n">1</span> <span class="o">/</span> <span class="o">|</span><span class="v">Cₖ</span><span class="o">|)</span> <span class="o">×</span> <span class="o">Σ</span><span class="v">xᵢ</span> &nbsp; <span class="k">for all</span> <span class="v">xᵢ ∈ Cₖ</span>
+          </div>
+          <div class="eq-vars">
+            <div class="ev"><span class="sym">|Cₖ|</span><span class="def">number of points in cluster k</span></div>
+            <div class="ev"><span class="sym">Σxᵢ</span><span class="def">sum of all point coordinates</span></div>
+            <div class="ev"><span class="sym">μₖ</span><span class="def">new centroid = mean of cluster</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="steps-list">
+        <div class="step"><div class="step-n">1</div><div><h4>Choose K &amp; Initialise Centroids</h4><p>Pick K data points randomly (or use K-Means++ which spreads centroids apart to reduce bad initialisation).</p></div></div>
+        <div class="step"><div class="step-n">2</div><div><h4>Assign Each Point to Nearest Centroid</h4><p>Compute Euclidean distance from every point to every centroid. Assign point to the closest cluster.</p></div></div>
+        <div class="step"><div class="step-n">3</div><div><h4>Recompute Centroids</h4><p>For each cluster, calculate the mean (μₖ) of all assigned points. This is the new centroid.</p></div></div>
+        <div class="step"><div class="step-n">4</div><div><h4>Repeat Until Convergence</h4><p>Repeat steps 2–3 until centroids move less than threshold ε, or max iterations reached.</p></div></div>
+      </div>
+
+      <div class="ex-block">
+        <div class="ex-tag">🏥 Real World</div>
+        <div class="ex-title">Hospital Patient Risk Grouping (K=3)</div>
+        <p>Features: age, BMI, blood pressure, cholesterol. K-Means finds 3 natural risk levels:</p>
+        <ul>
+          <li><strong>Cluster 1 — Low Risk:</strong> Age 20–35, normal BMI → routine check-ups</li>
+          <li><strong>Cluster 2 — Moderate Risk:</strong> Age 36–55, slightly elevated → quarterly monitoring</li>
+          <li><strong>Cluster 3 — High Risk:</strong> Age 55+, high BMI, elevated BP → immediate intervention</li>
+        </ul>
+      </div>
+
+      <div class="alert a-warn"><span class="alert-ico">⚠️</span><div class="alert-body"><strong>Limitations</strong>Sensitive to initial centroids (run multiple times). Assumes spherical, equal-sized clusters. Outliers drag centroids. Must specify K in advance — use the Elbow Method to find optimal K.</div></div>
+
+      <div class="eq-wrap mt">
+        <div class="eq-label">Elbow Method — Finding Optimal K</div>
+        <div class="eq-box">
+          <div class="eq-main">
+            <span class="k">For each</span> <span class="v">k</span> <span class="o">∈</span> <span class="o">[</span><span class="n">2</span><span class="o">,</span> <span class="n">max_k</span><span class="o">]</span><span class="o">:</span><br>
+            &nbsp;&nbsp;<span class="k">fit</span> <span class="v">KMeans</span><span class="o">(</span><span class="v">k</span><span class="o">)</span> <span class="o">→</span> <span class="k">record</span> <span class="v">WCSS</span><span class="o">[</span><span class="v">k</span><span class="o">]</span><br>
+            <span class="k">plot</span> <span class="v">k</span> <span class="o">vs</span> <span class="v">WCSS</span> <span class="o">→</span> <span class="k">pick "elbow" point</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIERARCHICAL -->
+  <div class="concept-block">
+    <div class="cb-header">
+      <div class="cb-num">H</div>
+      <div>
+        <h3>Hierarchical Clustering</h3>
+        <p>Builds a tree (dendrogram) of nested clusters. No need to specify K — cut the tree at any level. Agglomerative (bottom-up) is most widely used.</p>
+        <div class="cb-complexity"><span>Agglomerative: O(n² log n)</span></div>
+      </div>
+    </div>
+    <div class="cb-body">
+
+      <div class="g2">
+        <div class="card"><div class="card-icon ci-blue">⬆️</div><h3>Agglomerative (Bottom-Up)</h3><p>Start: every point = own cluster.<br>Merge the closest pair repeatedly.<br>End: one cluster. <strong>Most used.</strong></p></div>
+        <div class="card"><div class="card-icon ci-purple">⬇️</div><h3>Divisive (Top-Down)</h3><p>Start: all points in one cluster.<br>Split the most heterogeneous cluster.<br>End: each point alone. <strong>O(2ⁿ) — rare.</strong></p></div>
+      </div>
+
+      <div class="eq-wrap mt">
+        <div class="eq-label">Four Linkage Criteria</div>
+        <div class="eq-box">
+          <div class="eq-main">
+            <span class="o">Single:&nbsp;&nbsp;</span><span class="v">d</span><span class="o">(A,B)</span> <span class="o">=</span> <span class="k">min</span><span class="o">{</span> <span class="v">d</span><span class="o">(a,b)</span> <span class="o">:</span> <span class="v">a∈A</span><span class="o">,</span> <span class="v">b∈B</span> <span class="o">}</span><br><br>
+            <span class="o">Complete:</span> <span class="v">d</span><span class="o">(A,B)</span> <span class="o">=</span> <span class="k">max</span><span class="o">{</span> <span class="v">d</span><span class="o">(a,b)</span> <span class="o">:</span> <span class="v">a∈A</span><span class="o">,</span> <span class="v">b∈B</span> <span class="o">}</span><br><br>
+            <span class="o">Average:&nbsp;</span> <span class="v">d</span><span class="o">(A,B)</span> <span class="o">=</span> <span class="o">(</span><span class="n">1</span><span class="o">/|A||B|)</span> <span class="o">Σ</span><span class="v">ₐ</span> <span class="o">Σ</span><span class="v">ᵦ</span> <span class="v">d</span><span class="o">(a,b)</span><br><br>
+            <span class="o">Centroid:</span> <span class="v">d</span><span class="o">(A,B)</span> <span class="o">=</span> <span class="o">‖</span><span class="v">μ_A</span> <span class="o">−</span> <span class="v">μ_B</span><span class="o">‖</span>
+          </div>
+          <div class="eq-vars">
+            <div class="ev"><span class="sym">A, B</span><span class="def">two clusters being compared</span></div>
+            <div class="ev"><span class="sym">a, b</span><span class="def">individual points within clusters</span></div>
+            <div class="ev"><span class="sym">|A|, |B|</span><span class="def">cluster sizes</span></div>
+            <div class="ev"><span class="sym">μ_A, μ_B</span><span class="def">cluster centroids</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-block mt">
+        <div class="ex-tag">🧬 Real World</div>
+        <div class="ex-title">Gene Expression Analysis</div>
+        <p>Biologists cluster thousands of genes by expression patterns across conditions (healthy vs cancer). The dendrogram reveals co-expressed genes that likely share regulatory pathways. Scientists cut the tree at the level giving biologically meaningful groups (e.g., 5 clusters = 5 gene families).</p>
+      </div>
+
+      <div class="alert a-info mt"><span class="alert-ico">📊</span><div class="alert-body"><strong>Reading a Dendrogram</strong>The height of each merge = the distance at which two clusters joined. A large gap in merge heights signals a natural cluster boundary — cut the tree there.</div></div>
+    </div>
+  </div>
+
+  <!-- DBSCAN -->
+  <div class="concept-block">
+    <div class="cb-header">
+      <div class="cb-num">D</div>
+      <div>
+        <h3>DBSCAN — Density-Based Spatial Clustering</h3>
+        <p>Groups densely-packed points into clusters of any shape. Points in sparse regions are labelled as noise/outliers — not forced into clusters.</p>
+        <div class="cb-complexity"><span>Time: O(n log n) with spatial index</span></div>
+      </div>
+    </div>
+    <div class="cb-body">
+
+      <div class="g3">
+        <div class="card"><div class="card-icon ci-blue">⭐</div><h3>Core Point</h3><p>Has <strong>≥ MinPts</strong> neighbours within radius ε. Forms the dense interior.</p></div>
+        <div class="card"><div class="card-icon ci-gold">🔵</div><h3>Border Point</h3><p>Within ε of a core point, but has <strong>&lt; MinPts</strong> own neighbours. Lives on cluster edge.</p></div>
+        <div class="card"><div class="card-icon ci-red">❌</div><h3>Noise (Outlier)</h3><p>Neither core nor border. Not density-reachable from any core point.</p></div>
+      </div>
+
+      <div class="eq-wrap mt">
+        <div class="eq-label">ε-Neighbourhood &amp; Core Point Definitions</div>
+        <div class="eq-box">
+          <div class="eq-main">
+            <span class="v">N</span><span class="o">ε(</span><span class="v">p</span><span class="o">)</span> <span class="o">=</span> <span class="o">{</span> <span class="v">q ∈ D</span> <span class="o">:</span> <span class="v">d</span><span class="o">(</span><span class="v">p</span><span class="o">,</span><span class="v">q</span><span class="o">)</span> <span class="o">≤</span> <span class="v">ε</span> <span class="o">}</span><br><br>
+            <span class="v">p</span> <span class="k">is a Core Point</span> <span class="o">⟺</span> <span class="o">|</span><span class="v">N</span><span class="o">ε(</span><span class="v">p</span><span class="o">)|</span> <span class="o">≥</span> <span class="v">MinPts</span>
+          </div>
+          <div class="eq-vars">
+            <div class="ev"><span class="sym">Nε(p)</span><span class="def">ε-neighbourhood of point p</span></div>
+            <div class="ev"><span class="sym">D</span><span class="def">full dataset</span></div>
+            <div class="ev"><span class="sym">ε</span><span class="def">radius (user-defined)</span></div>
+            <div class="ev"><span class="sym">MinPts</span><span class="def">density threshold</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="steps-list mt">
+        <div class="step"><div class="step-n">1</div><div><h4>Pick an Unvisited Point</h4><p>Select any unvisited point from the dataset.</p></div></div>
+        <div class="step"><div class="step-n">2</div><div><h4>Find ε-Neighbourhood</h4><p>Count all points within radius ε. If fewer than MinPts → mark as noise (temporarily).</p></div></div>
+        <div class="step"><div class="step-n">3</div><div><h4>Expand Cluster from Core Point</h4><p>If ≥ MinPts neighbours found, start a new cluster. Recursively add all density-reachable points.</p></div></div>
+        <div class="step"><div class="step-n">4</div><div><h4>Repeat Until All Points Visited</h4><p>Points not belonging to any cluster remain noise. Clusters can be any shape.</p></div></div>
+      </div>
+
+      <div class="ex-block mt">
+        <div class="ex-tag">🌍 Real World</div>
+        <div class="ex-title">Geospatial Crime Hotspot Detection — Delhi</div>
+        <p>GPS coordinates of reported crimes with ε=500m, MinPts=10. DBSCAN finds irregularly shaped hotspots along busy bazaar streets or metro corridors — zones K-Means would split incorrectly.</p>
+        <ul>
+          <li>Result: 7 high-density crime zones + 43 isolated incidents (noise)</li>
+          <li>Isolated incidents are flagged as anomalies, not forced into a cluster</li>
+        </ul>
+      </div>
+
+      <div class="alert a-ok mt"><span class="alert-ico">✅</span><div class="alert-body"><strong>DBSCAN Advantages</strong>No need to specify K. Finds clusters of arbitrary shape. Explicit outlier labelling. Works excellently for geospatial and sensor data.</div></div>
+    </div>
+  </div>
+
+</div><!-- /algo -->
+
+
+<!-- ══════════════════════ K-MEANS LAB ══════════════════════ -->
+<div id="kmeans-lab" class="tab-panel">
+  <div class="sec mt2">
+    <div class="sec-tag">Interactive Lab</div>
+    <div class="sec-title">K-Means <em>Laboratory</em></div>
+    <p class="sec-desc">Upload your own CSV dataset or use a sample. Tune K and watch the algorithm converge in real time.</p>
+  </div>
+
+  <!-- Upload -->
+  <div class="upload-panel">
+    <h3>📁 Dataset Upload</h3>
+    <div class="g2">
+      <div>
+        <label class="fl">Upload CSV File</label>
+        <div class="file-drop" id="km-drop" onclick="document.getElementById('km-file').click()">
+          <div style="font-size:1.8rem">📂</div>
+          <p>Click or drag &amp; drop a CSV file</p>
+          <p style="font-size:0.7rem;color:var(--ink3);margin-top:0.2rem">First row = headers · Numeric columns will be auto-detected</p>
+          <input type="file" id="km-file" accept=".csv" onchange="handleCSV('km',this)">
+        </div>
+        <div class="dl-row" style="margin-top:0.75rem">
+          <button class="sm-btn" onclick="loadKMSample('example1')">📊 Sample 1 (8 pts)</button>
+          <button class="sm-btn" onclick="loadKMSample('customer')">👥 Customer (200 pts)</button>
+          <button class="sm-btn" onclick="loadKMSample('iris')">🌸 Iris (150 pts)</button>
+        </div>
+      </div>
+      <div id="km-col-panel" style="display:none">
+        <label class="fl">Select X Column</label>
+        <select class="fi mb" id="km-xcol" onchange="replotKM()"></select>
+        <label class="fl">Select Y Column</label>
+        <select class="fi" id="km-ycol" onchange="replotKM()"></select>
+        <div id="km-info" style="margin-top:0.75rem;font-size:0.8rem;color:var(--ink3)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lab-layout">
+    <div class="sidebar">
+      <h3>⚙️ Parameters</h3>
+      <div class="fg">
+        <label class="fl">Number of Clusters (K)</label>
+        <input type="number" class="fi" id="km-k" value="3" min="2" max="10">
+      </div>
+      <div class="fg">
+        <label class="fl">Max Iterations</label>
+        <input type="number" class="fi" id="km-iter" value="100" min="1" max="500">
+      </div>
+      <div class="fg">
+        <label class="fl">Initialisation</label>
+        <select class="fi" id="km-init">
+          <option value="random">Random</option>
+          <option value="kmpp">K-Means++</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">Show Voronoi Regions</label>
+        <select class="fi" id="km-voronoi">
+          <option value="1">Yes</option>
+          <option value="0">No</option>
+        </select>
+      </div>
+      <button class="run-btn" onclick="runKMeans()">▶ Run K-Means</button>
+      <div class="dl-row">
+        <button class="sm-btn" onclick="downloadCSV('km')">📥 CSV</button>
+        <button class="sm-btn" onclick="exportPNG('km-canvas')">🖼️ PNG</button>
+      </div>
+    </div>
+    <div>
+      <div class="cv-card">
+        <h4>Scatter Plot — Cluster Assignments</h4>
+        <canvas id="km-canvas" width="860" height="500"></canvas>
+        <div class="legend-row" id="km-legend"></div>
+      </div>
+      <div class="cv-card">
+        <h4>Elbow Curve — WCSS vs K</h4>
+        <canvas id="km-elbow" width="860" height="240"></canvas>
+      </div>
+      <div id="km-results" class="res-card" style="display:none">
+        <h4>Results</h4>
+        <div id="km-res-body"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ HIERARCHICAL LAB ══════════════════════ -->
+<div id="hier-lab" class="tab-panel">
+  <div class="sec mt2">
+    <div class="sec-tag">Interactive Lab</div>
+    <div class="sec-title">Hierarchical <em>Laboratory</em></div>
+    <p class="sec-desc">Build dendrograms and explore linkage methods. Upload CSV or use sample data.</p>
+  </div>
+
+  <div class="upload-panel">
+    <h3>📁 Dataset Upload</h3>
+    <div class="g2">
+      <div>
+        <div class="file-drop" onclick="document.getElementById('hier-file').click()">
+          <div style="font-size:1.8rem">📂</div>
+          <p>Upload CSV or use sample below</p>
+          <input type="file" id="hier-file" accept=".csv" onchange="handleCSV('hier',this)">
+        </div>
+        <div class="dl-row" style="margin-top:0.75rem">
+          <button class="sm-btn" onclick="loadHierSample('ex1')">📊 Sample A (4 pts)</button>
+          <button class="sm-btn" onclick="loadHierSample('ex2')">📊 Sample B (8 pts)</button>
+        </div>
+      </div>
+      <div id="hier-col-panel" style="display:none">
+        <label class="fl">Select X Column</label>
+        <select class="fi mb" id="hier-xcol"></select>
+        <label class="fl">Select Y Column</label>
+        <select class="fi" id="hier-ycol"></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="lab-layout">
+    <div class="sidebar">
+      <h3>⚙️ Parameters</h3>
+      <div class="fg">
+        <label class="fl">Method</label>
+        <select class="fi" id="hier-method">
+          <option value="agglomerative">Agglomerative (Bottom-Up)</option>
+          <option value="divisive">Divisive (Top-Down)</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">Linkage</label>
+        <select class="fi" id="hier-link">
+          <option value="single">Single (Min Distance)</option>
+          <option value="complete">Complete (Max Distance)</option>
+          <option value="average">Average Distance</option>
+          <option value="centroid">Centroid Distance</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">Cut at N Clusters</label>
+        <input type="number" class="fi" id="hier-cut" value="2" min="1" max="20">
+      </div>
+      <button class="run-btn" onclick="runHier()">▶ Run Hierarchical</button>
+      <div class="dl-row">
+        <button class="sm-btn" onclick="downloadCSV('hier')">📥 CSV</button>
+        <button class="sm-btn" onclick="exportPNG('hier-canvas')">🖼️ PNG</button>
+      </div>
+    </div>
+    <div>
+      <div class="cv-card">
+        <h4>Dendrogram</h4>
+        <canvas id="dendro-canvas" width="860" height="360"></canvas>
+      </div>
+      <div class="cv-card">
+        <h4>Scatter Plot — Cluster Assignments</h4>
+        <canvas id="hier-canvas" width="860" height="460"></canvas>
+        <div class="legend-row" id="hier-legend"></div>
+      </div>
+      <div id="hier-results" class="res-card" style="display:none">
+        <h4>Merge Log</h4>
+        <div id="hier-res-body"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ DBSCAN LAB ══════════════════════ -->
+<div id="dbscan-lab" class="tab-panel">
+  <div class="sec mt2">
+    <div class="sec-tag">Interactive Lab</div>
+    <div class="sec-title">DBSCAN <em>Laboratory</em></div>
+    <p class="sec-desc">Tune epsilon and MinPts to see how density thresholds shape clusters and surface outliers.</p>
+  </div>
+
+  <div class="upload-panel">
+    <h3>📁 Dataset Upload</h3>
+    <div class="g2">
+      <div>
+        <div class="file-drop" onclick="document.getElementById('db-file').click()">
+          <div style="font-size:1.8rem">📂</div>
+          <p>Upload CSV or use samples below</p>
+          <input type="file" id="db-file" accept=".csv" onchange="handleCSV('db',this)">
+        </div>
+        <div class="dl-row" style="margin-top:0.75rem">
+          <button class="sm-btn" onclick="loadDBSample('ex1')">📊 8 Points</button>
+          <button class="sm-btn" onclick="loadDBSample('moons')">🌙 Two Moons</button>
+          <button class="sm-btn" onclick="loadDBSample('circles')">⭕ Circles</button>
+        </div>
+      </div>
+      <div id="db-col-panel" style="display:none">
+        <label class="fl">X Column</label>
+        <select class="fi mb" id="db-xcol"></select>
+        <label class="fl">Y Column</label>
+        <select class="fi" id="db-ycol"></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="lab-layout">
+    <div class="sidebar">
+      <h3>⚙️ Parameters</h3>
+      <div class="fg">
+        <label class="fl">Epsilon (ε) — Radius</label>
+        <input type="number" class="fi" id="db-eps" value="2" min="0.1" step="0.1">
+      </div>
+      <div class="fg">
+        <label class="fl">MinPts — Min Neighbours</label>
+        <input type="number" class="fi" id="db-min" value="2" min="1" max="20">
+      </div>
+      <div class="fg">
+        <label class="fl">Show ε Circles</label>
+        <select class="fi" id="db-circles">
+          <option value="0">No</option>
+          <option value="1">Yes (core points only)</option>
+        </select>
+      </div>
+      <button class="run-btn" onclick="runDBSCAN()">▶ Run DBSCAN</button>
+      <div class="dl-row">
+        <button class="sm-btn" onclick="downloadCSV('db')">📥 CSV</button>
+        <button class="sm-btn" onclick="exportPNG('db-canvas')">🖼️ PNG</button>
+      </div>
+    </div>
+    <div>
+      <div class="cv-card">
+        <h4>DBSCAN Clustering Results</h4>
+        <canvas id="db-canvas" width="860" height="520"></canvas>
+        <div class="legend-row" id="db-legend"></div>
+      </div>
+      <div id="db-results" class="res-card" style="display:none">
+        <h4>Summary</h4>
+        <div id="db-res-body"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ COMPARE ══════════════════════ -->
+<div id="compare" class="tab-panel">
+  <div class="sec mt2">
+    <div class="sec-tag">Decision Guide</div>
+    <div class="sec-title">Algorithm <em>Comparison</em></div>
+    <p class="sec-desc">Pick the right algorithm for your data and problem.</p>
+  </div>
+
+  <div class="tbl-wrap mb2">
+    <table>
+      <thead><tr>
+        <th>Feature</th><th>K-Means</th><th>Hierarchical</th><th>DBSCAN</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><strong>Cluster Shape</strong></td><td><span class="badge b-y">Spherical only</span></td><td><span class="badge b-b">Any shape</span></td><td><span class="badge b-g">Arbitrary</span></td></tr>
+        <tr><td><strong>Specify K</strong></td><td><span class="badge b-r">Required</span></td><td><span class="badge b-g">No — cut tree</span></td><td><span class="badge b-g">No — automatic</span></td></tr>
+        <tr><td><strong>Outlier Handling</strong></td><td><span class="badge b-r">Poor</span></td><td><span class="badge b-y">Moderate</span></td><td><span class="badge b-g">Excellent</span></td></tr>
+        <tr><td><strong>Time Complexity</strong></td><td><span class="badge b-g">O(nkt)</span></td><td><span class="badge b-r">O(n²log n)</span></td><td><span class="badge b-b">O(n log n)</span></td></tr>
+        <tr><td><strong>Large Datasets</strong></td><td><span class="badge b-g">Excellent</span></td><td><span class="badge b-r">Poor</span></td><td><span class="badge b-b">Good</span></td></tr>
+        <tr><td><strong>Deterministic</strong></td><td><span class="badge b-r">No (random init)</span></td><td><span class="badge b-g">Yes</span></td><td><span class="badge b-g">Yes</span></td></tr>
+        <tr><td><strong>Parameters</strong></td><td>K</td><td>Linkage method</td><td>ε and MinPts</td></tr>
+        <tr><td><strong>Best Use Case</strong></td><td>Customer segmentation, image compression</td><td>Gene analysis, taxonomy</td><td>Geospatial, anomaly detection</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="card-icon ci-blue">🎯</div>
+      <h3>Use K-Means When…</h3>
+      <ul><li>You know (or can estimate) K</li><li>Clusters are roughly spherical</li><li>Dataset is large (&gt;100K points)</li><li>Speed is a priority</li><li>Features are numeric &amp; normalised</li></ul>
+      <div class="ex-block" style="margin-top:1rem;padding:0.75rem">
+        <p style="font-size:0.8rem"><strong>Netflix</strong> — clustering 200M users into viewing preference segments for recommendations.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon ci-green">🌳</div>
+      <h3>Use Hierarchical When…</h3>
+      <ul><li>Need a visual dendrogram</li><li>K is completely unknown</li><li>Small–medium dataset (&lt;10K)</li><li>Want nested cluster structure</li><li>Interpretability is critical</li></ul>
+      <div class="ex-block" style="margin-top:1rem;padding:0.75rem">
+        <p style="font-size:0.8rem"><strong>Genomics</strong> — grouping 500 species by DNA similarity to build evolutionary trees.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon ci-red">📍</div>
+      <h3>Use DBSCAN When…</h3>
+      <ul><li>Clusters have irregular shapes</li><li>Outlier detection is needed</li><li>K is unknown</li><li>Data has varying densities</li><li>Geospatial or sensor data</li></ul>
+      <div class="ex-block" style="margin-top:1rem;padding:0.75rem">
+        <p style="font-size:0.8rem"><strong>Traffic</strong> — accident hotspot mapping across city road networks.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert a-info mt2"><span class="alert-ico">💡</span><div class="alert-body"><strong>Pro Tip — Elbow Method for K-Means</strong>Plot WCSS (inertia) vs K. The "elbow" — where the curve bends sharply — suggests the optimal K. Beyond this point, adding more clusters gives diminishing returns on variance explained.</div></div>
+</div>
+
+</div><!-- /shell -->
+</div><!-- /page-wrap -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA STORES
+// ═══════════════════════════════════════════════════════
+const COLORS=['#2d35e8','#0a8a5c','#d63344','#b87a10','#7c3aed','#0891b2','#db2777','#65a30d','#ea580c','#0e7490'];
+const state={km:{data:[],labels:[]},hier:{data:[],labels:[]},db:{data:[],labels:[]}};
+
+// ── sample datasets ──
+function sampleKM_ex1(){return [{x:2,y:10,label:'A1'},{x:2,y:5,label:'A2'},{x:8,y:4,label:'A3'},{x:5,y:8,label:'A4'},{x:7,y:5,label:'A5'},{x:6,y:4,label:'A6'},{x:1,y:2,label:'A7'},{x:4,y:9,label:'A8'}];}
+function sampleCustomer(){const d=[];[[25,30,60,'B'],[60,65,70,'M'],[85,85,55,'P']].forEach(([cx,cy,n,nm])=>{for(let i=0;i<n;i++)d.push({x:+(cx+(Math.random()-.5)*18).toFixed(2),y:+(cy+(Math.random()-.5)*18).toFixed(2),label:`${nm}${i}` });});return d;}
+function sampleIris(){const d=[];for(let i=0;i<50;i++)d.push({x:+(5+Math.random()).toFixed(2),y:+(3.5+Math.random()*.5).toFixed(2),label:`S${i}`});for(let i=0;i<50;i++)d.push({x:+(6+Math.random()).toFixed(2),y:+(2.8+Math.random()*.5).toFixed(2),label:`V${i}`});for(let i=0;i<50;i++)d.push({x:+(6.5+Math.random()*1.5).toFixed(2),y:+(3+Math.random()*.7).toFixed(2),label:`Vi${i}`});return d;}
+function sampleHier1(){return [{x:1,y:1,label:'A'},{x:2,y:1,label:'B'},{x:5,y:3,label:'C'},{x:9,y:4,label:'D'}];}
+function sampleHier2(){return sampleKM_ex1();}
+function sampleMoons(){const d=[];for(let i=0;i<100;i++){const a=Math.PI*i/100;d.push({x:+(5+3*Math.cos(a)+(Math.random()-.5)*.45).toFixed(2),y:+(3*Math.sin(a)+(Math.random()-.5)*.45).toFixed(2),label:`M1_${i}`});}for(let i=0;i<100;i++){const a=Math.PI*i/100;d.push({x:+(5-3*Math.cos(a)+(Math.random()-.5)*.45).toFixed(2),y:+(3+3*Math.sin(a)+(Math.random()-.5)*.45).toFixed(2),label:`M2_${i}`});}return d;}
+function sampleCircles(){const d=[];for(let i=0;i<100;i++){const a=2*Math.PI*i/100;d.push({x:+(5+2*Math.cos(a)+(Math.random()-.5)*.25).toFixed(2),y:+(5+2*Math.sin(a)+(Math.random()-.5)*.25).toFixed(2),label:`In${i}`});}for(let i=0;i<100;i++){const a=2*Math.PI*i/100;d.push({x:+(5+5*Math.cos(a)+(Math.random()-.5)*.25).toFixed(2),y:+(5+5*Math.sin(a)+(Math.random()-.5)*.25).toFixed(2),label:`Ou${i}`});}return d;}
+
+// ── loaders ──
+function loadKMSample(t){const d=t==='example1'?sampleKM_ex1():t==='customer'?sampleCustomer():sampleIris();state.km.data=d;state.km.labels=d.map((_,i)=>i.toString());showColPanel('km',['x','y'],'x','y');document.getElementById('km-info').textContent=`${d.length} points loaded`;drawScatterInitial('km-canvas',d);}
+function loadHierSample(t){const d=t==='ex1'?sampleHier1():sampleHier2();state.hier.data=d;showColPanel('hier',['x','y'],'x','y');drawScatterInitial('hier-canvas',d);}
+function loadDBSample(t){const d=t==='ex1'?sampleKM_ex1():t==='moons'?sampleMoons():sampleCircles();state.db.data=d;showColPanel('db',['x','y'],'x','y');drawScatterInitial('db-canvas',d);}
+
+// ── CSV upload ──
+function handleCSV(ns, input){
+  const file=input.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.trim().split('\n');
+    const headers=lines[0].split(',').map(h=>h.trim().replace(/"/g,''));
+    const rows=[];
+    for(let i=1;i<lines.length;i++){
+      const vals=lines[i].split(',').map(v=>v.trim().replace(/"/g,''));
+      if(vals.length<2)continue;
+      const obj={};
+      headers.forEach((h,j)=>{obj[h]=isNaN(vals[j])?vals[j]:parseFloat(vals[j]);});
+      obj.label=obj[headers[0]]||`P${i}`;
+      rows.push(obj);
+    }
+    const numCols=headers.filter(h=>rows.length>0&&typeof rows[0][h]==='number');
+    state[ns].data=rows;state[ns].headers=numCols;
+    showColPanel(ns,numCols,numCols[0],numCols[1]||numCols[0]);
+    rebuildData(ns);
+    drawScatterInitial(`${ns==='km'?'km-canvas':ns==='hier'?'hier-canvas':'db-canvas'}`, state[ns].pts);
+  };
+  reader.readAsText(file);
+}
+function showColPanel(ns,cols,xd,yd){
+  const px=document.getElementById(`${ns}-xcol`),py=document.getElementById(`${ns}-ycol`);
+  const panel=document.getElementById(`${ns}-col-panel`);
+  if(!px||!py)return;
+  panel.style.display='block';
+  [px,py].forEach((sel,i)=>{sel.innerHTML=cols.map(c=>`<option value="${c}"${c===(i?yd:xd)?' selected':''}>${c}</option>`).join('');});
+}
+function rebuildData(ns){
+  const xc=document.getElementById(`${ns}-xcol`)?.value||'x';
+  const yc=document.getElementById(`${ns}-ycol`)?.value||'y';
+  state[ns].pts=state[ns].data.map(r=>({x:r[xc]||0,y:r[yc]||0,label:r.label||''}));
+}
+function replotKM(){rebuildData('km');drawScatterInitial('km-canvas',state.km.pts||state.km.data);}
+
+// ═══════════════════════════════════════════════════════
+// CANVAS UTILITIES
+// ═══════════════════════════════════════════════════════
+function getCtx(id){
+  const cv=document.getElementById(id);
+  cv.width=cv.parentElement.clientWidth-30||860;
+  return{cv,ctx:cv.getContext('2d')};
+}
+function getScale(pts,cv,pad=55){
+  const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
+  const mx=Math.max(...xs),mn=Math.min(...xs),my=Math.max(...ys),my2=Math.min(...ys);
+  const rx=mx-mn||1,ry=my-my2||1;
+  const extra=0.08;
+  return{
+    minX:mn-rx*extra,maxX:mx+rx*extra,
+    minY:my2-ry*extra,maxY:my+ry*extra,
+    sx:(cv.width-2*pad)/(rx+rx*2*extra),
+    sy:(cv.height-2*pad)/(ry+ry*2*extra),
+    pad,W:cv.width,H:cv.height
+  };
+}
+function tp(px,py,s){return{x:s.pad+(px-s.minX)*s.sx,y:s.H-s.pad-(py-s.minY)*s.sy};}
+function drawAxes(ctx,s,opts={}){
+  const {gridColor='rgba(0,0,0,0.06)',axisColor='#c8c5bc',tickCount=6}=opts;
+  ctx.strokeStyle=gridColor;ctx.lineWidth=1;
+  // vertical grid
+  for(let i=0;i<=tickCount;i++){
+    const x=s.pad+i*(s.W-2*s.pad)/tickCount;
+    ctx.beginPath();ctx.moveTo(x,s.pad);ctx.lineTo(x,s.H-s.pad);ctx.stroke();
+  }
+  // horizontal grid
+  for(let i=0;i<=tickCount;i++){
+    const y=s.pad+i*(s.H-2*s.pad)/tickCount;
+    ctx.beginPath();ctx.moveTo(s.pad,y);ctx.lineTo(s.W-s.pad,y);ctx.stroke();
+  }
+  // axes
+  ctx.strokeStyle=axisColor;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(s.pad,s.pad);ctx.lineTo(s.pad,s.H-s.pad);ctx.lineTo(s.W-s.pad,s.H-s.pad);ctx.stroke();
+  // tick labels
+  ctx.fillStyle='#7a7a8a';ctx.font='10px Manrope,sans-serif';ctx.textAlign='center';
+  for(let i=0;i<=tickCount;i++){
+    const valX=s.minX+i*(s.maxX-s.minX)/tickCount;
+    const px=s.pad+i*(s.W-2*s.pad)/tickCount;
+    ctx.fillText(valX.toFixed(1),px,s.H-s.pad+14);
+  }
+  ctx.textAlign='right';
+  for(let i=0;i<=tickCount;i++){
+    const valY=s.minY+i*(s.maxY-s.minY)/tickCount;
+    const py=s.H-s.pad-i*(s.H-2*s.pad)/tickCount;
+    ctx.fillText(valY.toFixed(1),s.pad-6,py+3);
+  }
+}
+function drawPoint(ctx,x,y,r,col,stroke=null){
+  ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,r,0,2*Math.PI);ctx.fill();
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();}
+}
+function drawLabel(ctx,text,x,y){
+  ctx.fillStyle='rgba(0,0,0,0.65)';ctx.font='9.5px Manrope,sans-serif';
+  ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  ctx.fillText(text,x+7,y-5);
+}
+function drawScatterInitial(id,data){
+  if(!data||!data.length)return;
+  const{cv,ctx}=getCtx(id);
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const s=getScale(data,cv);drawAxes(ctx,s);
+  data.forEach(p=>{const c=tp(p.x,p.y,s);drawPoint(ctx,c.x,c.y,4.5,'#2d35e8','#fff');drawLabel(ctx,p.label,c.x,c.y);});
+}
+function dist2D(a,b){return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);}
+function setLegend(id,items){document.getElementById(id).innerHTML=items.map(({col,label})=>`<div class="leg-item"><div class="leg-dot" style="background:${col}"></div>${label}</div>`).join('');}
+
+// ═══════════════════════════════════════════════════════
+// K-MEANS
+// ═══════════════════════════════════════════════════════
+function getKMData(){return(state.km.pts||state.km.data);}
+
+function runKMeans(){
+  let pts=getKMData(); if(!pts||!pts.length){loadKMSample('example1');pts=getKMData();}
+  const k=parseInt(document.getElementById('km-k').value)||3;
+  const maxIter=parseInt(document.getElementById('km-iter').value)||100;
+  const doVoronoi=document.getElementById('km-voronoi').value==='1';
+
+  // K-Means++ init
+  let centroids=[];const used=new Set();
+  const ri=Math.floor(Math.random()*pts.length);
+  centroids.push({...pts[ri]});used.add(ri);
+  while(centroids.length<k){
+    const dists=pts.map(p=>Math.min(...centroids.map(c=>dist2D(p,c)**2)));
+    const total=dists.reduce((a,b)=>a+b,0);
+    let r=Math.random()*total,acc=0,chosen=0;
+    for(let i=0;i<dists.length;i++){acc+=dists[i];if(acc>=r){chosen=i;break;}}
+    if(!used.has(chosen)){centroids.push({...pts[chosen]});used.add(chosen);}
+  }
+
+  let assign=new Array(pts.length).fill(0);
+  for(let iter=0;iter<maxIter;iter++){
+    let changed=false;
+    const na=pts.map((p,i)=>{
+      let md=Infinity,cl=0;
+      centroids.forEach((c,ci)=>{const d=dist2D(p,c);if(d<md){md=d;cl=ci;}});
+      if(assign[i]!==cl)changed=true; return cl;
+    });
+    assign=na; if(!changed)break;
+    for(let i=0;i<k;i++){
+      const gp=pts.filter((_,j)=>assign[j]===i);
+      if(gp.length){centroids[i]={x:gp.reduce((s,p)=>s+p.x,0)/gp.length,y:gp.reduce((s,p)=>s+p.y,0)/gp.length};}
+    }
+  }
+  const wcss=centroids.reduce((s,c,i)=>{const gp=pts.filter((_,j)=>assign[j]===i);return s+gp.reduce((ss,p)=>ss+dist2D(p,c)**2,0);},0);
+
+  drawKMResult(pts,centroids,assign,k,doVoronoi);
+  drawElbow(pts,k);
+  showKMResults(pts,centroids,assign,k,wcss);
+}
+
+function drawKMResult(pts,centroids,assign,k,doVoronoi){
+  const{cv,ctx}=getCtx('km-canvas');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const s=getScale(pts,cv);
+  // Voronoi-ish background regions
+  if(doVoronoi){
+    const img=ctx.createImageData(cv.width,cv.height);
+    for(let px=0;px<cv.width;px+=2)for(let py=0;py<cv.height;py+=2){
+      const rx=s.minX+(px-s.pad)/s.sx, ry=s.maxY-(py-s.pad)/s.sy;
+      let mn=Infinity,cl=0;
+      centroids.forEach((c,i)=>{const d=(rx-c.x)**2+(ry-c.y)**2;if(d<mn){mn=d;cl=i;}});
+      const col=hexToRGBA(COLORS[cl%COLORS.length],0.09);
+      for(let dx=0;dx<2;dx++)for(let dy=0;dy<2;dy++){
+        const idx=4*((py+dy)*cv.width+(px+dx));
+        img.data[idx]=col[0];img.data[idx+1]=col[1];img.data[idx+2]=col[2];img.data[idx+3]=col[3];
+      }
+    }
+    ctx.putImageData(img,0,0);
+  }
+  drawAxes(ctx,s);
+  // points
+  pts.forEach((p,i)=>{const c=tp(p.x,p.y,s);drawPoint(ctx,c.x,c.y,5,COLORS[assign[i]%COLORS.length],'rgba(255,255,255,0.7)');if(pts.length<=30)drawLabel(ctx,p.label,c.x,c.y);});
+  // centroids
+  centroids.forEach((ct,i)=>{
+    const c=tp(ct.x,ct.y,s);
+    ctx.strokeStyle=COLORS[i%COLORS.length];ctx.lineWidth=3;ctx.beginPath();
+    for(let a=0;a<5;a++){const ang=a*4*Math.PI/5-Math.PI/2;ctx.lineTo(c.x+10*Math.cos(ang),c.y+10*Math.sin(ang));ctx.lineTo(c.x+4*Math.cos(ang+2*Math.PI/5),c.y+4*Math.sin(ang+2*Math.PI/5));}
+    ctx.closePath();ctx.fillStyle=COLORS[i%COLORS.length];ctx.fill();ctx.stroke();
+    ctx.fillStyle='#111';ctx.font='bold 10px Manrope';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(`C${i+1}`,c.x,c.y-16);
+  });
+  setLegend('km-legend',centroids.map((_,i)=>({col:COLORS[i%COLORS.length],label:`Cluster ${i+1}`})));
+}
+
+function hexToRGBA(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return[r,g,b,Math.round(a*255)];}
+
+function drawElbow(pts,currentK){
+  const{cv,ctx}=getCtx('km-elbow');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const maxK=Math.min(10,pts.length-1);
+  const wcssArr=[];
+  for(let k=1;k<=maxK;k++){
+    let cents=[];const used=new Set();
+    for(let i=0;i<k;i++){let ri;do{ri=Math.floor(Math.random()*pts.length);}while(used.has(ri));used.add(ri);cents.push({...pts[ri]});}
+    let asgn=new Array(pts.length).fill(0);
+    for(let iter=0;iter<50;iter++){
+      const na=pts.map(p=>{let md=Infinity,cl=0;cents.forEach((c,ci)=>{const d=dist2D(p,c);if(d<md){md=d;cl=ci;}});return cl;});
+      asgn=na;
+      for(let i=0;i<k;i++){const gp=pts.filter((_,j)=>asgn[j]===i);if(gp.length)cents[i]={x:gp.reduce((s,p)=>s+p.x,0)/gp.length,y:gp.reduce((s,p)=>s+p.y,0)/gp.length};}
+    }
+    const w=cents.reduce((s,c,i)=>{const gp=pts.filter((_,j)=>asgn[j]===i);return s+gp.reduce((ss,p)=>ss+dist2D(p,c)**2,0);},0);
+    wcssArr.push(w);
+  }
+  const pad=50,W=cv.width,H=cv.height;
+  const mnW=Math.min(...wcssArr),mxW=Math.max(...wcssArr);
+  const sx=(W-2*pad)/(maxK-1||1),sy=(H-2*pad)/(mxW-mnW||1);
+  ctx.strokeStyle='rgba(0,0,0,0.05)';ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){const y=pad+i*(H-2*pad)/5;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke();}
+  // area fill
+  ctx.beginPath();ctx.moveTo(pad,H-pad);
+  wcssArr.forEach((w,i)=>{const x=pad+i*sx,y=H-pad-(w-mnW)*sy;ctx.lineTo(x,y);});
+  ctx.lineTo(pad+(maxK-1)*sx,H-pad);ctx.closePath();
+  ctx.fillStyle='rgba(45,53,232,0.08)';ctx.fill();
+  // line
+  ctx.beginPath();ctx.strokeStyle='#2d35e8';ctx.lineWidth=2.5;ctx.lineJoin='round';
+  wcssArr.forEach((w,i)=>{const x=pad+i*sx,y=H-pad-(w-mnW)*sy;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();
+  // dots
+  wcssArr.forEach((w,i)=>{
+    const x=pad+i*sx,y=H-pad-(w-mnW)*sy;
+    const isCur=i+1===currentK;
+    ctx.fillStyle=isCur?'#d63344':'#2d35e8';
+    ctx.beginPath();ctx.arc(x,y,isCur?7:4.5,0,2*Math.PI);ctx.fill();
+    ctx.fillStyle='#111';ctx.font='10px Manrope';ctx.textAlign='center';
+    ctx.fillText(`K=${i+1}`,x,H-pad+16);
+  });
+  ctx.fillStyle='#7a7a8a';ctx.font='10px Manrope';ctx.textAlign='right';
+  ctx.fillText('WCSS',pad-4,pad);ctx.fillText('K',W-pad,H-pad+16);
+}
+
+function showKMResults(pts,centroids,assign,k,wcss){
+  const div=document.getElementById('km-res-body');
+  let html=`<div class="res-item"><strong>Converged | WCSS = ${wcss.toFixed(2)}</strong></div>`;
+  for(let i=0;i<k;i++){
+    const gp=pts.filter((_,j)=>assign[j]===i);
+    html+=`<div class="res-item" style="border-left-color:${COLORS[i%COLORS.length]}">
+      <strong style="color:${COLORS[i%COLORS.length]}">Cluster ${i+1}</strong> — ${gp.length} pts | Centroid: (${centroids[i].x.toFixed(3)}, ${centroids[i].y.toFixed(3)})<br>
+      ${gp.slice(0,20).map(p=>`<span class="pill" style="background:${COLORS[i%COLORS.length]}">${p.label}</span>`).join('')}${gp.length>20?` <span style="color:var(--ink3);font-size:.78rem">+${gp.length-20} more</span>`:''}
+    </div>`;
+  }
+  div.innerHTML=html;document.getElementById('km-results').style.display='block';
+}
+
+// ═══════════════════════════════════════════════════════
+// HIERARCHICAL
+// ═══════════════════════════════════════════════════════
+function getHierData(){return(state.hier.pts||state.hier.data);}
+function clinkDist(a,b,lnk){
+  if(lnk==='single'){let mn=Infinity;a.points.forEach(p1=>b.points.forEach(p2=>{const d=dist2D(p1,p2);if(d<mn)mn=d;}));return mn;}
+  if(lnk==='complete'){let mx=0;a.points.forEach(p1=>b.points.forEach(p2=>{const d=dist2D(p1,p2);if(d>mx)mx=d;}));return mx;}
+  if(lnk==='centroid')return dist2D(a.centroid,b.centroid);
+  let s=0,c=0;a.points.forEach(p1=>b.points.forEach(p2=>{s+=dist2D(p1,p2);c++;}));return s/c;
+}
+function centroid(pts){return{x:pts.reduce((s,p)=>s+p.x,0)/pts.length,y:pts.reduce((s,p)=>s+p.y,0)/pts.length};}
+
+function runHier(){
+  let pts=getHierData();if(!pts||!pts.length){loadHierSample('ex1');pts=getHierData();}
+  const lnk=document.getElementById('hier-link').value;
+  const cutK=parseInt(document.getElementById('hier-cut').value)||2;
+  let clusters=pts.map((p,i)=>({id:i,points:[p],centroid:p,label:p.label}));
+  const merges=[];
+  while(clusters.length>1){
+    let mn=Infinity,mi=0,mj=1;
+    for(let i=0;i<clusters.length;i++)for(let j=i+1;j<clusters.length;j++){const d=clinkDist(clusters[i],clusters[j],lnk);if(d<mn){mn=d;mi=i;mj=j;}}
+    merges.push({a:{...clusters[mi],points:[...clusters[mi].points]},b:{...clusters[mj],points:[...clusters[mj].points]},d:mn,step:merges.length+1});
+    const merged={points:[...clusters[mi].points,...clusters[mj].points],label:`(${clusters[mi].label}+${clusters[mj].label})`};
+    merged.centroid=centroid(merged.points);
+    clusters.splice(mj,1);clusters.splice(mi,1);clusters.push(merged);
+  }
+  drawDendrogram(merges,pts.length);
+  // assign colours from cut
+  const colorMap={};
+  const cutStep=merges.length-(cutK-1);
+  if(cutK>=2&&cutK<=merges.length){
+    let clArr=pts.map((_,i)=>({id:i,points:[pts[i]],label:pts[i].label}));
+    for(let s=0;s<cutStep;s++){
+      const m=merges[s];let mi=-1,mj=-1;
+      clArr.forEach((c,idx)=>{if(c.label===m.a.label)mi=idx;if(c.label===m.b.label)mj=idx;});
+      if(mi>=0&&mj>=0){const mg={points:[...clArr[mi].points,...clArr[mj].points],label:`(${clArr[mi].label}+${clArr[mj].label})`};mg.centroid=centroid(mg.points);const rm=Math.max(mi,mj),rm2=Math.min(mi,mj);clArr.splice(rm,1);clArr.splice(rm2,1);clArr.push(mg);}
+    }
+    clArr.forEach((cl,ci)=>cl.points.forEach(p=>{colorMap[p.label]=COLORS[ci%COLORS.length];}));
+  }
+  drawHierScatter(pts,colorMap);
+  showHierResults(merges);
+}
+
+function drawDendrogram(merges,n){
+  const{cv,ctx}=getCtx('dendro-canvas');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const pad=55,W=cv.width,H=cv.height;
+  const labels=Object.keys(Object.fromEntries(merges.flatMap(m=>[...m.a.points,...m.b.points].map(p=>[p.label,true]))));
+  const leafLabels=[...new Set(merges.flatMap(m=>[...m.a.points.map(p=>p.label),...m.b.points.map(p=>p.label)]))].filter((l,i,a)=>a.indexOf(l)===i);
+  const nLeaves=leafLabels.length||n;
+  const maxD=Math.max(...merges.map(m=>m.d))||1;
+  const xPos={};leafLabels.forEach((l,i)=>{xPos[l]=pad+i*(W-2*pad)/(nLeaves-1||1);});
+  const yOfLabel={};leafLabels.forEach(l=>{yOfLabel[l]=H-35;});
+  ctx.fillStyle='#7a7a8a';ctx.font='10px Manrope';ctx.textAlign='center';
+  leafLabels.forEach(l=>{ctx.fillText(l,xPos[l],H-15);});
+  const clX={...xPos},clY={...yOfLabel};
+  merges.forEach((m,idx)=>{
+    const la=m.a.label,lb=m.b.label;
+    const xa=clX[la]||pad,xb=clX[lb]||pad+50;
+    const ya=clY[la]||H-35,yb=clY[lb]||H-35;
+    const mergeY=pad+(1-m.d/maxD)*(H-2*pad-20);
+    const mid=(xa+xb)/2;
+    ctx.strokeStyle=COLORS[idx%COLORS.length];ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(xa,ya);ctx.lineTo(xa,mergeY);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(xb,yb);ctx.lineTo(xb,mergeY);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(xa,mergeY);ctx.lineTo(xb,mergeY);ctx.stroke();
+    ctx.fillStyle=COLORS[idx%COLORS.length];ctx.font='9px DM Mono,monospace';ctx.textAlign='center';
+    ctx.fillText(m.d.toFixed(2),mid,mergeY-4);
+    const newL=m.a.label+'+'+m.b.label;clX[newL]=mid;clY[newL]=mergeY;
+    clX[m.a.label+'+'+m.b.label]=mid;clY[m.a.label+'+'+m.b.label]=mergeY;
+  });
+}
+
+function drawHierScatter(pts,colorMap){
+  const{cv,ctx}=getCtx('hier-canvas');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const s=getScale(pts,cv);drawAxes(ctx,s);
+  pts.forEach(p=>{const c=tp(p.x,p.y,s),col=colorMap[p.label]||'#2d35e8';drawPoint(ctx,c.x,c.y,5,col,'rgba(255,255,255,0.7)');if(pts.length<=30)drawLabel(ctx,p.label,c.x,c.y);});
+  const uniq=[...new Set(Object.values(colorMap))];
+  setLegend('hier-legend',uniq.map((col,i)=>({col,label:`Cluster ${i+1}`})));
+}
+
+function showHierResults(merges){
+  document.getElementById('hier-res-body').innerHTML=merges.map(m=>`<div class="res-item"><strong>Step ${m.step}:</strong> Merge <em>${m.a.label}</em> + <em>${m.b.label}</em> → d = <span class="mono">${m.d.toFixed(4)}</span></div>`).join('');
+  document.getElementById('hier-results').style.display='block';
+}
+
+// ═══════════════════════════════════════════════════════
+// DBSCAN
+// ═══════════════════════════════════════════════════════
+function getDBData(){return(state.db.pts||state.db.data);}
+function getNbrs(idx,eps,pts){return pts.map((_,i)=>i).filter(i=>dist2D(pts[idx],pts[i])<=eps);}
+
+function runDBSCAN(){
+  let pts=getDBData();if(!pts||!pts.length){loadDBSample('moons');pts=getDBData();}
+  const eps=parseFloat(document.getElementById('db-eps').value)||2;
+  const mp=parseInt(document.getElementById('db-min').value)||2;
+  const showCircles=document.getElementById('db-circles').value==='1';
+  const labels=new Array(pts.length).fill(-2);
+  const coreFlags=new Array(pts.length).fill(false);
+  let cId=0;
+  for(let i=0;i<pts.length;i++){
+    if(labels[i]!==-2)continue;
+    const nbrs=getNbrs(i,eps,pts);
+    if(nbrs.length<mp){labels[i]=-1;continue;}
+    coreFlags[i]=true;labels[i]=cId;
+    const seeds=[...nbrs];
+    for(let si=0;si<seeds.length;si++){
+      const q=seeds[si];
+      if(labels[q]===-1)labels[q]=cId;
+      if(labels[q]!==-2)continue;
+      labels[q]=cId;
+      const qn=getNbrs(q,eps,pts);
+      if(qn.length>=mp){coreFlags[q]=true;qn.forEach(x=>{if(!seeds.includes(x))seeds.push(x);});}
+    }
+    cId++;
+  }
+  drawDBSCAN(pts,labels,cId,eps,coreFlags,showCircles);
+  showDBResults(pts,labels,cId);
+}
+
+function drawDBSCAN(pts,labels,numC,eps,coreFlags,showCircles){
+  const{cv,ctx}=getCtx('db-canvas');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const s=getScale(pts,cv);
+  // ε circles for core points
+  if(showCircles){
+    pts.forEach((p,i)=>{
+      if(!coreFlags[i])return;
+      const c=tp(p.x,p.y,s);
+      ctx.strokeStyle=labels[i]>=0?COLORS[labels[i]%COLORS.length]+'55':'#cccccc55';
+      ctx.lineWidth=1;ctx.setLineDash([3,3]);
+      ctx.beginPath();ctx.arc(c.x,c.y,eps*s.sx,0,2*Math.PI);ctx.stroke();
+      ctx.setLineDash([]);
+    });
+  }
+  drawAxes(ctx,s);
+  pts.forEach((p,i)=>{
+    const c=tp(p.x,p.y,s);
+    const isNoise=labels[i]===-1;
+    const col=isNoise?'#d63344':COLORS[labels[i]%COLORS.length];
+    if(isNoise){
+      // X mark
+      ctx.strokeStyle=col;ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(c.x-5,c.y-5);ctx.lineTo(c.x+5,c.y+5);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(c.x+5,c.y-5);ctx.lineTo(c.x-5,c.y+5);ctx.stroke();
+    } else {
+      const r=coreFlags[i]?6:4.5;
+      drawPoint(ctx,c.x,c.y,r,col,'rgba(255,255,255,0.6)');
+    }
+    if(pts.length<=30)drawLabel(ctx,p.label,c.x,c.y);
+  });
+  const legItems=Array.from({length:numC},(_,i)=>({col:COLORS[i%COLORS.length],label:`Cluster ${i+1}`}));
+  legItems.push({col:'#d63344',label:'Noise / Outlier'});
+  setLegend('db-legend',legItems);
+}
+
+function showDBResults(pts,labels,numC){
+  const noise=pts.filter((_,i)=>labels[i]===-1);
+  let html=`<div class="res-item"><strong>Clusters: ${numC} &nbsp;|&nbsp; Noise Points: ${noise.length}</strong></div>`;
+  for(let i=0;i<numC;i++){
+    const gp=pts.filter((_,j)=>labels[j]===i);
+    html+=`<div class="res-item" style="border-left-color:${COLORS[i%COLORS.length]}">
+      <strong style="color:${COLORS[i%COLORS.length]}">Cluster ${i+1}</strong> — ${gp.length} pts<br>
+      ${gp.slice(0,20).map(p=>`<span class="pill" style="background:${COLORS[i%COLORS.length]}">${p.label}</span>`).join('')}${gp.length>20?` <span style="font-size:.78rem;color:var(--ink3)">+${gp.length-20} more</span>`:''}
+    </div>`;
+  }
+  if(noise.length)html+=`<div class="res-item" style="border-left-color:#d63344"><strong>Noise</strong> (${noise.length} pts): ${noise.slice(0,15).map(p=>`<span class="pill pill-noise">${p.label}</span>`).join('')}${noise.length>15?`…`:''}</div>`;
+  document.getElementById('db-res-body').innerHTML=html;document.getElementById('db-results').style.display='block';
+}
+
+// ═══════════════════════════════════════════════════════
+// CSV DOWNLOAD
+// ═══════════════════════════════════════════════════════
+function downloadCSV(ns){
+  const pts=ns==='km'?getKMData():ns==='hier'?getHierData():getDBData();
+  if(!pts||!pts.length){alert('Load a dataset first.');return;}
+  const csv='Label,X,Y\n'+pts.map(p=>`${p.label},${p.x},${p.y}`).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`${ns}_data.csv`;a.click();
+}
+function exportPNG(id){const a=document.createElement('a');a.href=document.getElementById(id).toDataURL('image/png');a.download=`${id}.png`;a.click();}
+
+// ═══════════════════════════════════════════════════════
+// TAB SWITCH
+// ═══════════════════════════════════════════════════════
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+// RESPONSIVE CANVAS RESIZE
+// ═══════════════════════════════════════════════════════
+window.addEventListener('resize',()=>{
+  const km=getKMData();if(km&&km.length)drawScatterInitial('km-canvas',km);
+  const hi=getHierData();if(hi&&hi.length)drawScatterInitial('hier-canvas',hi);
+  const db=getDBData();if(db&&db.length)drawScatterInitial('db-canvas',db);
+});
+
+// ── init ──
+window.onload=()=>{
+  loadKMSample('example1');
+  loadHierSample('ex1');
+  loadDBSample('moons');
+};
+</script>
+</body>
+</html>

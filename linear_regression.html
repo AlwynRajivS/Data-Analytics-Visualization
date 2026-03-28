@@ -1,0 +1,1220 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>RegPredict — Regression Analysis Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,700;0,900;1,300;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  --bg:        #f4f3ef;
+  --bg2:       #ede9e0;
+  --surface:   #ffffff;
+  --surface2:  #faf9f6;
+  --surface3:  #f0ede6;
+  --border:    rgba(80,72,50,0.12);
+  --border2:   rgba(80,72,50,0.22);
+
+  --indigo:    #3d3bcc;
+  --indigo-h:  #2e2cb8;
+  --indigo-lt: rgba(61,59,204,0.08);
+  --rose:      #d63965;
+  --rose-lt:   rgba(214,57,101,0.09);
+  --teal:      #0e8a6e;
+  --teal-lt:   rgba(14,138,110,0.09);
+  --amber:     #b45309;
+  --amber-lt:  rgba(180,83,9,0.09);
+
+  --text:      #1c1917;
+  --text2:     #6b6558;
+  --text3:     #a89f94;
+
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
+  --shadow:    0 3px 14px rgba(0,0,0,0.08);
+  --shadow-md: 0 8px 32px rgba(0,0,0,0.10);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.12);
+
+  --r:  14px;
+  --r2: 20px;
+  --fh: 'Fraunces', serif;
+  --fb: 'Plus Jakarta Sans', sans-serif;
+  --fm: 'JetBrains Mono', monospace;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:48px 48px;pointer-events:none;z-index:0;opacity:0.5;
+}
+
+.app{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 16px 80px}
+
+/* ─── HEADER ─── */
+.header{text-align:center;padding:40px 0 28px;animation:fadeDown .7s ease both}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+
+.header-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--indigo-lt);border:1px solid rgba(61,59,204,.18);
+  border-radius:100px;padding:5px 16px;
+  font-family:var(--fm);font-size:11px;color:var(--indigo);
+  letter-spacing:1.8px;text-transform:uppercase;margin-bottom:18px;
+}
+.header-eyebrow::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--indigo);animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+h1.hero{font-family:var(--fh);font-size:clamp(34px,9vw,82px);font-weight:900;line-height:.97;letter-spacing:-3px;color:var(--text);margin-bottom:6px}
+h1.hero em{font-style:italic;color:var(--indigo)}
+.hero-sub{font-size:15px;color:var(--text2);font-weight:400;max-width:500px;margin:16px auto 0;line-height:1.65}
+
+.pill-row{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:22px 0 0;animation:fadeUp .7s .2s ease both}
+.pill{
+  background:var(--surface);border:1px solid var(--border2);border-radius:100px;
+  padding:6px 14px;font-family:var(--fm);font-size:11px;color:var(--text2);
+  display:flex;align-items:center;gap:6px;box-shadow:var(--shadow-sm);
+}
+.pill b{color:var(--indigo);font-weight:500}
+
+/* ─── TAB BAR ─── */
+.tab-bar{
+  display:flex;gap:3px;background:var(--surface);border:1px solid var(--border2);
+  border-radius:100px;padding:5px;max-width:860px;margin:32px auto 28px;
+  overflow-x:auto;scrollbar-width:none;box-shadow:var(--shadow);
+  animation:fadeUp .7s .3s ease both;
+}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{
+  flex:1;min-width:130px;background:transparent;border:none;border-radius:100px;
+  padding:10px 14px;font-family:var(--fb);font-size:12.5px;font-weight:600;
+  color:var(--text2);cursor:pointer;transition:all .25s ease;
+  white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.tab-btn:hover{color:var(--text);background:var(--surface3)}
+.tab-btn.active{background:var(--indigo);color:#fff;box-shadow:0 4px 18px rgba(61,59,204,.35)}
+.tab-panel{display:none;animation:fadeUp .4s ease both}
+.tab-panel.active{display:block}
+
+/* ─── CARDS ─── */
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);
+  padding:24px 20px;margin-bottom:18px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent 0%,var(--indigo) 40%,transparent 100%);opacity:.25;
+}
+.card.rose-accent::after{background:linear-gradient(90deg,transparent,var(--rose),transparent)}
+.card.teal-accent::after{background:linear-gradient(90deg,transparent,var(--teal),transparent)}
+
+.card-title{
+  font-family:var(--fh);font-size:18px;font-weight:700;color:var(--text);
+  margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.card-sub{font-size:13.5px;color:var(--text2);line-height:1.65;margin-bottom:18px}
+hr.div{border:none;border-top:1px solid var(--border);margin:20px 0}
+
+/* ─── CONCEPT HERO ─── */
+.concept-hero{
+  background:linear-gradient(135deg,var(--indigo) 0%,#7c3aed 100%);
+  border-radius:var(--r2);padding:28px 24px;margin-bottom:18px;
+  color:#fff;position:relative;overflow:hidden;box-shadow:var(--shadow-md);
+}
+.concept-hero::before{content:'';position:absolute;right:-80px;top:-80px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.05)}
+.concept-hero::after{content:'';position:absolute;right:40px;bottom:-60px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.04)}
+.concept-hero h2{font-family:var(--fh);font-size:clamp(22px,5vw,38px);font-weight:900;letter-spacing:-1px;margin-bottom:10px}
+.concept-hero p{font-size:14px;opacity:.85;line-height:1.7;max-width:640px;position:relative;z-index:1}
+.concept-hero.rose-hero{background:linear-gradient(135deg,var(--rose) 0%,#9333ea 100%)}
+
+/* ─── BEAUTIFUL EQUATION CARDS ─── */
+.eq-section{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:var(--r);padding:0;margin:18px 0;overflow:hidden;
+}
+.eq-section-header{
+  background:linear-gradient(90deg,var(--indigo-lt),transparent);
+  padding:12px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.eq-section-header.rose-hdr{background:linear-gradient(90deg,var(--rose-lt),transparent)}
+.eq-tag{
+  font-family:var(--fm);font-size:9.5px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--indigo);font-weight:500;
+  background:var(--indigo-lt);border:1px solid rgba(61,59,204,.2);
+  border-radius:100px;padding:3px 10px;
+}
+.eq-tag.rose{color:var(--rose);background:var(--rose-lt);border-color:rgba(214,57,101,.2)}
+.eq-tag-label{font-size:13px;font-weight:600;color:var(--text2)}
+
+.eq-block{
+  padding:20px 24px;display:flex;flex-direction:column;gap:16px;
+}
+.eq-row{
+  display:flex;align-items:flex-start;gap:14px;
+  border-bottom:1px solid var(--border);padding-bottom:14px;
+}
+.eq-row:last-child{border-bottom:none;padding-bottom:0}
+.eq-num{
+  width:26px;height:26px;border-radius:50%;background:var(--indigo);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-family:var(--fh);font-size:12px;font-weight:800;flex-shrink:0;margin-top:2px;
+}
+.eq-num.rose{background:var(--rose)}
+.eq-content{flex:1;min-width:0}
+.eq-name{font-size:12px;font-weight:700;color:var(--text3);font-family:var(--fm);letter-spacing:.5px;margin-bottom:6px;text-transform:uppercase}
+.eq-math{
+  background:var(--surface);border:1px solid var(--border2);border-radius:10px;
+  padding:14px 18px;overflow-x:auto;margin-bottom:8px;
+  box-shadow:inset 0 1px 4px rgba(0,0,0,.04);
+}
+.eq-math .katex-display{margin:0 !important}
+.eq-math .katex{font-size:1.1em}
+.eq-desc{font-size:12.5px;color:var(--text2);line-height:1.6;font-style:italic}
+
+/* INLINE MATH BADGE ROW */
+.eq-badge-row{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;
+}
+.eq-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:8px;padding:8px 14px;
+  font-size:12px;color:var(--text2);
+}
+.eq-badge .katex{font-size:.9em}
+
+/* KEY CONCEPTS */
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:16px}
+.step-card{
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);
+  padding:18px 16px;position:relative;transition:box-shadow .2s,transform .2s;
+}
+.step-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.step-num{
+  width:32px;height:32px;border-radius:50%;background:var(--indigo);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fh);font-size:13px;font-weight:800;margin-bottom:10px;
+  box-shadow:0 4px 12px rgba(61,59,204,.3);
+}
+.step-num.rose{background:var(--rose);box-shadow:0 4px 12px rgba(214,57,101,.3)}
+.step-card h4{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:5px}
+.step-card p{font-size:12.5px;color:var(--text2);line-height:1.6}
+
+/* VIZ ROW */
+.viz-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0}
+.viz-box{
+  background:var(--surface);border:1px solid var(--border2);border-radius:10px;
+  padding:10px 14px;font-family:var(--fm);font-size:11.5px;color:var(--text);
+  text-align:center;flex:1;min-width:90px;
+}
+.viz-box.accent{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+.viz-box.accent2{background:var(--rose);color:#fff;border-color:var(--rose)}
+.viz-arrow{font-size:16px;color:var(--text3);flex-shrink:0}
+
+/* COMPARISON */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+@media(max-width:520px){.compare-grid{grid-template-columns:1fr}}
+.compare-col{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.compare-col.ind{border-top:3px solid var(--indigo)}
+.compare-col.ros{border-top:3px solid var(--rose)}
+.compare-col h3{font-family:var(--fh);font-size:16px;font-weight:700;margin-bottom:14px;color:var(--text)}
+.compare-item{display:flex;align-items:flex-start;gap:9px;margin-bottom:10px;font-size:12.5px;color:var(--text2);line-height:1.5}
+.ci-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.ind .ci-dot{background:var(--indigo)}.ros .ci-dot{background:var(--rose)}
+
+/* WORKED EXAMPLE */
+.worked-example{
+  background:linear-gradient(135deg,var(--indigo-lt),rgba(124,58,237,.05));
+  border:1px solid rgba(61,59,204,.18);border-radius:var(--r);padding:20px;margin:16px 0;
+}
+.worked-example.rose-ex{background:linear-gradient(135deg,var(--rose-lt),rgba(124,58,237,.05));border-color:rgba(214,57,101,.18)}
+.we-title{font-family:var(--fh);font-size:15px;font-weight:700;color:var(--indigo);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.we-title.rose{color:var(--rose)}
+
+/* RESPONSIVE TABLE WRAPPER */
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid var(--border);margin-bottom:14px}
+.we-table{width:100%;border-collapse:collapse;font-size:12px;font-family:var(--fm);min-width:520px}
+.we-table th{background:rgba(61,59,204,.1);color:var(--indigo);padding:8px 12px;text-align:center;font-size:10px;letter-spacing:1px;text-transform:uppercase}
+.we-table.rose th{background:rgba(214,57,101,.08);color:var(--rose)}
+.we-table td{padding:7px 12px;color:var(--text2);text-align:center;border-bottom:1px solid var(--border)}
+
+.we-calc{
+  background:var(--surface);border-radius:10px;padding:14px 16px;
+  font-family:var(--fm);font-size:12.5px;color:var(--text);line-height:2.2;overflow-x:auto;
+}
+.we-calc em{color:var(--indigo);font-style:normal}
+.we-calc strong{color:var(--teal);font-style:normal;font-weight:500}
+.we-calc .highlight{
+  display:inline-block;background:var(--indigo);color:#fff;
+  border-radius:6px;padding:2px 10px;font-weight:500;
+}
+.we-calc .highlight.rose{background:var(--rose)}
+
+/* FORMS */
+label.lbl{
+  display:block;font-family:var(--fm);font-size:10.5px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--text3);margin-bottom:7px;margin-top:16px;
+}
+input[type=number],input[type=text],select{
+  width:100%;background:var(--surface2);border:1.5px solid var(--border2);
+  border-radius:10px;padding:11px 14px;color:var(--text);
+  font-family:var(--fb);font-size:14px;outline:none;
+  transition:border .2s,box-shadow .2s;-webkit-appearance:none;
+}
+input[type=number]:focus,select:focus{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(61,59,204,.12)}
+select[multiple]{height:120px}
+
+/* UPLOAD ZONE */
+.upload-zone{
+  border:2px dashed rgba(61,59,204,.25);border-radius:var(--r);
+  padding:30px 20px;text-align:center;cursor:pointer;
+  transition:all .25s;background:var(--surface2);position:relative;
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--indigo);background:var(--indigo-lt)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;border:none;border-radius:0;background:transparent;padding:0;width:100%;height:100%}
+.uz-icon{font-size:38px;margin-bottom:10px;display:block}
+.uz-text{font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px}
+.uz-hint{font-size:11.5px;color:var(--text3);font-family:var(--fm)}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 22px;border:none;border-radius:100px;
+  font-family:var(--fb);font-size:13.5px;font-weight:700;
+  cursor:pointer;transition:all .22s ease;text-decoration:none;white-space:nowrap;
+}
+.btn-primary{background:var(--indigo);color:#fff;box-shadow:0 4px 18px rgba(61,59,204,.35)}
+.btn-primary:hover{background:var(--indigo-h);transform:translateY(-2px);box-shadow:0 8px 28px rgba(61,59,204,.45)}
+.btn-rose{background:var(--rose);color:#fff;box-shadow:0 4px 18px rgba(214,57,101,.3)}
+.btn-rose:hover{background:#c42e5a;transform:translateY(-2px)}
+.btn-ghost{background:var(--surface2);border:1.5px solid var(--border2);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--indigo);color:var(--indigo);background:var(--indigo-lt)}
+.btn-teal{background:var(--teal);color:#fff;box-shadow:0 4px 18px rgba(14,138,110,.25)}
+.btn-teal:hover{transform:translateY(-2px)}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;align-items:center}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin-top:16px}
+.metric{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px 12px;text-align:center;transition:box-shadow .2s}
+.metric:hover{box-shadow:var(--shadow)}
+.metric-val{font-family:var(--fh);font-size:24px;font-weight:700;color:var(--indigo);margin-bottom:4px;line-height:1}
+.metric-val.rose{color:var(--rose)}.metric-val.teal{color:var(--teal)}.metric-val.amber{color:var(--amber)}
+.metric-lbl{font-family:var(--fm);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3)}
+
+/* EQ OUTPUT BOX */
+.eq-box{
+  background:var(--surface2);border:1.5px solid rgba(61,59,204,.2);border-radius:12px;
+  padding:16px 20px;font-family:var(--fm);font-size:13px;color:var(--indigo);
+  min-height:52px;display:flex;align-items:center;word-break:break-all;
+  box-shadow:inset 0 2px 8px rgba(61,59,204,.06);overflow-x:auto;
+}
+.eq-box.rose{border-color:rgba(214,57,101,.2);color:var(--rose)}
+
+/* PREDICTION PANEL */
+.pred-panel{
+  background:linear-gradient(135deg,var(--indigo-lt),rgba(124,58,237,.06));
+  border:1.5px solid rgba(61,59,204,.18);border-radius:var(--r2);
+  padding:24px 20px;margin-top:18px;display:none;
+}
+.pred-panel.rose{background:linear-gradient(135deg,var(--rose-lt),rgba(124,58,237,.04));border-color:rgba(214,57,101,.2)}
+.pred-panel.show{display:block;animation:scaleIn .35s ease}
+.pred-label{font-family:var(--fm);font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.pred-value{font-family:var(--fh);font-size:clamp(28px,6vw,58px);font-weight:900;color:var(--indigo);letter-spacing:-2px;line-height:1}
+.pred-value.rose{color:var(--rose)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--border);margin-top:14px}
+table{width:100%;border-collapse:collapse;font-size:12px;font-family:var(--fm);min-width:400px}
+th{background:var(--surface3);color:var(--indigo);padding:10px 12px;text-align:left;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;border-bottom:1px solid var(--border2)}
+td{padding:9px 12px;color:var(--text2);border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--indigo-lt)}
+
+/* CHART */
+.chart-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-top:16px}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:100px;padding:5px 13px;font-family:var(--fm);font-size:11px}
+.badge-ok{background:var(--teal-lt);color:var(--teal);border:1px solid rgba(14,138,110,.2)}
+.badge-warn{background:var(--amber-lt);color:var(--amber);border:1px solid rgba(180,83,9,.2)}
+.badge-err{background:rgba(220,38,38,.07);color:#dc2626;border:1px solid rgba(220,38,38,.18)}
+
+/* INFO BOX */
+.info-box{background:var(--amber-lt);border:1px solid rgba(180,83,9,.18);border-radius:10px;padding:12px 16px;font-size:12.5px;color:var(--amber);display:flex;gap:9px;align-items:flex-start;margin:12px 0;line-height:1.6}
+
+/* PRED INPUTS */
+.pred-inputs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* FOOTER */
+.footer{text-align:center;padding:28px 0 10px;font-size:11.5px;color:var(--text3);font-family:var(--fm)}
+
+/* ─── MOBILE BREAKPOINTS ─── */
+@media(max-width:700px){
+  .app{padding:0 12px 60px}
+  .header{padding:28px 0 20px}
+  h1.hero{letter-spacing:-2px}
+  .tab-bar{margin:22px auto 20px;border-radius:16px;padding:4px}
+  .tab-btn{min-width:100px;font-size:11.5px;padding:9px 10px;border-radius:12px}
+  .tab-btn .ti{display:none}
+  .card{padding:18px 14px;border-radius:16px}
+  .card-title{font-size:16px}
+  .steps-grid{grid-template-columns:1fr}
+  .g2{grid-template-columns:1fr}
+  .viz-row{gap:6px}
+  .viz-box{min-width:75px;font-size:10.5px;padding:8px 10px}
+  .eq-block{padding:14px 16px}
+  .eq-math{padding:12px 14px}
+  .eq-math .katex{font-size:.95em}
+  .worked-example{padding:14px 12px}
+  .we-calc{font-size:11.5px;padding:12px}
+  .btn{padding:10px 18px;font-size:13px}
+  .btn-row{gap:8px}
+  .metrics-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+  .metric{padding:12px 8px}
+  .metric-val{font-size:20px}
+  .pred-panel{padding:18px 14px}
+  .concept-hero{padding:22px 16px}
+  .concept-hero h2{font-size:22px}
+  .compare-col{padding:14px}
+}
+
+@media(max-width:420px){
+  .tab-btn{min-width:78px;font-size:10.5px;padding:8px 8px}
+  .metrics-grid{grid-template-columns:repeat(2,1fr)}
+  .pill{font-size:10px;padding:5px 11px}
+  .eq-math .katex{font-size:.85em}
+}
+
+/* KaTeX theme integration */
+.katex{color:var(--text) !important}
+.concept-hero .katex{color:#fff !important}
+.eq-math .katex-display>.katex{text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-eyebrow">Regression Analysis Platform</div>
+  <h1 class="hero">Reg<em>Predict</em></h1>
+  <p class="hero-sub">Upload any dataset, understand the math, visualise the fit, and predict future values — all in one place.</p>
+  <div class="pill-row">
+    <div class="pill">Models <b>Simple &amp; Multiple</b></div>
+    <div class="pill">Engine <b>OLS Matrix (Pure JS)</b></div>
+    <div class="pill">Metrics <b>R² · RMSE · MAE</b></div>
+    <div class="pill">Dynamic <b>Any CSV Dataset</b></div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('slr-concept',this)"><span class="ti">📖</span> Simple Concept</button>
+  <button class="tab-btn" onclick="switchTab('mlr-concept',this)"><span class="ti">📘</span> Multiple Concept</button>
+  <button class="tab-btn" onclick="switchTab('slr-lab',this)"><span class="ti">🔬</span> Simple Lab</button>
+  <button class="tab-btn" onclick="switchTab('mlr-lab',this)"><span class="ti">🧪</span> Multiple Lab</button>
+</div>
+
+<!-- ══════════ TAB 1 — SIMPLE LINEAR REGRESSION CONCEPT ══════════ -->
+<div id="tab-slr-concept" class="tab-panel active">
+
+  <div class="concept-hero">
+    <h2>Simple Linear Regression</h2>
+    <p>Find the best-fit straight line through two variables and use it to predict future values. The foundation of all predictive modelling.</p>
+  </div>
+
+  <!-- WHAT IS IT -->
+  <div class="card">
+    <div class="card-title">💡 What is Simple Linear Regression?</div>
+    <p class="card-sub">SLR models the <strong>linear relationship</strong> between one input variable <em>(X)</em> and one output variable <em>(Y)</em>. The goal is to find a straight line that best describes how Y changes as X changes.</p>
+    <div class="viz-row">
+      <div class="viz-box"><b>Input (X)</b><br><span style="font-size:10px;color:var(--text3)">Independent Var</span></div>
+      <div class="viz-arrow">→</div>
+      <div class="viz-box accent"><b>Regression Model</b><br><span style="font-size:10px;opacity:.75">Ŷ = β₀ + β₁X</span></div>
+      <div class="viz-arrow">→</div>
+      <div class="viz-box"><b>Output (Ŷ)</b><br><span style="font-size:10px;color:var(--text3)">Predicted Y</span></div>
+    </div>
+
+    <!-- BEAUTIFUL EQUATION BLOCK -->
+    <div class="eq-section">
+      <div class="eq-section-header">
+        <span class="eq-tag">Core Equations</span>
+        <span class="eq-tag-label">Simple Linear Regression Formulas</span>
+      </div>
+      <div class="eq-block">
+
+        <div class="eq-row">
+          <div class="eq-num">1</div>
+          <div class="eq-content">
+            <div class="eq-name">Regression Equation</div>
+            <div class="eq-math">$$\hat{Y} = \beta_0 + \beta_1 \cdot X$$</div>
+            <div class="eq-desc">The predicted value of Y for a given X. The line that minimises prediction errors.</div>
+          </div>
+        </div>
+
+        <div class="eq-row">
+          <div class="eq-num">2</div>
+          <div class="eq-content">
+            <div class="eq-name">Slope (β₁)</div>
+            <div class="eq-math">$$\beta_1 = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n}(x_i - \bar{x})^2}$$</div>
+            <div class="eq-desc">Rate of change of Y per unit increase in X. Numerator = covariance × n; denominator = variance of X × n.</div>
+          </div>
+        </div>
+
+        <div class="eq-row">
+          <div class="eq-num">3</div>
+          <div class="eq-content">
+            <div class="eq-name">Intercept (β₀)</div>
+            <div class="eq-math">$$\beta_0 = \bar{y} - \beta_1 \cdot \bar{x}$$</div>
+            <div class="eq-desc">The predicted Y when X = 0. The regression line always passes through the point $(\bar{x},\, \bar{y})$.</div>
+          </div>
+        </div>
+
+        <div class="eq-row">
+          <div class="eq-num">4</div>
+          <div class="eq-content">
+            <div class="eq-name">R² — Coefficient of Determination</div>
+            <div class="eq-math">$$R^2 = 1 - \frac{SS_{res}}{SS_{tot}} = 1 - \frac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i - \bar{y})^2}$$</div>
+            <div class="eq-desc">Proportion of variance in Y explained by X. Ranges from 0 (no fit) to 1 (perfect fit).</div>
+          </div>
+        </div>
+
+        <div class="eq-row">
+          <div class="eq-num">5</div>
+          <div class="eq-content">
+            <div class="eq-name">RMSE &amp; MAE</div>
+            <div class="eq-math">$$RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2} \qquad MAE = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|$$</div>
+            <div class="eq-desc">Error metrics in the same units as Y. Lower = more accurate predictions.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="info-box">⚠️ <span>SLR assumes a <strong>linear relationship</strong> between X and Y. If the true relationship is curved, a different model is needed. Always plot your data first!</span></div>
+  </div>
+
+  <!-- KEY CONCEPTS -->
+  <div class="card">
+    <div class="card-title">📚 Key Concepts Explained</div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num" style="font-size:11px">β₀</div>
+        <h4>Intercept</h4>
+        <p>Where the regression line crosses the Y-axis. The predicted Y when $X=0$. A mathematical anchor — may not have practical meaning.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num" style="font-size:11px">β₁</div>
+        <h4>Slope</h4>
+        <p>How much Y changes for every 1-unit increase in X. Example: salary increases by ₹5,200 per year of experience.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num" style="font-size:11px">R²</div>
+        <h4>Goodness of Fit</h4>
+        <p>$R^2 = 0.87$ means 87% of Y's variation is explained by X. Closer to 1 = better fit.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num" style="font-size:10px">OLS</div>
+        <h4>Least Squares</h4>
+        <p>Finds $\beta_0, \beta_1$ that minimise $\sum(y_i - \hat{y}_i)^2$. Mathematically optimal line through the data.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">ε</div>
+        <h4>Residuals</h4>
+        <p>Residual $= y_i - \hat{y}_i$. A good model has small, randomly scattered residuals around zero.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num" style="font-size:10px">RMSE</div>
+        <h4>Error Metric</h4>
+        <p>Average prediction error in Y's units. $RMSE = \sqrt{\frac{SS_{res}}{n}}$. Lower = more accurate.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP BY STEP -->
+  <div class="card">
+    <div class="card-title">🔢 Step-by-Step Calculation</div>
+    <div class="steps-grid">
+      <div class="step-card"><div class="step-num">1</div><h4>Gather Data Pairs</h4><p>Collect $(X_i, Y_i)$ pairs. Example: 30 employees each with experience $X$ and salary $Y$.</p></div>
+      <div class="step-card"><div class="step-num">2</div><h4>Compute Means</h4><p>$\bar{x} = \frac{1}{n}\sum x_i$ and $\bar{y} = \frac{1}{n}\sum y_i$</p></div>
+      <div class="step-card"><div class="step-num">3</div><h4>Compute Slope β₁</h4><p>$\beta_1 = \frac{\sum(x_i-\bar{x})(y_i-\bar{y})}{\sum(x_i-\bar{x})^2}$</p></div>
+      <div class="step-card"><div class="step-num">4</div><h4>Compute Intercept β₀</h4><p>$\beta_0 = \bar{y} - \beta_1 \cdot \bar{x}$. The line passes through $(\bar{x}, \bar{y})$.</p></div>
+      <div class="step-card"><div class="step-num">5</div><h4>Generate Predictions</h4><p>$\hat{Y}_i = \beta_0 + \beta_1 x_i$ for each observation.</p></div>
+      <div class="step-card"><div class="step-num">6</div><h4>Evaluate Model</h4><p>Calculate $R^2$, RMSE, and MAE. If $R^2 < 0.5$, the model has weak explanatory power.</p></div>
+    </div>
+  </div>
+
+  <!-- WORKED EXAMPLE -->
+  <div class="card">
+    <div class="card-title">🧮 Worked Example — Salary Prediction</div>
+    <p class="card-sub">5 employees. We calculate the regression line manually, step by step.</p>
+    <div class="worked-example">
+      <div class="we-title">📊 Raw Data</div>
+      <div class="tbl-scroll">
+        <table class="we-table">
+          <tr><th>Emp</th><th>X (yrs)</th><th>Y (₹000)</th><th>$x_i-\bar{x}$</th><th>$y_i-\bar{y}$</th><th>$(x_i-\bar{x})(y_i-\bar{y})$</th><th>$(x_i-\bar{x})^2$</th></tr>
+          <tr><td>A</td><td>1</td><td>30</td><td>−3</td><td>−22</td><td>66</td><td>9</td></tr>
+          <tr><td>B</td><td>2</td><td>40</td><td>−2</td><td>−12</td><td>24</td><td>4</td></tr>
+          <tr><td>C</td><td>4</td><td>55</td><td>0</td><td>3</td><td>0</td><td>0</td></tr>
+          <tr><td>D</td><td>6</td><td>65</td><td>2</td><td>13</td><td>26</td><td>4</td></tr>
+          <tr><td>E</td><td>7</td><td>70</td><td>3</td><td>18</td><td>54</td><td>9</td></tr>
+          <tr style="font-weight:700;background:var(--surface3)"><td>Σ</td><td>20</td><td>260</td><td>0</td><td>0</td><td><b>170</b></td><td><b>26</b></td></tr>
+        </table>
+      </div>
+      <div class="we-calc">
+        <em>x̄ = 20/5 = 4.0 years &nbsp;|&nbsp; ȳ = 260/5 = 52.0 (₹000)</em><br>
+        <em>β₁ = 170 / 26 = </em><span class="highlight">6.538</span><br>
+        <em>β₀ = 52 − 6.538 × 4 = </em><span class="highlight">25.846</span><br>
+        <strong>Ŷ = 25.846 + 6.538 × X</strong>
+      </div>
+    </div>
+    <div class="worked-example" style="margin-top:12px">
+      <div class="we-title">📈 Predictions &amp; R²</div>
+      <div class="tbl-scroll">
+        <table class="we-table">
+          <tr><th>Emp</th><th>X</th><th>Actual Y</th><th>Predicted Ŷ</th><th>Residual</th><th>$(y-\hat{y})^2$</th></tr>
+          <tr><td>A</td><td>1</td><td>30</td><td>32.38</td><td>−2.38</td><td>5.66</td></tr>
+          <tr><td>B</td><td>2</td><td>40</td><td>38.92</td><td>1.08</td><td>1.17</td></tr>
+          <tr><td>C</td><td>4</td><td>55</td><td>51.99</td><td>3.01</td><td>9.06</td></tr>
+          <tr><td>D</td><td>6</td><td>65</td><td>65.07</td><td>−0.07</td><td>0.00</td></tr>
+          <tr><td>E</td><td>7</td><td>70</td><td>71.61</td><td>−1.61</td><td>2.59</td></tr>
+          <tr style="font-weight:700;background:var(--surface3)"><td colspan="5">$SS_{res}$</td><td><b>18.48</b></td></tr>
+        </table>
+      </div>
+      <div class="we-calc">
+        <em>SS_tot = (−22)²+(−12)²+3²+13²+18² = 1006</em><br>
+        <strong>R² = 1 − 18.48/1006 = </strong><span class="highlight">0.9816</span> → <strong>98.2% explained!</strong><br>
+        <em>RMSE = √(18.48/5) = </em><span class="highlight">1.923</span>
+      </div>
+    </div>
+    <hr class="div">
+    <div class="card-title" style="margin-bottom:12px;font-size:15px">▶ Run Live Demo (30 Employees)</div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="runSlrConcept()">Run Salary Analysis</button>
+      <button class="btn btn-teal" onclick="dlCSV('simple')">⬇ Sample CSV</button>
+    </div>
+    <div id="slr-c-out" style="display:none;margin-top:18px">
+      <div class="eq-box" id="slr-c-eq"></div>
+      <div class="metrics-grid" id="slr-c-metrics"></div>
+      <div class="chart-wrap"><canvas id="slr-c-chart" height="300"></canvas></div>
+      <hr class="div">
+      <div class="card-title" style="margin-bottom:10px;font-size:15px">🔮 Predict Salary</div>
+      <label class="lbl">Years of Experience</label>
+      <input type="number" id="slr-c-px" placeholder="e.g. 8.5" step="0.1" min="0" style="max-width:280px">
+      <div class="btn-row"><button class="btn btn-primary" onclick="predictSlrConcept()">Predict</button></div>
+      <div class="pred-panel" id="slr-c-pred">
+        <div class="pred-label">Estimated Annual Salary</div>
+        <div class="pred-value" id="slr-c-pv"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════ TAB 2 — MULTIPLE LINEAR REGRESSION CONCEPT ══════════ -->
+<div id="tab-mlr-concept" class="tab-panel">
+
+  <div class="concept-hero rose-hero">
+    <h2>Multiple Linear Regression</h2>
+    <p>Model the relationship between <em>two or more</em> input variables and one output. Find what drives your outcome and predict with greater accuracy.</p>
+  </div>
+
+  <div class="card rose-accent">
+    <div class="card-title">💡 What is Multiple Linear Regression?</div>
+    <p class="card-sub">MLR extends simple regression to include <strong>two or more independent variables</strong>. Each coefficient tells you the effect of that variable while <em>holding all others constant</em> — the partial effect.</p>
+    <div class="viz-row">
+      <div class="viz-box"><b>X₁, X₂…Xₙ</b><br><span style="font-size:10px;color:var(--text3)">Multiple Features</span></div>
+      <div class="viz-arrow">→</div>
+      <div class="viz-box accent2"><b>OLS Matrix</b><br><span style="font-size:10px;opacity:.75">(XᵀX)⁻¹XᵀY</span></div>
+      <div class="viz-arrow">→</div>
+      <div class="viz-box"><b>Predicted Ŷ</b><br><span style="font-size:10px;color:var(--text3)">One Output</span></div>
+    </div>
+
+    <!-- BEAUTIFUL EQUATION BLOCK FOR MLR -->
+    <div class="eq-section" style="margin-top:16px">
+      <div class="eq-section-header rose-hdr">
+        <span class="eq-tag rose">Core Equations</span>
+        <span class="eq-tag-label">Multiple Linear Regression Formulas</span>
+      </div>
+      <div class="eq-block">
+
+        <div class="eq-row">
+          <div class="eq-num rose">1</div>
+          <div class="eq-content">
+            <div class="eq-name">General Equation</div>
+            <div class="eq-math">$$\hat{Y} = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p$$</div>
+            <div class="eq-desc">Each $\beta_k$ is the partial effect of $X_k$ on $Y$, holding all other variables constant.</div>
+          </div>
+        </div>
+
+        <div class="eq-row">
+          <div class="eq-num rose">2</div>
+          <div class="eq-content">
+            <div class="eq-name">Matrix Form (OLS Solution)</div>
+            <div class="eq-math">$$\boldsymbol{\hat{\beta}} = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}$$</div>
+            <div class="eq-desc">Where $\mathbf{X}$ is the design matrix $(n \times (p+1))$ with a leading column of 1s. This gives the unique least-squares solution.</div>
+          </div>
+        </div>
+
+        <div class="eq-row">
+          <div class="eq-num rose">3</div>
+          <div class="eq-content">
+            <div class="eq-name">Design Matrix Structure</div>
+            <div class="eq-math">$$\mathbf{X} = \begin{bmatrix} 1 & x_{11} & x_{12} & \cdots & x_{1p} \\ 1 & x_{21} & x_{22} & \cdots & x_{2p} \\ \vdots & \vdots & \vdots & \ddots & \vdots \\ 1 & x_{n1} & x_{n2} & \cdots & x_{np} \end{bmatrix}$$</div>
+            <div class="eq-desc">The first column of 1s corresponds to the intercept $\beta_0$. Dimensions: $n \times (p+1)$.</div>
+          </div>
+        </div>
+
+        <div class="eq-row">
+          <div class="eq-num rose">4</div>
+          <div class="eq-content">
+            <div class="eq-name">Adjusted R² (penalises extra variables)</div>
+            <div class="eq-math">$$\bar{R}^2 = 1 - \frac{(1-R^2)(n-1)}{n-p-1}$$</div>
+            <div class="eq-desc">Unlike $R^2$, Adjusted $R^2$ only increases if a new predictor genuinely improves the model. $n$ = samples, $p$ = predictors.</div>
+          </div>
+        </div>
+
+        <div class="eq-row">
+          <div class="eq-num rose">5</div>
+          <div class="eq-content">
+            <div class="eq-name">Normal Equations (Equivalent)</div>
+            <div class="eq-math">$$(\mathbf{X}^\top \mathbf{X})\,\boldsymbol{\hat{\beta}} = \mathbf{X}^\top \mathbf{y}$$</div>
+            <div class="eq-desc">Setting the gradient of the loss to zero yields these normal equations. Solving them gives the OLS solution via matrix inversion.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="compare-grid">
+      <div class="compare-col ind">
+        <h3>Simple Regression</h3>
+        <div class="compare-item"><div class="ci-dot"></div>1 predictor: $\hat{Y} = \beta_0 + \beta_1 X$</div>
+        <div class="compare-item"><div class="ci-dot"></div>Fits a 2D line</div>
+        <div class="compare-item"><div class="ci-dot"></div>Easy to visualise on a chart</div>
+        <div class="compare-item"><div class="ci-dot"></div>May miss important factors</div>
+      </div>
+      <div class="compare-col ros">
+        <h3>Multiple Regression</h3>
+        <div class="compare-item"><div class="ci-dot"></div>2+ predictors: $\hat{Y} = \beta_0 + \sum \beta_k X_k$</div>
+        <div class="compare-item"><div class="ci-dot"></div>Fits a hyperplane in $p+1$ dimensions</div>
+        <div class="compare-item"><div class="ci-dot"></div>Requires Actual vs Predicted plot</div>
+        <div class="compare-item"><div class="ci-dot"></div>More realistic, accurate model</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY CONCEPTS -->
+  <div class="card rose-accent">
+    <div class="card-title">📚 Key Concepts in MLR</div>
+    <div class="steps-grid">
+      <div class="step-card"><div class="step-num rose" style="font-size:11px">β</div><h4>Partial Coefficients</h4><p>Each $\beta_k$ represents the change in $Y$ for a 1-unit increase in $X_k$, holding all other variables constant.</p></div>
+      <div class="step-card"><div class="step-num rose" style="font-size:11px">Xᵀ</div><h4>Design Matrix</h4><p>Matrix where each row is one observation. First column = 1s for $\beta_0$. Dimension: $n \times (p+1)$.</p></div>
+      <div class="step-card"><div class="step-num rose" style="font-size:10px">⁻¹</div><h4>Matrix Inversion</h4><p>The OLS solution requires inverting $(X^\top X)$. We use Gaussian Elimination — numerically stable.</p></div>
+      <div class="step-card"><div class="step-num rose" style="font-size:11px">R̄²</div><h4>Adjusted R²</h4><p>Penalises adding useless predictors: $\bar{R}^2 = 1 - \frac{(1-R^2)(n-1)}{n-p-1}$</p></div>
+      <div class="step-card"><div class="step-num rose" style="font-size:10px">VIF</div><h4>Multicollinearity</h4><p>When two predictors are highly correlated, it distorts coefficients. If $(X^\top X)$ is singular, inversion fails.</p></div>
+      <div class="step-card"><div class="step-num rose">ε</div><h4>Residual Analysis</h4><p>Residuals $\varepsilon_i = y_i - \hat{y}_i$ should be randomly scattered around zero. Patterns indicate missing structure.</p></div>
+    </div>
+  </div>
+
+  <!-- MATRIX STEPS -->
+  <div class="card rose-accent">
+    <div class="card-title">🔢 Step-by-Step: Matrix OLS Calculation</div>
+    <div class="steps-grid">
+      <div class="step-card"><div class="step-num rose">1</div><h4>Build Design Matrix $\mathbf{X}$</h4><p>Add a column of 1s as the first column. For $p=3$ features: $\mathbf{X}$ is $n \times 4$.</p></div>
+      <div class="step-card"><div class="step-num rose">2</div><h4>Transpose: $\mathbf{X}^\top$</h4><p>Flip rows and columns. If $\mathbf{X}$ is $n \times 4$, then $\mathbf{X}^\top$ is $4 \times n$.</p></div>
+      <div class="step-card"><div class="step-num rose">3</div><h4>Compute $\mathbf{X}^\top \mathbf{X}$</h4><p>$(4 \times n) \cdot (n \times 4) \to (4 \times 4)$. Captures all correlations between features.</p></div>
+      <div class="step-card"><div class="step-num rose">4</div><h4>Invert $(\mathbf{X}^\top \mathbf{X})^{-1}$</h4><p>Gaussian elimination on the $4 \times 4$ matrix. Most computationally intensive step.</p></div>
+      <div class="step-card"><div class="step-num rose">5</div><h4>Solve $\hat{\boldsymbol{\beta}}$</h4><p>$\hat{\boldsymbol{\beta}} = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}$ gives $[\beta_0, \beta_1, \ldots, \beta_p]$.</p></div>
+      <div class="step-card"><div class="step-num rose">6</div><h4>Predict &amp; Evaluate</h4><p>$\hat{\mathbf{y}} = \mathbf{X}\hat{\boldsymbol{\beta}}$. Compute $R^2$, Adj. $R^2$, RMSE, MAE.</p></div>
+    </div>
+  </div>
+
+  <!-- WORKED EXAMPLE -->
+  <div class="card rose-accent">
+    <div class="card-title">🧮 Worked Example — House Price Prediction</div>
+    <p class="card-sub">4 features: Square Footage, Bedrooms, Age, Distance to City → predict house price.</p>
+    <div class="worked-example rose-ex">
+      <div class="we-title rose">📊 Sample Data (5 Houses)</div>
+      <div class="tbl-scroll">
+        <table class="we-table rose">
+          <tr><th>House</th><th>$X_1$ Sqft</th><th>$X_2$ Beds</th><th>$X_3$ Age</th><th>$X_4$ Dist</th><th>Y Price $000</th></tr>
+          <tr><td>H1</td><td>1400</td><td>3</td><td>10</td><td>5</td><td>245</td></tr>
+          <tr><td>H2</td><td>1600</td><td>3</td><td>8</td><td>3</td><td>312</td></tr>
+          <tr><td>H3</td><td>2100</td><td>4</td><td>5</td><td>2</td><td>420</td></tr>
+          <tr><td>H4</td><td>2350</td><td>4</td><td>3</td><td>1</td><td>485</td></tr>
+          <tr><td>H5</td><td>1100</td><td>2</td><td>15</td><td>10</td><td>198</td></tr>
+        </table>
+      </div>
+      <div class="we-calc">
+        <em>Solve: β̂ = (XᵀX)⁻¹ XᵀY</em><br>
+        <em>β₀ =  28,450</em> (base price constant)<br>
+        <em>β₁ = +143.2</em> per sqft → +1 sqft adds $143<br>
+        <em>β₂ = +9,800</em> per bedroom → adds $9,800<br>
+        <em>β₃ =  −2,150</em> per year → older = cheaper<br>
+        <em>β₄ =  −5,400</em> per km → further = cheaper<br><br>
+        <strong>Ŷ = 28,450 + 143.2X₁ + 9,800X₂ − 2,150X₃ − 5,400X₄</strong><br><br>
+        Predict H1: 28450+143.2×1400+9800×3−2150×10−5400×5 = <span class="highlight rose">$209,830</span>
+      </div>
+    </div>
+    <hr class="div">
+    <div class="card-title" style="margin-bottom:10px;font-size:15px">▶ Run Live Demo (30 Houses)</div>
+    <div class="btn-row">
+      <button class="btn btn-rose" onclick="runMlrConcept()">Run House Price Analysis</button>
+      <button class="btn btn-teal" onclick="dlCSV('multiple')">⬇ Sample CSV</button>
+    </div>
+    <div id="mlr-c-out" style="display:none;margin-top:18px">
+      <div class="eq-box rose" id="mlr-c-eq"></div>
+      <div class="metrics-grid" id="mlr-c-metrics"></div>
+      <div class="chart-wrap"><canvas id="mlr-c-chart" height="300"></canvas></div>
+      <hr class="div">
+      <div class="card-title" style="margin-bottom:10px;font-size:15px">🔮 Predict House Price</div>
+      <div class="pred-inputs-grid">
+        <div><label class="lbl">Square Footage (X₁)</label><input type="number" id="mlr-c-p1" placeholder="e.g. 2000" min="0"></div>
+        <div><label class="lbl">Bedrooms (X₂)</label><input type="number" id="mlr-c-p2" placeholder="e.g. 4" min="0"></div>
+        <div><label class="lbl">Age in Years (X₃)</label><input type="number" id="mlr-c-p3" placeholder="e.g. 5" min="0"></div>
+        <div><label class="lbl">Distance to City km (X₄)</label><input type="number" id="mlr-c-p4" placeholder="e.g. 3" min="0"></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-rose" onclick="predictMlrConcept()">Predict Price</button></div>
+      <div class="pred-panel rose" id="mlr-c-pred">
+        <div class="pred-label">Estimated House Price (USD)</div>
+        <div class="pred-value rose" id="mlr-c-pv"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════ TAB 3 — SIMPLE LAB ══════════ -->
+<div id="tab-slr-lab" class="tab-panel">
+  <div class="card">
+    <div class="card-title">🔬 Simple Regression Lab — Upload Any Dataset</div>
+    <p class="card-sub">Upload <strong>any CSV</strong> with numeric columns. Select your X and Y variables. The platform calculates regression, visualises the fit, and lets you predict new values.</p>
+    <div class="btn-row" style="margin-top:0;margin-bottom:18px">
+     <button class="btn btn-teal" onclick="dlCSV('S_housing_dataset.csv')">⬇ Housing Dataset</button>
+
+<button class="btn btn-teal" onclick="dlCSV('S_supermarket_sales_dataset.csv')">⬇ Supermarket Dataset</button>
+
+<button class="btn btn-teal" onclick="dlCSV('S_hospital_dataset.csv')">⬇ Hospital Dataset</button>
+
+<button class="btn btn-teal" onclick="dlCSV('S_mobile_sales_dataset.csv')">⬇ Mobile Sales Dataset</button>
+
+<button class="btn btn-teal" onclick="dlCSV('S_vehicle_dataset.csv')">⬇ Vehicle Dataset</button>
+
+<button class="btn btn-teal" onclick="dlCSV('S_agriculture_dataset.csv')">⬇ Agriculture Dataset</button>
+    </div>
+    <div class="upload-zone" id="sl-zone">
+      <input type="file" accept=".csv" onchange="loadSL(event)">
+      <span class="uz-icon">📂</span>
+      <div class="uz-text">Drop CSV here or click to browse</div>
+      <div class="uz-hint">All columns must be numeric · Row 1 = headers</div>
+    </div>
+    <div id="sl-status" style="margin-top:12px"></div>
+    <div id="sl-ctrl" style="display:none;margin-top:20px">
+      <div class="g2">
+        <div>
+          <label class="lbl">🎯 Target Variable — Y</label>
+          <select id="sl-y"></select>
+        </div>
+        <div>
+          <label class="lbl">📥 Feature Variable — X</label>
+          <select id="sl-x"></select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="runSL()">▶ Run Regression</button>
+        <button class="btn btn-ghost" onclick="resetSL()">✕ Reset</button>
+      </div>
+    </div>
+  </div>
+  <div id="sl-results" style="display:none">
+    <div class="card">
+      <div class="card-title">📈 Regression Equation</div>
+      <div class="eq-box" id="sl-eq"></div>
+      <div class="metrics-grid" id="sl-metrics"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 Scatter Plot + Regression Line</div>
+      <div class="chart-wrap"><canvas id="sl-chart" height="340"></canvas></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-ghost" onclick="exportChart('sl-chart','simple_regression')">📷 Export PNG</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔮 Predict — Enter Any Value</div>
+      <p class="card-sub" id="sl-pred-hint">Enter a value for your X variable to get the predicted Y.</p>
+      <label class="lbl" id="sl-px-lbl">X Value</label>
+      <input type="number" id="sl-px" placeholder="Enter X value to predict…" step="any" style="max-width:320px">
+      <div class="btn-row"><button class="btn btn-primary" onclick="predictSL()">Predict</button></div>
+      <div class="pred-panel" id="sl-pred">
+        <div class="pred-label" id="sl-pred-lbl">Predicted Y</div>
+        <div class="pred-value" id="sl-pred-val"></div>
+        <div id="sl-pred-sub" style="margin-top:10px;font-size:12.5px;color:var(--text2)"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Data Preview <span style="font-size:12px;font-weight:400;color:var(--text3)">(first 30 rows)</span></div>
+      <div class="tbl-wrap" id="sl-table"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ TAB 4 — MULTIPLE LAB ══════════ -->
+<div id="tab-mlr-lab" class="tab-panel">
+  <div class="card rose-accent">
+    <div class="card-title">🧪 Multiple Regression Lab — Upload Any Dataset</div>
+    <p class="card-sub">Upload <strong>any CSV</strong> with numeric columns. Select your target and multiple feature variables. The platform solves the OLS equation and lets you predict based on your selections.</p>
+    <div class="btn-row" style="margin-top:0;margin-bottom:18px">
+      <button class="btn btn-teal" onclick="dlCSV('M_housing_multiple.csv')">⬇ Housing (Multiple)</button>
+
+<button class="btn btn-teal" onclick="dlCSV('M_supermarket_multiple.csv')">⬇ Supermarket (Multiple)</button>
+<button class="btn btn-teal" onclick="dlCSV('M_hospital_multiple.csv')">⬇ Hospital (Multiple)</button>
+
+<button class="btn btn-teal" onclick="dlCSV('M_mobile_multiple.csv')">⬇ Mobile (Multiple)</button>
+
+<button class="btn btn-teal" onclick="dlCSV('M_vehicle_multiple.csv')">⬇ Vehicle (Multiple)</button>
+
+<button class="btn btn-teal" onclick="dlCSV('M_agriculture_multiple.csv')">⬇ Agriculture (Multiple)</button>
+    </div>
+    <div class="upload-zone" id="ml-zone">
+      <input type="file" accept=".csv" onchange="loadML(event)">
+      <span class="uz-icon">📂</span>
+      <div class="uz-text">Drop CSV here or click to browse</div>
+      <div class="uz-hint">All columns numeric · Row 1 = headers · Min 3 columns</div>
+    </div>
+    <div id="ml-status" style="margin-top:12px"></div>
+    <div id="ml-ctrl" style="display:none;margin-top:20px">
+      <div class="g2">
+        <div>
+          <label class="lbl">🎯 Target Variable — Y</label>
+          <select id="ml-y"></select>
+        </div>
+        <div>
+          <label class="lbl">📥 Feature Variables — X (Hold Ctrl for multi)</label>
+          <select id="ml-x" multiple></select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-rose" onclick="runML()">▶ Run Regression</button>
+        <button class="btn btn-ghost" onclick="resetML()">✕ Reset</button>
+      </div>
+    </div>
+  </div>
+  <div id="ml-results" style="display:none">
+    <div class="card rose-accent">
+      <div class="card-title">📈 Regression Equation</div>
+      <div class="eq-box rose" id="ml-eq"></div>
+      <div class="metrics-grid" id="ml-metrics"></div>
+    </div>
+    <div class="card rose-accent">
+      <div class="card-title">📊 Actual vs Predicted</div>
+      <div class="chart-wrap"><canvas id="ml-chart" height="320"></canvas></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-ghost" onclick="exportChart('ml-chart','multiple_regression')">📷 Export PNG</button>
+      </div>
+    </div>
+    <div class="card rose-accent">
+      <div class="card-title">📊 Residuals Chart</div>
+      <div class="chart-wrap"><canvas id="ml-resid-chart" height="240"></canvas></div>
+    </div>
+    <div class="card rose-accent">
+      <div class="card-title">🔮 Predict — Enter Values for All Features</div>
+      <p class="card-sub" id="ml-pred-hint">Fill in values for each feature to get the predicted outcome.</p>
+      <div class="pred-inputs-grid" id="ml-pred-inputs"></div>
+      <div class="btn-row"><button class="btn btn-rose" onclick="predictML()">Predict</button></div>
+      <div class="pred-panel rose" id="ml-pred">
+        <div class="pred-label" id="ml-pred-lbl">Predicted Y</div>
+        <div class="pred-value rose" id="ml-pred-val"></div>
+        <div id="ml-pred-sub" style="margin-top:10px;font-size:12.5px;color:var(--text2)"></div>
+      </div>
+    </div>
+    <div class="card rose-accent">
+      <div class="card-title">📋 Coefficient Summary</div>
+      <div class="tbl-wrap" id="ml-coeff-tbl"></div>
+    </div>
+    <div class="card rose-accent">
+      <div class="card-title">📋 Data Preview <span style="font-size:12px;font-weight:400;color:var(--text3)">(first 30 rows)</span></div>
+      <div class="tbl-wrap" id="ml-data-tbl"></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">alwyn@</div>
+</div>
+
+<script>
+// TAB SWITCH
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  // Re-render KaTeX in newly shown panel
+  if(window.renderMathInElement) renderMathInElement(document.getElementById('tab-'+id),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+}
+
+// SAMPLE DATA
+const SIMPLE_DATA={headers:['YearsExperience','Salary'],rows:[[1.1,39343],[1.3,46205],[1.5,37731],[2.0,43525],[2.2,39891],[2.9,56642],[3.0,60150],[3.2,54445],[3.2,64445],[3.7,57189],[3.9,63218],[4.0,55794],[4.0,56957],[4.1,57081],[4.5,61111],[4.9,67938],[5.1,66029],[5.3,83088],[5.9,81363],[6.0,93940],[6.8,91738],[7.1,98273],[7.9,101302],[8.2,113812],[8.7,109431],[9.0,105582],[9.5,116969],[9.6,112635],[10.3,122391],[10.5,121872]]};
+const MULTIPLE_DATA={headers:['SquareFootage','Bedrooms','Age','Distance','Price'],rows:[[1400,3,10,5,245000],[1600,3,8,3,312000],[1700,4,5,2,379000],[1875,4,12,8,315000],[1100,2,15,10,198000],[1550,3,7,4,289000],[2350,4,3,1,485000],[2450,4,2,1,510000],[1425,3,9,6,265000],[1700,3,6,3,310000],[1900,4,4,2,395000],[2100,4,8,5,420000],[1300,2,18,12,187000],[1600,3,10,7,275000],[2200,5,1,1,525000],[1850,4,6,3,365000],[1500,3,11,6,268000],[2500,5,2,1,568000],[1750,3,7,4,320000],[1350,2,14,9,210000],[2000,4,5,3,430000],[1650,3,8,5,295000],[1800,4,3,2,385000],[2300,5,4,2,490000],[1250,2,20,15,178000],[1900,4,9,6,375000],[2100,3,6,4,410000],[1700,4,7,5,315000],[2400,5,3,2,545000],[1550,3,12,8,255000]]};
+
+function dlCSV(fileName){
+  const a = document.createElement('a');
+  a.href = fileName;          // file from same folder
+  a.download = fileName;      // download with same name
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// MATH ENGINE
+function slrCalc(x,y){
+  const n=x.length,mx=x.reduce((a,b)=>a+b,0)/n,my=y.reduce((a,b)=>a+b,0)/n;
+  const num=x.reduce((s,v,i)=>s+(v-mx)*(y[i]-my),0),den=x.reduce((s,v)=>s+(v-mx)**2,0);
+  const b1=num/den,b0=my-b1*mx;
+  const preds=x.map(v=>b0+b1*v);
+  const ssRes=y.reduce((s,v,i)=>s+(v-preds[i])**2,0),ssTot=y.reduce((s,v)=>s+(v-my)**2,0);
+  const r2=1-ssRes/ssTot,rmse=Math.sqrt(ssRes/n),mae=y.reduce((s,v,i)=>s+Math.abs(v-preds[i]),0)/n;
+  return{b0,b1,preds,r2,rmse,mae,mx,my,n};
+}
+function T(m){return m[0].map((_,i)=>m.map(r=>r[i]))}
+function MM(a,b){return a.map(r=>b[0].map((_,j)=>r.reduce((s,v,k)=>s+v*b[k][j],0)))}
+function eye(n){return Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>i===j?1:0))}
+function inv(m){
+  const n=m.length,C=m.map((r,i)=>[...r,...eye(n)[i]]);
+  for(let i=0;i<n;i++){
+    let max=i;for(let k=i+1;k<n;k++)if(Math.abs(C[k][i])>Math.abs(C[max][i]))max=k;
+    [C[i],C[max]]=[C[max],C[i]];
+    const d=C[i][i];if(Math.abs(d)<1e-12)return null;
+    for(let j=0;j<2*n;j++)C[i][j]/=d;
+    for(let k=0;k<n;k++)if(k!==i){const f=C[k][i];for(let j=0;j<2*n;j++)C[k][j]-=f*C[i][j];}
+  }
+  return C.map(r=>r.slice(n));
+}
+function mlrCalc(xiArr,yi,data){
+  const X=data.map(r=>[1,...xiArr.map(i=>r[i])]),Y=data.map(r=>[r[yi]]);
+  const XT=T(X),XTX=MM(XT,X),I=inv(XTX);if(!I)return null;
+  const B=MM(MM(I,XT),Y),coeffs=B.map(b=>b[0]);
+  const preds=X.map(row=>row.reduce((s,v,i)=>s+v*coeffs[i],0)),actuals=Y.map(v=>v[0]);
+  const my=actuals.reduce((a,b)=>a+b,0)/actuals.length;
+  const ssRes=actuals.reduce((s,v,i)=>s+(v-preds[i])**2,0),ssTot=actuals.reduce((s,v)=>s+(v-my)**2,0);
+  const r2=1-ssRes/ssTot,n=actuals.length,p=xiArr.length;
+  const adjR2=1-(1-r2)*(n-1)/(n-p-1),rmse=Math.sqrt(ssRes/n),mae=actuals.reduce((s,v,i)=>s+Math.abs(v-preds[i]),0)/n;
+  return{coeffs,preds,actuals,r2,adjR2,rmse,mae,residuals:actuals.map((v,i)=>v-preds[i])};
+}
+
+// CHARTS
+const CR={};
+function mkChart(id,cfg){if(CR[id])CR[id].destroy();CR[id]=new Chart(document.getElementById(id),cfg)}
+const G={color:'#6b6558',grid:'rgba(80,72,50,0.08)'};Chart.defaults.color=G.color;
+
+function scatterChart(id,x,y,preds,xL,yL){
+  const pts=x.map((v,i)=>({x:v,y:y[i]}));
+  const sx=[...x].sort((a,b)=>a-b),b1=(preds[preds.length-1]-preds[0])/(x[x.length-1]-x[0]),b0=preds[0]-b1*x[0];
+  mkChart(id,{type:'scatter',data:{datasets:[
+    {label:'Actual Data',data:pts,backgroundColor:'rgba(61,59,204,0.55)',pointRadius:5,pointBorderColor:'rgba(61,59,204,0.8)',pointBorderWidth:1.5},
+    {label:'Regression Line',data:sx.map(v=>({x:v,y:b0+b1*v})),type:'line',borderColor:'#d63965',borderWidth:2.5,fill:false,pointRadius:0,tension:0}
+  ]},options:{responsive:true,plugins:{legend:{labels:{color:G.color,font:{family:'Plus Jakarta Sans',size:12}}}},scales:{
+    x:{title:{display:true,text:xL,color:G.color},grid:{color:G.grid},ticks:{color:G.color}},
+    y:{title:{display:true,text:yL,color:G.color},grid:{color:G.grid},ticks:{color:G.color}}
+  }}});
+}
+function avpChart(id,actuals,preds,yL){
+  mkChart(id,{type:'line',data:{labels:actuals.map((_,i)=>`#${i+1}`),datasets:[
+    {label:'Actual',data:actuals,borderColor:'#3d3bcc',backgroundColor:'rgba(61,59,204,0.06)',borderWidth:2,pointRadius:2,tension:0.3,fill:true},
+    {label:'Predicted',data:preds,borderColor:'#d63965',backgroundColor:'rgba(214,57,101,0.05)',borderWidth:2,pointRadius:1,tension:0.3,fill:true,borderDash:[6,3]}
+  ]},options:{responsive:true,plugins:{legend:{labels:{color:G.color,font:{family:'Plus Jakarta Sans',size:12}}}},scales:{
+    x:{grid:{color:G.grid},ticks:{color:G.color,maxTicksLimit:14}},
+    y:{title:{display:true,text:yL,color:G.color},grid:{color:G.grid},ticks:{color:G.color}}
+  }}});
+}
+function residChart(id,residuals){
+  mkChart(id,{type:'bar',data:{labels:residuals.map((_,i)=>`#${i+1}`),datasets:[{label:'Residuals',data:residuals,backgroundColor:residuals.map(v=>v>=0?'rgba(14,138,110,0.5)':'rgba(214,57,101,0.5)'),borderColor:residuals.map(v=>v>=0?'rgba(14,138,110,0.85)':'rgba(214,57,101,0.85)'),borderWidth:1}]},options:{responsive:true,plugins:{legend:{labels:{color:G.color}}},scales:{x:{grid:{color:G.grid},ticks:{color:G.color,maxTicksLimit:18}},y:{title:{display:true,text:'Residual',color:G.color},grid:{color:G.grid},ticks:{color:G.color}}}}});
+}
+function fmtN(v){return Math.abs(v)>1000?v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','):v.toFixed(4)}
+function metricsHTML(r2,rmse,mae,extra=''){
+  return`<div class="metric"><div class="metric-val">${(r2*100).toFixed(1)}%</div><div class="metric-lbl">R² Score</div></div>
+  <div class="metric"><div class="metric-val teal">${fmtN(rmse)}</div><div class="metric-lbl">RMSE</div></div>
+  <div class="metric"><div class="metric-val amber">${fmtN(mae)}</div><div class="metric-lbl">MAE</div></div>${extra}`;
+}
+function mkTable(headers,rows){
+  let h='<table><tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
+  rows.slice(0,30).forEach(r=>{h+='<tr>'+r.map(v=>`<td>${typeof v==='number'?Number(v.toFixed(4)).toLocaleString():v}</td>`).join('')+'</tr>';});
+  return h+'</table>';
+}
+
+// CONCEPT — SIMPLE
+let slrCModel=null;
+function runSlrConcept(){
+  const x=SIMPLE_DATA.rows.map(r=>r[0]),y=SIMPLE_DATA.rows.map(r=>r[1]);
+  slrCModel=slrCalc(x,y);const m=slrCModel;
+  document.getElementById('slr-c-eq').textContent=`Ŷ (Salary) = ${m.b0.toFixed(2)} + ${m.b1.toFixed(2)} × YearsExperience`;
+  document.getElementById('slr-c-metrics').innerHTML=metricsHTML(m.r2,m.rmse,m.mae,`<div class="metric"><div class="metric-val rose">${m.n}</div><div class="metric-lbl">Observations</div></div>`);
+  scatterChart('slr-c-chart',x,y,m.preds,'Years of Experience','Salary (USD)');
+  document.getElementById('slr-c-out').style.display='block';
+}
+function predictSlrConcept(){
+  if(!slrCModel)return;
+  const xv=parseFloat(document.getElementById('slr-c-px').value);
+  if(isNaN(xv)){alert('Enter a valid number');return;}
+  document.getElementById('slr-c-pv').textContent='$'+Math.round(slrCModel.b0+slrCModel.b1*xv).toLocaleString();
+  document.getElementById('slr-c-pred').classList.add('show');
+}
+
+// CONCEPT — MULTIPLE
+let mlrCModel=null;
+function runMlrConcept(){
+  const res=mlrCalc([0,1,2,3],4,MULTIPLE_DATA.rows);if(!res){alert('Matrix inversion failed');return;}
+  mlrCModel=res;
+  const names=['SquareFootage','Bedrooms','Age','Distance'];
+  let eq=`Ŷ (Price) = ${res.coeffs[0].toFixed(2)}`;
+  names.forEach((n,i)=>eq+=` + ${res.coeffs[i+1].toFixed(2)}×${n}`);
+  document.getElementById('mlr-c-eq').textContent=eq;
+  document.getElementById('mlr-c-metrics').innerHTML=metricsHTML(res.r2,res.rmse,res.mae,`<div class="metric"><div class="metric-val rose">${(res.adjR2*100).toFixed(1)}%</div><div class="metric-lbl">Adj. R²</div></div>`);
+  avpChart('mlr-c-chart',res.actuals,res.preds,'Price (USD)');
+  document.getElementById('mlr-c-out').style.display='block';
+}
+function predictMlrConcept(){
+  if(!mlrCModel)return;
+  const vals=['mlr-c-p1','mlr-c-p2','mlr-c-p3','mlr-c-p4'].map(id=>parseFloat(document.getElementById(id).value));
+  if(vals.some(isNaN)){alert('Please fill all 4 fields');return;}
+  const p=mlrCModel.coeffs[0]+vals.reduce((s,v,i)=>s+v*mlrCModel.coeffs[i+1],0);
+  document.getElementById('mlr-c-pv').textContent='$'+Math.round(p).toLocaleString();
+  document.getElementById('mlr-c-pred').classList.add('show');
+}
+
+// SIMPLE LAB
+let slData=[],slHdrs=[],slModel=null,slXi=0,slYi=1;
+function loadSL(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=ev=>{
+    const rows=ev.target.result.trim().split(/\r?\n/).map(row=>row.split(',').map(v=>v.trim()));
+    slHdrs=rows[0];
+    const parsed=rows.slice(1).map(r=>r.map(v=>parseFloat(v))).filter(r=>r.every(v=>!isNaN(v)));
+    if(parsed.length<3){document.getElementById('sl-status').innerHTML='<span class="badge badge-err">❌ Need at least 3 valid numeric rows</span>';return;}
+    slData=parsed;
+    const opts=slHdrs.map((h,i)=>`<option value="${i}">${h}</option>`).join('');
+    document.getElementById('sl-y').innerHTML=opts;document.getElementById('sl-x').innerHTML=opts;
+    document.getElementById('sl-y').value=slHdrs.length-1;document.getElementById('sl-x').value=0;
+    document.getElementById('sl-status').innerHTML=`<span class="badge badge-ok">✓ Loaded ${slData.length} rows · ${slHdrs.length} columns</span>`;
+    document.getElementById('sl-ctrl').style.display='block';document.getElementById('sl-results').style.display='none';
+  };r.readAsText(f);
+}
+function runSL(){
+  slYi=+document.getElementById('sl-y').value;slXi=+document.getElementById('sl-x').value;
+  if(slXi===slYi){alert('X and Y must be different columns');return;}
+  const x=slData.map(r=>r[slXi]),y=slData.map(r=>r[slYi]);
+  slModel=slrCalc(x,y);slModel.xi=slXi;slModel.yi=slYi;const m=slModel;
+  document.getElementById('sl-eq').textContent=`Ŷ (${slHdrs[slYi]}) = ${m.b0.toFixed(4)} + ${m.b1.toFixed(4)} × ${slHdrs[slXi]}`;
+  document.getElementById('sl-metrics').innerHTML=metricsHTML(m.r2,m.rmse,m.mae,`<div class="metric"><div class="metric-val rose">${m.n}</div><div class="metric-lbl">Observations</div></div>`);
+  scatterChart('sl-chart',x,y,m.preds,slHdrs[slXi],slHdrs[slYi]);
+  document.getElementById('sl-px-lbl').textContent=`Enter ${slHdrs[slXi]} value`;
+  document.getElementById('sl-pred-hint').textContent=`Enter a ${slHdrs[slXi]} value below to predict ${slHdrs[slYi]}.`;
+  document.getElementById('sl-pred-lbl').textContent=`Predicted ${slHdrs[slYi]}`;
+  document.getElementById('sl-table').innerHTML=mkTable(slHdrs,slData);
+  document.getElementById('sl-results').style.display='block';
+  document.getElementById('sl-pred').classList.remove('show');document.getElementById('sl-px').value='';
+}
+function predictSL(){
+  if(!slModel)return;const xv=parseFloat(document.getElementById('sl-px').value);
+  if(isNaN(xv)){alert('Enter a valid number');return;}
+  const p=slModel.b0+slModel.b1*xv;
+  document.getElementById('sl-pred-val').textContent=fmtN(p);
+  document.getElementById('sl-pred-sub').textContent=`When ${slHdrs[slXi]} = ${xv} → ${slHdrs[slYi]} ≈ ${fmtN(p)}`;
+  document.getElementById('sl-pred').classList.add('show');
+}
+function resetSL(){
+  slData=[];slHdrs=[];slModel=null;
+  document.getElementById('sl-zone').querySelector('input').value='';
+  document.getElementById('sl-status').innerHTML='';
+  document.getElementById('sl-ctrl').style.display='none';document.getElementById('sl-results').style.display='none';
+}
+
+// MULTIPLE LAB
+let mlData=[],mlHdrs=[],mlModel=null,mlYi=0,mlXis=[];
+function loadML(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=ev=>{
+    const rows=ev.target.result.trim().split(/\r?\n/).map(row=>row.split(',').map(v=>v.trim()));
+    mlHdrs=rows[0];
+    if(mlHdrs.length<3){document.getElementById('ml-status').innerHTML='<span class="badge badge-err">❌ Need at least 3 columns</span>';return;}
+    const parsed=rows.slice(1).map(r=>r.map(v=>parseFloat(v))).filter(r=>r.every(v=>!isNaN(v)));
+    if(parsed.length<5){document.getElementById('ml-status').innerHTML='<span class="badge badge-err">❌ Need at least 5 valid rows</span>';return;}
+    mlData=parsed;
+    const opts=mlHdrs.map((h,i)=>`<option value="${i}">${h}</option>`).join('');
+    document.getElementById('ml-y').innerHTML=opts;document.getElementById('ml-x').innerHTML=opts;
+    const lastIdx=mlHdrs.length-1;document.getElementById('ml-y').value=lastIdx;
+    Array.from(document.getElementById('ml-x').options).forEach(o=>{o.selected=+o.value!==lastIdx});
+    document.getElementById('ml-status').innerHTML=`<span class="badge badge-ok">✓ Loaded ${mlData.length} rows · ${mlHdrs.length} columns</span>`;
+    document.getElementById('ml-ctrl').style.display='block';document.getElementById('ml-results').style.display='none';
+  };r.readAsText(f);
+}
+function runML(){
+  mlYi=+document.getElementById('ml-y').value;
+  mlXis=Array.from(document.getElementById('ml-x').selectedOptions).map(o=>+o.value).filter(i=>i!==mlYi);
+  if(mlXis.length<2){alert('Please select at least 2 feature columns');return;}
+  const res=mlrCalc(mlXis,mlYi,mlData);
+  if(!res){document.getElementById('ml-status').innerHTML='<span class="badge badge-err">❌ Matrix inversion failed — check for correlated columns</span>';return;}
+  mlModel=res;
+  let eq=`Ŷ (${mlHdrs[mlYi]}) = ${res.coeffs[0].toFixed(4)}`;
+  mlXis.forEach((xi,i)=>eq+=` + ${res.coeffs[i+1].toFixed(4)}×${mlHdrs[xi]}`);
+  document.getElementById('ml-eq').textContent=eq;
+  document.getElementById('ml-metrics').innerHTML=metricsHTML(res.r2,res.rmse,res.mae,
+    `<div class="metric"><div class="metric-val rose">${(res.adjR2*100).toFixed(1)}%</div><div class="metric-lbl">Adj. R²</div></div>
+     <div class="metric"><div class="metric-val">${mlXis.length}</div><div class="metric-lbl">Features</div></div>
+     <div class="metric"><div class="metric-val teal">${mlData.length}</div><div class="metric-lbl">Rows</div></div>`);
+  avpChart('ml-chart',res.actuals,res.preds,mlHdrs[mlYi]);
+  residChart('ml-resid-chart',res.residuals);
+  let pinp='';mlXis.forEach((xi,i)=>{pinp+=`<div><label class="lbl">${mlHdrs[xi]}</label><input type="number" id="mlpi_${i}" placeholder="Enter ${mlHdrs[xi]}…" step="any"></div>`;});
+  document.getElementById('ml-pred-inputs').innerHTML=pinp;
+  document.getElementById('ml-pred-hint').textContent=`Fill in: ${mlXis.map(i=>mlHdrs[i]).join(', ')} → predicts ${mlHdrs[mlYi]}`;
+  document.getElementById('ml-pred-lbl').textContent=`Predicted ${mlHdrs[mlYi]}`;
+  const coeffRows=[['Intercept (β₀)','—',res.coeffs[0].toFixed(6)]];
+  mlXis.forEach((xi,i)=>coeffRows.push([mlHdrs[xi],`β${i+1}`,res.coeffs[i+1].toFixed(6)]));
+  document.getElementById('ml-coeff-tbl').innerHTML=mkTable(['Variable','Coefficient','Value'],coeffRows);
+  document.getElementById('ml-data-tbl').innerHTML=mkTable(mlHdrs,mlData);
+  document.getElementById('ml-results').style.display='block';document.getElementById('ml-pred').classList.remove('show');
+}
+function predictML(){
+  if(!mlModel)return;
+  const vals=mlXis.map((_,i)=>parseFloat(document.getElementById(`mlpi_${i}`).value));
+  if(vals.some(isNaN)){alert('Please fill in all feature values');return;}
+  const p=mlModel.coeffs[0]+vals.reduce((s,v,i)=>s+v*mlModel.coeffs[i+1],0);
+  document.getElementById('ml-pred-val').textContent=fmtN(p);
+  document.getElementById('ml-pred-sub').textContent=`Input: [${mlXis.map((xi,i)=>`${mlHdrs[xi]}=${vals[i]}`).join(', ')}] → ${mlHdrs[mlYi]} ≈ ${fmtN(p)}`;
+  document.getElementById('ml-pred').classList.add('show');
+}
+function resetML(){
+  mlData=[];mlHdrs=[];mlModel=null;mlXis=[];
+  document.getElementById('ml-zone').querySelector('input').value='';
+  document.getElementById('ml-status').innerHTML='';
+  document.getElementById('ml-ctrl').style.display='none';document.getElementById('ml-results').style.display='none';
+}
+function exportChart(id,name){const a=document.createElement('a');a.download=name+'_chart.png';a.href=document.getElementById(id).toDataURL('image/png');a.click();}
+
+// DRAG & DROP
+['sl-zone','ml-zone'].forEach(id=>{
+  const z=document.getElementById(id);
+  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag')});
+  z.addEventListener('dragleave',()=>z.classList.remove('drag'));
+  z.addEventListener('drop',e=>{
+    e.preventDefault();z.classList.remove('drag');
+    const f=e.dataTransfer.files[0];if(!f)return;
+    const inp=z.querySelector('input[type=file]');const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;
+    inp.dispatchEvent(new Event('change'));
+  });
+});
+</script>
+</body>
+</html>
