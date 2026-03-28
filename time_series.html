@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>RegPredict · Time Series Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -43,12 +43,13 @@
   --shadow-lg: 0 2px 8px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.1);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
   font-family: var(--sans);
   background: var(--bg);
   color: var(--ink);
   min-height: 100vh;
+  overflow-x: hidden;
   background-image: radial-gradient(circle at 15% 20%, rgba(43,92,230,0.04) 0%, transparent 50%),
     radial-gradient(circle at 85% 80%, rgba(212,98,10,0.04) 0%, transparent 50%);
 }
@@ -81,22 +82,23 @@ body {
 .hero-tag span { width: 6px; height: 6px; background: var(--blue); border-radius: 50%; display: inline-block; }
 .hero h1 {
   font-family: var(--serif);
-  font-size: clamp(2.8rem, 7vw, 5rem);
+  font-size: clamp(2.4rem, 7vw, 5rem);
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -1px;
   color: var(--ink);
   margin-bottom: 16px;
+  word-break: break-word;
 }
 .hero h1 em { font-style: italic; color: var(--blue); }
 .hero p {
   color: var(--muted); font-size: 1.05rem; max-width: 540px; margin: 0 auto 24px;
   font-weight: 400; line-height: 1.7;
 }
-.hero-badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.hero-badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; padding: 0 10px; }
 .badge {
   padding: 5px 14px; border-radius: 99px; font-size: 0.78rem; font-weight: 600;
-  border: 1.5px solid;
+  border: 1.5px solid; white-space: nowrap;
 }
 .badge-blue { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-border); }
 .badge-orange { background: var(--orange-bg); color: var(--orange); border-color: var(--orange-border); }
@@ -111,13 +113,17 @@ body {
   display: flex; gap: 4px;
   background: var(--surface); border: 1.5px solid var(--border);
   border-radius: var(--radius); padding: 5px; margin-bottom: 28px;
-  box-shadow: var(--shadow); flex-wrap: wrap;
+  box-shadow: var(--shadow); overflow-x: auto;
+  flex-wrap: nowrap; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.main-tabs::-webkit-scrollbar { display: none; }
 .main-tab {
-  flex: 1; min-width: 120px; text-align: center;
-  padding: 11px 20px; border-radius: 10px; cursor: pointer;
+  flex: 1; min-width: 110px; text-align: center;
+  padding: 11px 16px; border-radius: 10px; cursor: pointer;
   font-weight: 600; font-size: 0.88rem; color: var(--muted);
   transition: all 0.22s; user-select: none; white-space: nowrap;
+  flex-shrink: 0;
 }
 .main-tab:hover { background: var(--bg2); color: var(--ink2); }
 .main-tab.active { background: var(--blue); color: #fff; box-shadow: 0 2px 10px rgba(43,92,230,0.3); }
@@ -138,7 +144,7 @@ body {
 .card-head {
   display: flex; align-items: center; gap: 10px;
   font-family: var(--serif); font-size: 1.15rem; font-weight: 700;
-  color: var(--ink); margin-bottom: 20px;
+  color: var(--ink); margin-bottom: 20px; flex-wrap: wrap;
 }
 .card-icon {
   width: 36px; height: 36px; border-radius: 9px; background: var(--bg2);
@@ -184,6 +190,7 @@ body {
 }
 .snum.orange { background: var(--orange); box-shadow: 0 0 0 4px rgba(212,98,10,0.1); }
 .snum.green { background: var(--green); box-shadow: 0 0 0 4px rgba(26,122,74,0.1); }
+.sbody { flex: 1; min-width: 0; }
 .sbody h4 { font-weight: 700; font-size: 0.95rem; margin-bottom: 5px; color: var(--ink); }
 .sbody p { color: var(--muted); font-size: 0.875rem; line-height: 1.7; }
 .calc {
@@ -191,6 +198,7 @@ body {
   padding: 12px 16px; font-size: 0.82rem; margin-top: 10px; color: var(--orange);
   white-space: pre; line-height: 1.75; border-left: 3px solid var(--orange-border);
   overflow-x: auto; border: 1.5px solid var(--border); border-left: 3px solid var(--orange);
+  -webkit-overflow-scrolling: touch; word-break: normal;
 }
 
 /* ── INFO BOXES ── */
@@ -214,14 +222,15 @@ body {
 .success-box strong { color: var(--green); }
 
 /* ── TABLE ── */
-.tbl-wrap { overflow-x: auto; border-radius: 10px; border: 1.5px solid var(--border); }
-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.tbl-wrap { overflow-x: auto; border-radius: 10px; border: 1.5px solid var(--border); -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 480px; }
 th {
   background: var(--bg2); padding: 10px 14px; text-align: left;
   color: var(--muted); font-weight: 700; font-size: 0.73rem;
   text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1.5px solid var(--border);
+  white-space: nowrap;
 }
-td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 0.84rem; }
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 0.84rem; white-space: nowrap; }
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: var(--bg2); }
 .tc { color: var(--blue); font-weight: 500; }
@@ -236,6 +245,8 @@ tr:hover td { background: var(--bg2); }
   margin-top: 14px; font-family: var(--mono); font-size: 0.9rem;
   color: var(--orange); border: 1.5px solid var(--border);
   border-left: 3px solid var(--orange); line-height: 1.9;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  word-break: break-word; white-space: pre-wrap;
 }
 
 /* ── COMPARE ROW ── */
@@ -264,7 +275,7 @@ tr:hover td { background: var(--bg2); }
 select.fc { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238c8479' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
 
 /* ── BUTTONS ── */
-.btn { padding: 10px 22px; border: none; border-radius: 9px; cursor: pointer; font-family: var(--sans); font-weight: 700; font-size: 0.88rem; transition: all 0.2s; letter-spacing: 0.1px; }
+.btn { padding: 10px 22px; border: none; border-radius: 9px; cursor: pointer; font-family: var(--sans); font-weight: 700; font-size: 0.88rem; transition: all 0.2s; letter-spacing: 0.1px; touch-action: manipulation; }
 .btn-primary { background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(43,92,230,0.3); }
 .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(43,92,230,0.4); }
 .btn-ghost { background: var(--surface2); color: var(--ink2); border: 1.5px solid var(--border); }
@@ -278,7 +289,7 @@ select.fc { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xm
   text-align: center; cursor: pointer; transition: all 0.22s; margin-bottom: 14px;
   background: var(--surface2);
 }
-.upload-area:hover { border-color: var(--blue); background: var(--blue-bg); }
+.upload-area:hover, .upload-area:active { border-color: var(--blue); background: var(--blue-bg); }
 .upload-area input { display: none; }
 .upload-area .u-icon { font-size: 2.4rem; margin-bottom: 10px; }
 .upload-area p { color: var(--muted); font-size: 0.875rem; line-height: 1.6; }
@@ -295,20 +306,33 @@ select.fc { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xm
 .val-red { color: var(--red); }
 .val-purple { color: var(--purple); }
 .val-muted { color: var(--muted); }
+.val-up { color: var(--green); }
+.val-dn { color: var(--red); }
+.val-nt { color: var(--muted); }
 
 /* ── CHART ── */
 .chart-wrap { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 22px 24px; margin-bottom: 18px; box-shadow: var(--shadow); }
 .chart-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
 
 /* ── RANGE ── */
-input[type=range] { width: 100%; accent-color: var(--blue); margin-top: 4px; }
+input[type=range] { width: 100%; accent-color: var(--blue); margin-top: 4px; cursor: pointer; }
 
 /* ── DIVIDER ── */
 hr.div { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 
 /* ── LAB INNER TABS ── */
-.lab-tabs { display: flex; gap: 4px; background: var(--bg2); border-radius: 10px; padding: 4px; margin-bottom: 20px; border: 1.5px solid var(--border); flex-wrap: wrap; }
-.lab-tab { flex: 1; min-width: 80px; text-align: center; padding: 9px 14px; border-radius: 7px; cursor: pointer; font-weight: 600; font-size: 0.84rem; color: var(--muted); transition: all 0.2s; user-select: none; }
+.lab-tabs {
+  display: flex; gap: 4px; background: var(--bg2); border-radius: 10px; padding: 4px;
+  margin-bottom: 20px; border: 1.5px solid var(--border);
+  overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.lab-tabs::-webkit-scrollbar { display: none; }
+.lab-tab {
+  flex: 0 0 auto; text-align: center; padding: 9px 14px; border-radius: 7px;
+  cursor: pointer; font-weight: 600; font-size: 0.84rem; color: var(--muted);
+  transition: all 0.2s; user-select: none; white-space: nowrap;
+}
 .lab-tab:hover { background: var(--surface); color: var(--ink2); }
 .lab-tab.active { background: var(--surface); color: var(--blue); border: 1.5px solid var(--blue-border); font-weight: 700; }
 
@@ -322,8 +346,8 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
   padding: 22px 26px; margin-top: 18px;
 }
 .pred-box h3 { font-family: var(--serif); font-size: 1.1rem; color: var(--blue); margin-bottom: 14px; }
-.pred-value { font-family: var(--mono); font-size: 2.2rem; font-weight: 700; color: var(--ink); }
-.pred-ci { font-size: 0.82rem; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
+.pred-value { font-family: var(--mono); font-size: 2.2rem; font-weight: 700; color: var(--ink); line-height: 1.2; word-break: break-all; }
+.pred-ci { font-size: 0.82rem; color: var(--muted); margin-top: 4px; font-family: var(--mono); word-break: break-all; }
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -331,7 +355,6 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
 
 /* ── DETAIL SECTION ── */
-.detail-expand { margin-top: 14px; }
 .detail-toggle { background: none; border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 16px; font-family: var(--sans); font-size: 0.82rem; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.2s; }
 .detail-toggle:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
 .detail-body { display: none; margin-top: 12px; }
@@ -349,13 +372,192 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 .col-pill:hover { border-color: var(--blue); color: var(--blue); }
 .col-pill.sel { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
 
-/* ── RESPONSIVE ── */
-@media(max-width: 640px) {
-  .concept-grid, .grid2, .grid3, .grid4, .compare-row { grid-template-columns: 1fr; }
-  .main-tabs { flex-wrap: wrap; }
-  .hero h1 { font-size: 2.4rem; }
-  .calc { font-size: 0.75rem; }
-  .pred-value { font-size: 1.6rem; }
+/* ═══════════════════════════════════════
+   RESPONSIVE — TABLET (≤900px)
+═══════════════════════════════════════ */
+@media (max-width: 900px) {
+  .concept-grid { grid-template-columns: repeat(2, 1fr); }
+  .grid4 { grid-template-columns: repeat(2, 1fr); }
+  .compare-row { grid-template-columns: 1fr; }
+  .app { padding: 24px 16px 48px; }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — MOBILE (≤640px)
+═══════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* ── Hero ── */
+  .hero { padding: 32px 14px 24px; }
+  .hero::before { display: none; }
+  .hero h1 { font-size: 2rem; letter-spacing: -0.3px; margin-bottom: 10px; line-height: 1.1; }
+  .hero p { font-size: 0.9rem; margin-bottom: 16px; padding: 0 4px; }
+  .hero-tag { font-size: 0.67rem; padding: 4px 11px; margin-bottom: 14px; }
+  .hero-badges { gap: 6px; }
+  .badge { font-size: 0.7rem; padding: 4px 10px; }
+
+  /* ── Layout ── */
+  .app { padding: 14px 12px 40px; }
+
+  /* ── Main Tabs ── */
+  .main-tabs {
+    padding: 4px; gap: 3px;
+    border-radius: 10px; margin-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .main-tab {
+    flex: 0 0 auto; min-width: unset;
+    padding: 9px 14px; font-size: 0.81rem;
+    border-radius: 8px;
+  }
+
+  /* ── Cards ── */
+  .card { padding: 16px 14px; margin-bottom: 14px; border-radius: 12px; }
+  .card-head { font-size: 0.98rem; margin-bottom: 14px; gap: 8px; }
+  .card-icon { width: 30px; height: 30px; font-size: 0.95rem; border-radius: 7px; }
+
+  /* ── All grids → single column ── */
+  .concept-grid,
+  .grid2,
+  .grid3,
+  .grid4,
+  .compare-row { grid-template-columns: 1fr; gap: 10px; }
+
+  /* ── Concept Items ── */
+  .ci { padding: 12px 13px; }
+  .ci h4 { font-size: 0.66rem; margin-bottom: 5px; }
+  .ci p { font-size: 0.83rem; }
+
+  /* ── Formula Box ── */
+  .fbox { padding: 14px 12px; border-radius: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .fbox::before { display: none; }
+  .fbox-title { font-size: 0.67rem; }
+  .fbox-desc { font-size: 0.78rem; line-height: 1.6; }
+  .fbox .katex-display { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+
+  /* ── Steps ── */
+  .step { gap: 11px; margin-bottom: 16px; }
+  .snum { width: 26px; height: 26px; font-size: 0.71rem; }
+  .sbody h4 { font-size: 0.88rem; margin-bottom: 4px; }
+  .sbody p { font-size: 0.82rem; line-height: 1.6; }
+
+  /* ── Code blocks ── */
+  .calc {
+    font-size: 0.71rem; padding: 10px 11px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    line-height: 1.65; border-radius: 7px;
+  }
+
+  /* ── Info boxes ── */
+  .info-box, .warn-box, .success-box {
+    font-size: 0.82rem; padding: 11px 13px;
+    border-radius: 9px; line-height: 1.6;
+  }
+
+  /* ── Tables ── */
+  .tbl-wrap { border-radius: 9px; }
+  table { min-width: 420px; }
+  th { font-size: 0.67rem; padding: 8px 9px; }
+  td { font-size: 0.78rem; padding: 8px 9px; }
+
+  /* ── Demo result ── */
+  .demo-result {
+    font-size: 0.78rem; padding: 11px 12px; line-height: 1.7;
+    white-space: pre-wrap; word-break: break-word;
+  }
+
+  /* ── Compare boxes ── */
+  .cmp-box { padding: 14px; border-radius: 9px; }
+  .cmp-box h4 { font-size: 0.85rem; margin-bottom: 8px; }
+  .cmp-box ul li { font-size: 0.8rem; padding: 3px 0; }
+
+  /* ── Inputs & forms ── */
+  .fg { margin-bottom: 11px; }
+  .fg label { font-size: 0.72rem; }
+  .fc { font-size: 0.88rem; padding: 10px 11px; border-radius: 7px; }
+  select.fc { font-size: 0.88rem; }
+
+  /* ── Buttons ── */
+  .btn { padding: 12px 18px; font-size: 0.85rem; border-radius: 8px; width: 100%; text-align: center; }
+  .btn-row { gap: 8px; flex-direction: column; }
+
+  /* ── Upload area ── */
+  .upload-area { padding: 20px 14px; border-radius: 12px; }
+  .upload-area .u-icon { font-size: 1.9rem; margin-bottom: 8px; }
+  .upload-area p { font-size: 0.81rem; line-height: 1.5; }
+
+  /* ── Stats grid ── */
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .stat-card { padding: 10px 11px; border-radius: 9px; }
+  .stat-card .lbl { font-size: 0.65rem; }
+  .stat-card .val { font-size: 1.05rem; }
+
+  /* ── Chart ── */
+  .chart-wrap { padding: 14px 11px; border-radius: 12px; margin-bottom: 14px; }
+  .chart-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .chart-head .card-head { margin: 0; font-size: 0.92rem; }
+  #mainChart { max-height: 260px !important; }
+  #acfChart { max-height: 170px !important; }
+  #decompChart { max-height: 170px !important; }
+
+  /* ── Lab inner tabs ── */
+  .lab-tabs { padding: 3px; gap: 3px; border-radius: 9px; margin-bottom: 14px; }
+  .lab-tab { padding: 8px 12px; font-size: 0.79rem; border-radius: 7px; }
+
+  /* ── Prediction ── */
+  .pred-box { padding: 16px 14px; border-radius: 12px; margin-top: 14px; }
+  .pred-box h3 { font-size: 0.96rem; margin-bottom: 10px; }
+  .pred-value { font-size: 1.45rem; }
+  .pred-ci { font-size: 0.75rem; }
+
+  /* ── Column pills ── */
+  .col-pill { font-size: 0.78rem; padding: 5px 11px; }
+
+  /* ── Slider row ── */
+  .slider-row { display: flex; align-items: center; gap: 8px; }
+  .slider-row input[type=range] { flex: 1; }
+  .slider-lbl { font-family: var(--mono); font-weight: 700; min-width: 28px; font-size: 0.88rem; }
+
+  /* ── Horizon slider containers ── */
+  #ar_h_lbl, #ma_h_lbl, #arima_h_lbl { font-size: 0.9rem; }
+
+  /* ── Theory highlight ── */
+  .th-highlight { font-size: 0.81rem; padding: 10px 12px; }
+
+  /* ── Detail toggle ── */
+  .detail-toggle { font-size: 0.78rem; padding: 7px 12px; }
+
+  /* ── Forecast table ── */
+  #forecastBody td { font-size: 0.75rem; padding: 7px 8px; }
+  #forecastBody td:nth-child(n+3) { min-width: 80px; }
+
+  /* ── Metrics info ── */
+  #metricsInfo .info-box { font-size: 0.79rem; }
+
+  /* ── ARIMA table ── */
+  #sec-arima .tbl-wrap table { min-width: 520px; }
+
+  /* ── Hint text below chart ── */
+  .chart-wrap > p { font-size: 0.73rem; }
+
+  /* ── Card head badge row ── */
+  .chart-head .hero-badges { justify-content: flex-start; }
+}
+
+/* ═══════════════════════════════════════
+   VERY SMALL (≤380px)
+═══════════════════════════════════════ */
+@media (max-width: 380px) {
+  .hero h1 { font-size: 1.75rem; }
+  .main-tab { padding: 8px 11px; font-size: 0.76rem; }
+  .pred-value { font-size: 1.2rem; }
+  .calc { font-size: 0.66rem; }
+  td, th { font-size: 0.72rem; padding: 7px 7px; }
+  .card { padding: 13px 11px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-card .val { font-size: 0.95rem; }
+  .hero p { font-size: 0.84rem; }
+  .badge { font-size: 0.67rem; padding: 4px 9px; }
 }
 </style>
 </head>
@@ -386,9 +588,7 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
   <div class="main-tab" data-tab="lab" onclick="openMainTab('lab',this,'lab-tab')">🔬 Live Lab</div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     AR SECTION
-═══════════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════ AR SECTION ═══════════════════ -->
 <div id="sec-ar" class="section show">
 
   <div class="card">
@@ -410,7 +610,6 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
     </div>
   </div>
 
-  <!-- Deep Concept -->
   <div class="card">
     <div class="card-head"><div class="card-icon">🧠</div> Theory Deep Dive: What Do AR Coefficients Mean?</div>
     <div class="steps">
@@ -449,7 +648,7 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
       <div class="step">
         <div class="snum">4</div>
         <div class="sbody">
-          <h4>Estimation: Yule-Walker & OLS</h4>
+          <h4>Estimation: Yule-Walker &amp; OLS</h4>
           <p>AR coefficients are estimated via <strong>Yule-Walker equations</strong> (method of moments) or <strong>Ordinary Least Squares (OLS)</strong>. OLS treats lagged values as regressors and minimises the sum of squared residuals.</p>
           <div class="calc">OLS Setup for AR(2):
 Y = [Y₃, Y₄, ..., Yₙ]ᵀ
@@ -477,7 +676,6 @@ k = number of parameters | L̂ = maximised likelihood
     </div>
   </div>
 
-  <!-- Worked Example -->
   <div class="card">
     <div class="card-head"><div class="card-icon">🏦</div> Worked Example: Stock Price Prediction with AR(2)</div>
     <div class="info-box">
@@ -509,8 +707,9 @@ k = number of parameters | L̂ = maximised likelihood
         <div class="calc">ε₆ = Actual − Forecast = 116 − 107.10 = +8.90
 
 Residual analysis:
-→ Plot residuals over time (should look random, no pattern)
-→ Ljung-Box test: H₀ = residuals are white noise (p > 0.05 = good)
+→ Plot residuals over time (should look random)
+→ Ljung-Box test: H₀ = residuals are white noise
+   (p > 0.05 = good)
 → Large systematic residuals → try higher p or ARIMA</div>
       </div></div>
       <div class="step"><div class="snum">5</div><div class="sbody">
@@ -520,12 +719,13 @@ Residual analysis:
    = 69.615 + 34.20 = ₹103.82
 
 Note: Forecast uncertainty ∝ horizon length
-95% CI width expands as: ±1.96 × σ × √h (approximately)</div>
+95% CI width expands as:
+  ±1.96 × σ × √h (approximately)</div>
       </div></div>
     </div>
     <div class="tbl-wrap">
       <table>
-        <thead><tr><th>Day</th><th>Actual Price (₹)</th><th>Y_{t-1}</th><th>Y_{t-2}</th><th>AR(2) Prediction</th><th>Residual ε</th><th>Squared Error</th></tr></thead>
+        <thead><tr><th>Day</th><th>Actual (₹)</th><th>Y_{t-1}</th><th>Y_{t-2}</th><th>AR(2) Pred.</th><th>Residual ε</th><th>Sq. Error</th></tr></thead>
         <tbody>
           <tr><td>3</td><td>112</td><td>108</td><td>105</td><td class="tc">101.70</td><td class="to">+10.30</td><td class="tm">106.09</td></tr>
           <tr><td>4</td><td>110</td><td>112</td><td>108</td><td class="tc">105.20</td><td class="to">+4.80</td><td class="tm">23.04</td></tr>
@@ -534,12 +734,11 @@ Note: Forecast uncertainty ∝ horizon length
         </tbody>
       </table>
     </div>
-    <div style="margin-top:12px;color:var(--muted);font-size:0.82rem;">RMSE on fit = √((106.09+23.04+79.21)/3) = √(69.45) ≈ 8.33 &nbsp;|&nbsp; MAE = (10.30+4.80+8.90)/3 ≈ 8.00</div>
+    <div style="margin-top:12px;color:var(--muted);font-size:0.82rem;line-height:1.6;">RMSE on fit = √((106.09+23.04+79.21)/3) = √(69.45) ≈ 8.33 &nbsp;|&nbsp; MAE = (10.30+4.80+8.90)/3 ≈ 8.00</div>
   </div>
 
-  <!-- AR Selection Guide -->
   <div class="card">
-    <div class="card-head"><div class="card-icon">📐</div> AR Model Selection & Diagnostics Guide</div>
+    <div class="card-head"><div class="card-icon">📐</div> AR Model Selection &amp; Diagnostics Guide</div>
     <div class="compare-row">
       <div class="cmp-box">
         <h4>✅ Use AR When...</h4>
@@ -564,15 +763,14 @@ Note: Forecast uncertainty ∝ horizon length
     </div>
   </div>
 
-  <!-- Interactive AR Calculator -->
   <div class="card">
     <div class="card-head"><div class="card-icon">🧮</div> Interactive AR(2) Calculator</div>
     <p style="color:var(--muted);font-size:0.87rem;margin-bottom:16px">Adjust any parameter to instantly see how the AR(2) prediction changes with full working shown.</p>
     <div class="grid4">
-      <div class="fg"><label>Y<sub>t-1</sub> (Lag 1)</label><input class="fc" id="ar_y1" value="114" type="number" oninput="calcAR()"></div>
-      <div class="fg"><label>Y<sub>t-2</sub> (Lag 2)</label><input class="fc" id="ar_y2" value="110" type="number" oninput="calcAR()"></div>
-      <div class="fg"><label>φ₁ Coefficient</label><input class="fc" id="ar_p1" value="0.65" type="number" step="0.01" oninput="calcAR()"></div>
-      <div class="fg"><label>φ₂ Coefficient</label><input class="fc" id="ar_p2" value="0.30" type="number" step="0.01" oninput="calcAR()"></div>
+      <div class="fg"><label>Y<sub>t-1</sub> (Lag 1)</label><input class="fc" id="ar_y1" value="114" type="number" inputmode="decimal" oninput="calcAR()"></div>
+      <div class="fg"><label>Y<sub>t-2</sub> (Lag 2)</label><input class="fc" id="ar_y2" value="110" type="number" inputmode="decimal" oninput="calcAR()"></div>
+      <div class="fg"><label>φ₁ Coefficient</label><input class="fc" id="ar_p1" value="0.65" type="number" step="0.01" inputmode="decimal" oninput="calcAR()"></div>
+      <div class="fg"><label>φ₂ Coefficient</label><input class="fc" id="ar_p2" value="0.30" type="number" step="0.01" inputmode="decimal" oninput="calcAR()"></div>
     </div>
     <div class="demo-result" id="ar_result"></div>
     <div id="ar_stability" style="margin-top:10px;"></div>
@@ -580,13 +778,11 @@ Note: Forecast uncertainty ∝ horizon length
 
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     MA SECTION
-═══════════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════ MA SECTION ═══════════════════ -->
 <div id="sec-ma" class="section">
 
   <div class="card">
-    <div class="card-head"><div class="card-icon">〰️</div> Moving Average Models — SMA, EMA & MA(q)</div>
+    <div class="card-head"><div class="card-icon">〰️</div> Moving Average Models — SMA, EMA &amp; MA(q)</div>
     <div class="concept-grid">
       <div class="ci"><h4>Simple MA (SMA)</h4><p>Assigns <strong>equal weights</strong> to the last n observations. Easy to compute, smooth output, but reacts slowly — introduces a lag equal to (n-1)/2 periods.</p></div>
       <div class="ci orange"><h4>Exponential MA (EMA)</h4><p>Assigns <strong>geometrically decreasing weights</strong>. Recent data gets more influence. Faster reaction to trend changes — essential for trading signals like MACD.</p></div>
@@ -594,40 +790,39 @@ Note: Forecast uncertainty ∝ horizon length
     </div>
     <div class="fbox">
       <div class="fbox-title">Simple Moving Average (SMA)</div>
-      $$SMA_t = \frac{1}{n}\sum_{i=0}^{n-1} Y_{t-i} = \frac{Y_t + Y_{t-1} + \cdots + Y_{t-n+1}}{n}$$
+      $$SMA_t = \frac{1}{n}\sum_{i=0}^{n-1} Y_{t-i}$$
       <hr class="fdivider">
       <div class="fbox-title" style="margin-top:14px">Exponential Moving Average (EMA)</div>
       $$EMA_t = \alpha \cdot Y_t + (1-\alpha)\cdot EMA_{t-1} \qquad \alpha = \frac{2}{n+1}$$
       <hr class="fdivider">
       <div class="fbox-title" style="margin-top:14px">Statistical MA(q) — Used in ARIMA</div>
-      $$Y_t = \mu + \varepsilon_t + \theta_1\varepsilon_{t-1} + \theta_2\varepsilon_{t-2} + \cdots + \theta_q\varepsilon_{t-q}$$
+      $$Y_t = \mu + \varepsilon_t + \theta_1\varepsilon_{t-1} + \cdots + \theta_q\varepsilon_{t-q}$$
       <div class="fbox-desc">$\theta_i$ = MA coefficients &nbsp;|&nbsp; $\varepsilon_{t-i}$ = past forecast errors &nbsp;|&nbsp; $\mu$ = series mean. Note: MA(q) uses past <em>errors</em>, AR(p) uses past <em>values</em>.</div>
     </div>
   </div>
 
-  <!-- Theory: Weight Distribution -->
   <div class="card">
     <div class="card-head"><div class="card-icon">⚖️</div> Theory: Weight Distribution Explained</div>
     <div class="steps">
       <div class="step"><div class="snum">1</div><div class="sbody">
         <h4>SMA: Uniform Weights — A Rectangle</h4>
         <p>Every observation in the window gets weight 1/n. Data outside the window gets weight 0. This creates a <strong>rectangular (boxcar) filter</strong> in signal processing terms — it attenuates high-frequency fluctuations but preserves low-frequency trends.</p>
-        <div class="calc">SMA(3) weights for n=3:  [1/3,  1/3,  1/3,  0, 0, 0, ...]
-SMA(5) weights for n=5:  [1/5, 1/5, 1/5, 1/5, 1/5, 0, ...]
+        <div class="calc">SMA(3) weights: [1/3, 1/3, 1/3, 0, 0, ...]
+SMA(5) weights: [1/5, 1/5, 1/5, 1/5, 1/5, 0, ...]
 
-Lag introduced = (n-1)/2 periods
-SMA(3) lags by 1 period | SMA(5) lags by 2 periods</div>
+Lag = (n-1)/2 periods
+SMA(3) lags by 1 | SMA(5) lags by 2</div>
       </div></div>
       <div class="step"><div class="snum">2</div><div class="sbody">
         <h4>EMA: Exponentially Decaying Weights</h4>
         <p>Expanding the EMA recursion reveals it's an infinite weighted average of all past observations, with weights decaying as $(1-\alpha)^k$. This gives EMA a <strong>long memory</strong> while still emphasising the recent past.</p>
-        <div class="calc">EMA_t = α·Y_t + α(1-α)·Y_{t-1} + α(1-α)²·Y_{t-2} + ...
+        <div class="calc">EMA_t = α·Yt + α(1-α)·Y_{t-1} + α(1-α)²·Y_{t-2}...
 
-For α=0.50 (n=3): weights = [0.50, 0.25, 0.125, 0.0625, ...]
-For α=0.33 (n=5): weights = [0.33, 0.22, 0.15,  0.10, ...]
+α=0.50 (n=3): weights=[0.50, 0.25, 0.125, ...]
+α=0.33 (n=5): weights=[0.33, 0.22, 0.15, ...]
 
-Sum of all weights = 1 (infinite geometric series)
-Effective "memory" ≈ 1/α periods</div>
+Sum of all weights = 1
+Effective memory ≈ 1/α periods</div>
       </div></div>
       <div class="step"><div class="snum">3</div><div class="sbody">
         <h4>Choosing the Window Size n</h4>
@@ -638,66 +833,64 @@ Effective "memory" ≈ 1/α periods</div>
       </div></div>
       <div class="step"><div class="snum">4</div><div class="sbody">
         <h4>Statistical MA(q): Error Correction Model</h4>
-        <p>Unlike SMA/EMA, the statistical MA(q) corrects for <strong>past forecast mistakes</strong>. If the model overpredicted last period (ε_{t-1} &lt; 0), it adjusts this period's prediction downward by θ₁×ε_{t-1}. This is why MA(q) models short-term "shocks" that decay over q periods.</p>
+        <p>Unlike SMA/EMA, the statistical MA(q) corrects for <strong>past forecast mistakes</strong>. If the model overpredicted last period (ε_{t-1} &lt; 0), it adjusts this period's prediction downward by θ₁×ε_{t-1}.</p>
         <div class="calc">ACF Rule for MA(q) order:
-• ACF has a SHARP cutoff after lag q → use MA(q)
-• PACF decays slowly/gradually → supports MA
-• ACF significant only at lag 1 → MA(1)
+• ACF sharp cutoff after lag q → use MA(q)
+• PACF decays slowly → supports MA model
+• ACF significant at lag 1 only → MA(1)
 • ACF significant at lags 1,2 → MA(2)</div>
       </div></div>
     </div>
   </div>
 
-  <!-- Real Problem -->
   <div class="card">
-    <div class="card-head"><div class="card-icon">🌡️</div> Worked Example: Temperature Smoothing & Forecast</div>
+    <div class="card-head"><div class="card-icon">🌡️</div> Worked Example: Temperature Smoothing &amp; Forecast</div>
     <div class="info-box">
       <strong>Problem:</strong> Daily max temperatures (°C) for 7 days: 32, 35, 30, 33, 36, 34, 38. Apply SMA(3) and EMA(3) to smooth the data. Compare their accuracy. Forecast Day 8.
     </div>
     <div class="steps">
       <div class="step"><div class="snum">1</div><div class="sbody">
         <h4>Compute α for EMA(3)</h4>
-        <div class="calc">α = 2/(n+1) = 2/(3+1) = 2/4 = 0.50
-This means 50% weight to the current observation, 50% to the running EMA</div>
+        <div class="calc">α = 2/(n+1) = 2/(3+1) = 0.50
+→ 50% weight to current, 50% to running EMA</div>
       </div></div>
       <div class="step"><div class="snum">2</div><div class="sbody">
         <h4>Initialise EMA: Seed = First Observation</h4>
-        <div class="calc">EMA₁ = Y₁ = 32°C  (seed — no previous EMA available)</div>
+        <div class="calc">EMA₁ = Y₁ = 32°C  (seed — no previous EMA)</div>
       </div></div>
       <div class="step"><div class="snum">3</div><div class="sbody">
         <h4>Iterate EMA Day by Day</h4>
-        <div class="calc">EMA₂ = 0.50 × 35 + 0.50 × 32.00  = 17.500 + 16.000 = 33.500
-EMA₃ = 0.50 × 30 + 0.50 × 33.50  = 15.000 + 16.750 = 31.750
-EMA₄ = 0.50 × 33 + 0.50 × 31.75  = 16.500 + 15.875 = 32.375
-EMA₅ = 0.50 × 36 + 0.50 × 32.375 = 18.000 + 16.188 = 34.188
-EMA₆ = 0.50 × 34 + 0.50 × 34.188 = 17.000 + 17.094 = 34.094
-EMA₇ = 0.50 × 38 + 0.50 × 34.094 = 19.000 + 17.047 = 36.047</div>
+        <div class="calc">EMA₂ = 0.50×35 + 0.50×32.00 = 33.500
+EMA₃ = 0.50×30 + 0.50×33.50 = 31.750
+EMA₄ = 0.50×33 + 0.50×31.75 = 32.375
+EMA₅ = 0.50×36 + 0.50×32.38 = 34.188
+EMA₆ = 0.50×34 + 0.50×34.19 = 34.094
+EMA₇ = 0.50×38 + 0.50×34.09 = 36.047</div>
       </div></div>
       <div class="step"><div class="snum">4</div><div class="sbody">
         <h4>Compute SMA(3) — Starting from Day 3</h4>
-        <div class="calc">SMA₃ = (32 + 35 + 30) / 3 = 97/3  = 32.333
-SMA₄ = (35 + 30 + 33) / 3 = 98/3  = 32.667
-SMA₅ = (30 + 33 + 36) / 3 = 99/3  = 33.000
-SMA₆ = (33 + 36 + 34) / 3 = 103/3 = 34.333
-SMA₇ = (36 + 34 + 38) / 3 = 108/3 = 36.000</div>
+        <div class="calc">SMA₃ = (32+35+30)/3 = 32.333
+SMA₄ = (35+30+33)/3 = 32.667
+SMA₅ = (30+33+36)/3 = 33.000
+SMA₆ = (33+36+34)/3 = 34.333
+SMA₇ = (36+34+38)/3 = 36.000</div>
       </div></div>
       <div class="step"><div class="snum">5</div><div class="sbody">
         <h4>Forecast Day 8</h4>
-        <div class="calc">EMA Day 8 = 0.50 × 38 + 0.50 × 36.047 = 19 + 18.024 = 37.02°C
-SMA Day 8 uses last 3 days: (34 + 38 + X)/3 — "next" SMA = (36+34+38)/3 = 36.00°C
-→ EMA is more responsive to the recent upward spike to 38°C</div>
+        <div class="calc">EMA Day 8 = 0.50×38 + 0.50×36.047 = 37.02°C
+SMA Day 8 = (36+34+38)/3 = 36.00°C
+→ EMA is more responsive to recent spike to 38°C</div>
       </div></div>
     </div>
     <div class="tbl-wrap">
       <table>
-        <thead><tr><th>Day</th><th>Temp (°C)</th><th>SMA(3)</th><th>EMA(3)</th><th>|SMA Error|</th><th>|EMA Error|</th><th>Better Fit?</th></tr></thead>
+        <thead><tr><th>Day</th><th>Temp (°C)</th><th>SMA(3)</th><th>EMA(3)</th><th>|SMA Err|</th><th>|EMA Err|</th><th>Better?</th></tr></thead>
         <tbody id="ma_table_body"></tbody>
       </table>
     </div>
     <div id="ma_mae_summary" style="margin-top:12px;"></div>
   </div>
 
-  <!-- SMA vs EMA -->
   <div class="card">
     <div class="card-head"><div class="card-icon">⚖️</div> SMA vs EMA — Complete Comparison</div>
     <div class="compare-row">
@@ -705,7 +898,7 @@ SMA Day 8 uses last 3 days: (34 + 38 + X)/3 — "next" SMA = (36+34+38)/3 = 36.0
         <h4>SMA — When to Use</h4>
         <ul>
           <li>Long-term trend analysis without recent bias</li>
-          <li>Data has no dominant outliers (sensitive to extreme values)</li>
+          <li>Data has no dominant outliers</li>
           <li>Equal-importance historical context needed</li>
           <li>Baseline smoothing before ARIMA fitting</li>
           <li>Economic data: unemployment, CPI, population</li>
@@ -714,11 +907,11 @@ SMA Day 8 uses last 3 days: (34 + 38 + X)/3 — "next" SMA = (36+34+38)/3 = 36.0
       <div class="cmp-box orange">
         <h4>EMA — When to Use</h4>
         <ul>
-          <li>High-frequency trading (MACD uses 12 & 26 day EMAs)</li>
+          <li>High-frequency trading (MACD uses 12 &amp; 26 day EMAs)</li>
           <li>Volatile data where recency matters more</li>
           <li>Reducing lag in trend following strategies</li>
           <li>Live sensor data, IoT telemetry streams</li>
-          <li>When you need continuous (no missing) smoothed values</li>
+          <li>When you need continuous smoothed values</li>
         </ul>
       </div>
     </div>
@@ -727,22 +920,19 @@ SMA Day 8 uses last 3 days: (34 + 38 + X)/3 — "next" SMA = (36+34+38)/3 = 36.0
     </div>
   </div>
 
-  <!-- EMA Calculator -->
   <div class="card">
     <div class="card-head"><div class="card-icon">🧮</div> Interactive EMA Step Calculator</div>
     <div class="grid3">
-      <div class="fg"><label>Current Value (Yₜ)</label><input class="fc" id="ema_y" value="38" type="number" oninput="calcEMA()"></div>
-      <div class="fg"><label>Previous EMA</label><input class="fc" id="ema_prev" value="34.09" type="number" step="0.01" oninput="calcEMA()"></div>
-      <div class="fg"><label>Window Size (n)</label><input class="fc" id="ema_n" value="3" type="number" min="2" max="50" oninput="calcEMA()"></div>
+      <div class="fg"><label>Current Value (Yₜ)</label><input class="fc" id="ema_y" value="38" type="number" inputmode="decimal" oninput="calcEMA()"></div>
+      <div class="fg"><label>Previous EMA</label><input class="fc" id="ema_prev" value="34.09" type="number" step="0.01" inputmode="decimal" oninput="calcEMA()"></div>
+      <div class="fg"><label>Window Size (n)</label><input class="fc" id="ema_n" value="3" type="number" min="2" max="50" inputmode="numeric" oninput="calcEMA()"></div>
     </div>
     <div class="demo-result" id="ema_result"></div>
   </div>
 
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     ARIMA SECTION
-═══════════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════ ARIMA SECTION ═══════════════════ -->
 <div id="sec-arima" class="section">
 
   <div class="card">
@@ -754,118 +944,112 @@ SMA Day 8 uses last 3 days: (34 + 38 + X)/3 — "next" SMA = (36+34+38)/3 = 36.0
     </div>
     <div class="fbox">
       <div class="fbox-title">ARIMA — Backshift Operator Form</div>
-      $$\underbrace{\Phi_p(B)}_{\text{AR}(p)}\;\underbrace{(1-B)^d}_{\text{Differencing}}\;Y_t = c + \underbrace{\Theta_q(B)}_{\text{MA}(q)}\;\varepsilon_t$$
+      $$\underbrace{\Phi_p(B)}_{\text{AR}(p)}\;\underbrace{(1-B)^d}_{\text{Diff.}}\;Y_t = c + \underbrace{\Theta_q(B)}_{\text{MA}(q)}\;\varepsilon_t$$
       <hr class="fdivider">
       <div class="fbox-title" style="margin-top:12px">Expanded ARIMA(1,1,1)</div>
-      $$(1-\phi_1 B)(1-B)Y_t = (1 + \theta_1 B)\varepsilon_t \quad\Rightarrow\quad \Delta Y_t = \phi_1\Delta Y_{t-1} + \varepsilon_t + \theta_1\varepsilon_{t-1}$$
-      <div class="fbox-desc">$B$ = backshift operator: $B \cdot Y_t = Y_{t-1}$ &nbsp;|&nbsp; $\Delta Y_t = Y_t - Y_{t-1}$ = first difference &nbsp;|&nbsp; $\Phi_p(B) = 1 - \phi_1 B - \cdots - \phi_p B^p$</div>
+      $$(1-\phi_1 B)(1-B)Y_t = (1 + \theta_1 B)\varepsilon_t$$
+      <div class="fbox-desc">$B$ = backshift operator: $B \cdot Y_t = Y_{t-1}$ &nbsp;|&nbsp; $\Delta Y_t = Y_t - Y_{t-1}$ = first difference</div>
     </div>
   </div>
 
-  <!-- ARIMA Deep Theory -->
   <div class="card">
     <div class="card-head"><div class="card-icon">🧠</div> Theory: The ARIMA Construction Process</div>
     <div class="steps">
       <div class="step"><div class="snum">1</div><div class="sbody">
         <h4>Step 1: Test Stationarity → Choose d</h4>
-        <p>Run ADF test. If non-stationary, apply first difference ($\Delta Y_t = Y_t - Y_{t-1}$) and test again. Repeat until stationary. Usually d=0 or d=1 suffices.</p>
-        <div class="calc">d=0: Series already stationary (ACF decays quickly)
+        <p>Run ADF test. If non-stationary, apply first difference ($\Delta Y_t = Y_t - Y_{t-1}$) and test again. Usually d=0 or d=1 suffices.</p>
+        <div class="calc">d=0: Series already stationary
 d=1: Linear trend removed by ΔYt = Yt − Y(t-1)
-d=2: Quadratic trend removed by ΔΔYt = ΔYt − ΔY(t-1)
-→ Over-differencing (too large d) introduces artificial MA structure</div>
+d=2: Quadratic trend removed
+→ Over-differencing introduces artificial MA structure</div>
       </div></div>
       <div class="step"><div class="snum">2</div><div class="sbody">
         <h4>Step 2: Identify p and q from ACF/PACF</h4>
         <p>On the <strong>differenced</strong> series, examine the ACF and PACF plots:</p>
-        <div class="calc">ACF tail-off + PACF cuts at p  →  AR(p)  → ARIMA(p,d,0)
-ACF cuts at q + PACF tail-off  →  MA(q)  → ARIMA(0,d,q)
-Both tail off slowly           →  ARMA   → ARIMA(p,d,q) with p,q ≥ 1
-Try multiple (p,q) combinations and compare AIC/BIC</div>
+        <div class="calc">ACF tail-off + PACF cuts at p  →  ARIMA(p,d,0)
+ACF cuts at q + PACF tail-off  →  ARIMA(0,d,q)
+Both tail off slowly  →  ARIMA(p,d,q) with p,q ≥ 1
+Try multiple combos and compare AIC/BIC</div>
       </div></div>
       <div class="step"><div class="snum">3</div><div class="sbody">
         <h4>Step 3: Estimate Parameters by MLE</h4>
-        <p>ARIMA parameters are estimated by <strong>Maximum Likelihood Estimation (MLE)</strong>, which maximises the probability of observing the data given the model. Unlike pure OLS, MLE handles the MA component's non-linearity.</p>
-        <div class="th-highlight">Modern software (statsmodels, R's forecast) uses the <strong>Kalman filter</strong> to evaluate the exact log-likelihood efficiently, even for large time series.
+        <p>ARIMA parameters are estimated by <strong>Maximum Likelihood Estimation (MLE)</strong>, which maximises the probability of observing the data given the model.</p>
+        <div class="th-highlight">
+          Modern software (statsmodels, R's forecast) uses the <strong>Kalman filter</strong> to evaluate the exact log-likelihood efficiently, even for large time series.
         </div>
       </div></div>
       <div class="step"><div class="snum">4</div><div class="sbody">
         <h4>Step 4: Diagnostic Checking</h4>
         <p>After fitting, verify the model is adequate by checking residuals:</p>
-        <div class="calc">✓ Ljung-Box test: p > 0.05 → residuals are white noise (good)
-✓ Shapiro-Wilk test: p > 0.05 → residuals are normal (good)
-✓ Residual ACF: all lags within ±1.96/√n confidence bands
+        <div class="calc">✓ Ljung-Box: p > 0.05 → white noise residuals
+✓ Shapiro-Wilk: p > 0.05 → normal residuals
+✓ Residual ACF: all within ±1.96/√n bands
 ✓ Q-Q plot: points follow diagonal line
 
-If residuals show structure → increase p or q and re-fit</div>
+If residuals show structure → increase p or q</div>
       </div></div>
       <div class="step"><div class="snum">5</div><div class="sbody">
         <h4>Step 5: Forecast with Confidence Intervals</h4>
         <p>Point forecasts from ARIMA converge toward the series mean as the horizon grows. Confidence intervals widen because forecast uncertainty compounds at each future step.</p>
-        <div class="calc">1-step-ahead 95% CI: Ŷ(t+1) ± 1.96 × σ_ε
-h-step-ahead CI (ARIMA(1,0,0)):
-  σ²(h) = σ²_ε × (1 + φ₁² + φ₁⁴ + ... + φ₁²⁽ʰ⁻¹⁾)
+        <div class="calc">1-step 95% CI: Ŷ(t+1) ± 1.96 × σ_ε
+h-step CI (ARIMA(1,0,0)):
+  σ²(h) = σ²_ε × (1+φ₁²+φ₁⁴+...+φ₁²⁽ʰ⁻¹⁾)
 → CI expands with horizon h
-→ For ARIMA(1,1,0): CI expands as √h (random-walk-like)</div>
+→ ARIMA(1,1,0): CI expands as √h</div>
       </div></div>
     </div>
   </div>
 
-  <!-- Worked Example -->
   <div class="card">
-    <div class="card-head"><div class="card-icon">🛒</div> Worked Example: Monthly Sales Forecast with ARIMA(1,1,1)</div>
+    <div class="card-head"><div class="card-icon">🛒</div> Worked Example: Monthly Sales with ARIMA(1,1,1)</div>
     <div class="info-box">
       <strong>Problem:</strong> Monthly sales (units) for 6 months: 200, 220, 215, 235, 230, 250. Clear upward trend → non-stationary. Fit ARIMA(1,1,1) with φ₁ = 0.6, θ₁ = −0.4. Forecast Month 7.
     </div>
     <div class="steps">
       <div class="step"><div class="snum">1</div><div class="sbody">
         <h4>Diagnose: Non-Stationary (d = 1 Needed)</h4>
-        <div class="calc">Sales series: [200, 220, 215, 235, 230, 250]
-Rolling mean: 200, 210, 211.7, 217.5, 220, 225  ← clearly increasing
-ADF p-value: > 0.05 → non-stationary confirmed → apply d=1</div>
+        <div class="calc">Sales: [200, 220, 215, 235, 230, 250]
+Rolling mean: clearly increasing ↑
+ADF p > 0.05 → non-stationary → apply d=1</div>
       </div></div>
       <div class="step"><div class="snum">2</div><div class="sbody">
         <h4>First Difference — Remove Trend</h4>
-        <div class="calc">ΔY₂ = 220 − 200 = +20
-ΔY₃ = 215 − 220 = −5
-ΔY₄ = 235 − 215 = +20
-ΔY₅ = 230 − 235 = −5
-ΔY₆ = 250 − 230 = +20
-Differenced series {+20, −5, +20, −5, +20} alternates → stationary ✓</div>
+        <div class="calc">ΔY₂ = 220−200 = +20
+ΔY₃ = 215−220 = −5
+ΔY₄ = 235−215 = +20
+ΔY₅ = 230−235 = −5
+ΔY₆ = 250−230 = +20
+Series {+20,−5,+20,−5,+20} ← stationary ✓</div>
       </div></div>
       <div class="step"><div class="snum">3</div><div class="sbody">
         <h4>Fit ARMA(1,1) on Differenced Series</h4>
-        <p>Model: $\hat{Z}_t = \phi_1 Z_{t-1} + \theta_1 \varepsilon_{t-1} + \varepsilon_t$. Forecast $\hat{Z}_7$ using last differenced value and last residual.</p>
-        <div class="calc">Ẑ₇ = φ₁ × ΔY₆  + θ₁ × ε₆
-   = 0.6 × (+20) + (−0.4) × 0   [assume ε₆ ≈ 0 for simplicity]
-   = 12.00 + 0.00
-   = +12 units (predicted change in Month 7)</div>
+        <div class="calc">Ẑ₇ = φ₁ × ΔY₆ + θ₁ × ε₆
+   = 0.6 × (+20) + (−0.4) × 0
+   = 12.00 + 0.00 = +12 units</div>
       </div></div>
       <div class="step"><div class="snum">4</div><div class="sbody">
         <h4>Inverse Difference → Recover Forecast</h4>
-        <div class="calc">Ŷ₇ = Y₆ + Ẑ₇
-   = 250 + 12
-   = 262 units  ✓
+        <div class="calc">Ŷ₇ = Y₆ + Ẑ₇ = 250 + 12 = 262 units ✓
 
-95% CI: 262 ± 1.96 × σ_residual = 262 ± 1.96 × 16.2 ≈ [230.2, 293.8]</div>
+95% CI: 262 ± 1.96 × 16.2 ≈ [230.2, 293.8]</div>
       </div></div>
     </div>
     <div class="tbl-wrap">
       <table>
-        <thead><tr><th>Month</th><th>Sales (Y)</th><th>Diff ΔY</th><th>ARMA Forecast (Ẑ)</th><th>Forecast Sales</th><th>Actual</th><th>Error</th></tr></thead>
+        <thead><tr><th>Month</th><th>Sales (Y)</th><th>Diff ΔY</th><th>ARMA Fore.</th><th>Fore. Sales</th><th>Actual</th><th>Error</th></tr></thead>
         <tbody>
           <tr><td>1</td><td>200</td><td class="tm">—</td><td class="tm">—</td><td class="tm">—</td><td class="tm">—</td><td class="tm">—</td></tr>
           <tr><td>2</td><td>220</td><td>+20</td><td class="tm">—</td><td class="tm">—</td><td class="tm">—</td><td class="tm">—</td></tr>
-          <tr><td>3</td><td>215</td><td>−5</td><td class="tc">0.6×20 = 12</td><td class="tc">220+12 = 232</td><td>215</td><td class="tr">−17</td></tr>
-          <tr><td>4</td><td>235</td><td>+20</td><td class="tc">0.6×(−5) = −3</td><td class="tc">215+(−3) = 212</td><td>235</td><td class="tr">+23</td></tr>
-          <tr><td>5</td><td>230</td><td>−5</td><td class="tc">0.6×20 = 12</td><td class="tc">235+12 = 247</td><td>230</td><td class="tr">−17</td></tr>
-          <tr><td>6</td><td>250</td><td>+20</td><td class="tc">0.6×(−5) = −3</td><td class="tc">230+(−3) = 227</td><td>250</td><td class="tr">+23</td></tr>
-          <tr><td><strong style="color:var(--orange)">7 (Forecast)</strong></td><td class="to">?</td><td>—</td><td class="to">0.6×20 = 12</td><td class="to"><strong>250+12 = 262</strong></td><td class="tm">—</td><td class="tm">—</td></tr>
+          <tr><td>3</td><td>215</td><td>−5</td><td class="tc">12</td><td class="tc">232</td><td>215</td><td class="tr">−17</td></tr>
+          <tr><td>4</td><td>235</td><td>+20</td><td class="tc">−3</td><td class="tc">212</td><td>235</td><td class="tr">+23</td></tr>
+          <tr><td>5</td><td>230</td><td>−5</td><td class="tc">12</td><td class="tc">247</td><td>230</td><td class="tr">−17</td></tr>
+          <tr><td>6</td><td>250</td><td>+20</td><td class="tc">−3</td><td class="tc">227</td><td>250</td><td class="tr">+23</td></tr>
+          <tr><td><strong style="color:var(--orange)">7 (Fore.)</strong></td><td class="to">?</td><td>—</td><td class="to">12</td><td class="to"><strong>262</strong></td><td class="tm">—</td><td class="tm">—</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- ARIMA Configurations -->
   <div class="card">
     <div class="card-head"><div class="card-icon">📋</div> Common ARIMA Configurations Reference</div>
     <div class="tbl-wrap">
@@ -886,25 +1070,21 @@ Differenced series {+20, −5, +20, −5, +20} alternates → stationary ✓</di
 
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     LAB SECTION
-═══════════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════ LAB SECTION ═══════════════════ -->
 <div id="sec-lab" class="section">
 
-  <!-- Data Input Card -->
   <div class="card">
     <div class="card-head"><div class="card-icon">📂</div> Step 1: Load Your Dataset</div>
     <div class="upload-area" onclick="document.getElementById('fileInput').click()">
       <div class="u-icon">📁</div>
-      <p>Click to upload a <strong>CSV file</strong> (any number of columns supported)<br>
-      First row = headers · Choose which column to analyse after loading</p>
+      <p>Click to upload a <strong>CSV file</strong><br>First row = headers · Choose column after loading</p>
       <input type="file" id="fileInput" accept=".csv" onchange="loadFile(event)">
     </div>
     <div class="btn-row">
-      <button class="btn btn-ghost" onclick="loadSample('trend')">📈 Trend + Seasonal (72 pts)</button>
-      <button class="btn btn-ghost" onclick="loadSample('stock')">🏦 Stock Prices (30 pts)</button>
-      <button class="btn btn-ghost" onclick="loadSample('sales')">🛒 Monthly Sales (24 pts)</button>
-      <button class="btn btn-ghost" onclick="loadSample('volatile')">⚡ Volatile + Noisy (60 pts)</button>
+      <button class="btn btn-ghost" onclick="loadSample('trend')">📈 Trend + Seasonal</button>
+      <button class="btn btn-ghost" onclick="loadSample('stock')">🏦 Stock Prices</button>
+      <button class="btn btn-ghost" onclick="loadSample('sales')">🛒 Monthly Sales</button>
+      <button class="btn btn-ghost" onclick="loadSample('volatile')">⚡ Volatile + Noisy</button>
     </div>
     <div id="dataLoadInfo" style="display:none;margin-top:14px;">
       <div class="success-box" id="dataInfoBox"></div>
@@ -915,25 +1095,22 @@ Differenced series {+20, −5, +20, −5, +20} alternates → stationary ✓</di
     </div>
   </div>
 
-  <!-- Model Configuration -->
   <div class="card" id="configCard" style="display:none;">
-    <div class="card-head"><div class="card-icon">⚙️</div> Step 2: Configure & Run Model</div>
-    
-    <!-- Lab Inner Tabs -->
+    <div class="card-head"><div class="card-icon">⚙️</div> Step 2: Configure &amp; Run Model</div>
     <div class="lab-tabs">
       <div class="lab-tab active" onclick="openLabTab('lab-ar',this)">📈 AR Model</div>
       <div class="lab-tab" onclick="openLabTab('lab-ma',this)">〰️ MA / EMA</div>
       <div class="lab-tab" onclick="openLabTab('lab-arima',this)">🔄 ARIMA</div>
     </div>
 
-    <!-- AR Config -->
     <div id="lab-ar" class="lab-section show">
       <div class="grid3">
-        <div class="fg"><label>AR Order (p)</label><input class="fc" id="lab_ar_p" type="number" value="2" min="1" max="10"></div>
-        <div class="fg"><label>Forecast Horizon</label>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <input type="range" id="ar_horizon" min="1" max="60" value="10" oninput="document.getElementById('ar_h_lbl').textContent=this.value" style="flex:1">
-            <span id="ar_h_lbl" style="font-family:var(--mono);color:var(--blue);font-weight:700;min-width:24px">10</span>
+        <div class="fg"><label>AR Order (p)</label><input class="fc" id="lab_ar_p" type="number" value="2" min="1" max="10" inputmode="numeric"></div>
+        <div class="fg">
+          <label>Forecast Horizon</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+            <input type="range" id="ar_horizon" min="1" max="60" value="10" oninput="document.getElementById('ar_h_lbl').textContent=this.value" style="flex:1;">
+            <span id="ar_h_lbl" style="font-family:var(--mono);color:var(--blue);font-weight:700;min-width:28px;font-size:0.9rem;">10</span>
           </div>
         </div>
         <div class="fg"><label>Confidence Level</label>
@@ -946,7 +1123,6 @@ Differenced series {+20, −5, +20, −5, +20} alternates → stationary ✓</di
       </div>
     </div>
 
-    <!-- MA Config -->
     <div id="lab-ma" class="lab-section">
       <div class="grid3">
         <div class="fg"><label>MA Type</label>
@@ -956,11 +1132,12 @@ Differenced series {+20, −5, +20, −5, +20} alternates → stationary ✓</di
             <option value="BOTH">Compare SMA vs EMA</option>
           </select>
         </div>
-        <div class="fg"><label>Window Size (n)</label><input class="fc" id="lab_ma_n" type="number" value="3" min="2" max="20"></div>
-        <div class="fg"><label>Forecast Horizon</label>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <input type="range" id="ma_horizon" min="1" max="60" value="10" oninput="document.getElementById('ma_h_lbl').textContent=this.value" style="flex:1">
-            <span id="ma_h_lbl" style="font-family:var(--mono);color:var(--orange);font-weight:700;min-width:24px">10</span>
+        <div class="fg"><label>Window Size (n)</label><input class="fc" id="lab_ma_n" type="number" value="3" min="2" max="20" inputmode="numeric"></div>
+        <div class="fg">
+          <label>Forecast Horizon</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+            <input type="range" id="ma_horizon" min="1" max="60" value="10" oninput="document.getElementById('ma_h_lbl').textContent=this.value" style="flex:1;">
+            <span id="ma_h_lbl" style="font-family:var(--mono);color:var(--orange);font-weight:700;min-width:28px;font-size:0.9rem;">10</span>
           </div>
         </div>
       </div>
@@ -970,16 +1147,16 @@ Differenced series {+20, −5, +20, −5, +20} alternates → stationary ✓</di
       </div>
     </div>
 
-    <!-- ARIMA Config -->
     <div id="lab-arima" class="lab-section">
       <div class="grid4">
-        <div class="fg"><label>AR Order (p)</label><input class="fc" id="lab_ar_pp" type="number" value="1" min="0" max="5"></div>
-        <div class="fg"><label>Differencing (d)</label><input class="fc" id="lab_ar_d" type="number" value="1" min="0" max="2"></div>
-        <div class="fg"><label>MA Order (q)</label><input class="fc" id="lab_ar_q" type="number" value="1" min="0" max="5"></div>
-        <div class="fg"><label>Forecast Horizon</label>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <input type="range" id="arima_horizon" min="1" max="60" value="10" oninput="document.getElementById('arima_h_lbl').textContent=this.value" style="flex:1">
-            <span id="arima_h_lbl" style="font-family:var(--mono);color:var(--green);font-weight:700;min-width:24px">10</span>
+        <div class="fg"><label>AR Order (p)</label><input class="fc" id="lab_ar_pp" type="number" value="1" min="0" max="5" inputmode="numeric"></div>
+        <div class="fg"><label>Differencing (d)</label><input class="fc" id="lab_ar_d" type="number" value="1" min="0" max="2" inputmode="numeric"></div>
+        <div class="fg"><label>MA Order (q)</label><input class="fc" id="lab_ar_q" type="number" value="1" min="0" max="5" inputmode="numeric"></div>
+        <div class="fg">
+          <label>Forecast Horizon</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+            <input type="range" id="arima_horizon" min="1" max="60" value="10" oninput="document.getElementById('arima_h_lbl').textContent=this.value" style="flex:1;">
+            <span id="arima_h_lbl" style="font-family:var(--mono);color:var(--green);font-weight:700;min-width:28px;font-size:0.9rem;">10</span>
           </div>
         </div>
       </div>
@@ -990,7 +1167,6 @@ Differenced series {+20, −5, +20, −5, +20} alternates → stationary ✓</di
     </div>
   </div>
 
-  <!-- Stats Panel -->
   <div id="statsPanel" style="display:none;">
     <div class="card">
       <div class="card-head"><div class="card-icon">📊</div> Dataset Statistics</div>
@@ -999,7 +1175,6 @@ Differenced series {+20, −5, +20, −5, +20} alternates → stationary ✓</di
     </div>
   </div>
 
-  <!-- Prediction Highlight -->
   <div id="predPanel" style="display:none;">
     <div class="pred-box">
       <h3>🔮 Next-Step Forecast</h3>
@@ -1007,69 +1182,59 @@ Differenced series {+20, −5, +20, −5, +20} alternates → stationary ✓</di
     </div>
   </div>
 
-  <!-- Main Chart -->
   <div class="chart-wrap" id="chartWrap" style="display:none;">
     <div class="chart-head">
       <div class="card-head" style="margin:0;"><div class="card-icon">📉</div> Forecast Chart</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <span class="badge badge-blue">Actual</span>
-        <span class="badge badge-orange">Model Fit</span>
+        <span class="badge badge-orange">Fit</span>
         <span class="badge badge-green">Forecast</span>
         <span id="modelBadge" class="badge badge-purple">—</span>
       </div>
     </div>
-    <canvas id="mainChart" style="max-height:420px;"></canvas>
+    <canvas id="mainChart" style="max-height:420px;width:100%;"></canvas>
     <p style="text-align:center;color:var(--muted);font-size:0.78rem;margin-top:10px;">
-      Hover any point for exact values &nbsp;|&nbsp; Shaded band = Confidence Interval
+      Hover/tap any point for exact values &nbsp;|&nbsp; Shaded band = Confidence Interval
     </p>
   </div>
 
-  <!-- ACF Chart -->
   <div class="card" id="acfCard" style="display:none;">
     <div class="card-head"><div class="card-icon">📡</div> Autocorrelation Analysis (ACF)</div>
-    <canvas id="acfChart" style="max-height:200px;"></canvas>
+    <canvas id="acfChart" style="max-height:200px;width:100%;"></canvas>
     <div id="acfHint" style="margin-top:12px;"></div>
   </div>
 
-  <!-- Decomposition Chart -->
   <div class="card" id="decompCard" style="display:none;">
     <div class="card-head"><div class="card-icon">🔬</div> Trend Decomposition</div>
-    <canvas id="decompChart" style="max-height:200px;"></canvas>
+    <canvas id="decompChart" style="max-height:200px;width:100%;"></canvas>
     <p style="color:var(--muted);font-size:0.82rem;margin-top:8px;">Orange = Trend (SMA-5 smoothed). Blue = Actual. Grey = Residual (noise).</p>
   </div>
 
-  <!-- Forecast Table -->
   <div class="card" id="forecastCard" style="display:none;">
     <div class="card-head"><div class="card-icon">🔮</div> Detailed Forecast Table</div>
     <div class="tbl-wrap">
       <table>
-        <thead><tr><th>Step</th><th>Forecast</th><th>Lower CI</th><th>Upper CI</th><th>CI Width</th><th>Step Change</th><th>Direction</th></tr></thead>
+        <thead><tr><th>Step</th><th>Forecast</th><th>Lower CI</th><th>Upper CI</th><th>CI Width</th><th>Change</th><th>Dir.</th></tr></thead>
         <tbody id="forecastBody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- Metrics -->
   <div class="card" id="metricsCard" style="display:none;">
     <div class="card-head"><div class="card-icon">📐</div> Model Accuracy Metrics</div>
     <div class="stats-grid" id="metricsGrid"></div>
     <div id="metricsInfo" style="margin-top:14px;"></div>
   </div>
 
-</div><!-- /sec-lab -->
-
-</div><!-- /app -->
+</div>
+</div>
 
 <script>
-// ──────────────────────────────────────────────────────────────
-// STATE
-// ──────────────────────────────────────────────────────────────
+// ── STATE ──
 let rawData = [], dataVals = [], selectedCol = 1, headers = [];
 let mainChartObj = null, acfChartObj = null, decompChartObj = null;
 
-// ──────────────────────────────────────────────────────────────
-// MAIN TABS
-// ──────────────────────────────────────────────────────────────
+// ── MAIN TABS ──
 function openMainTab(id, el, extraClass) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('show'));
   document.querySelectorAll('.main-tab').forEach(t => { t.classList.remove('active','orange','green','lab-tab'); });
@@ -1077,11 +1242,11 @@ function openMainTab(id, el, extraClass) {
   el.classList.add('active');
   if (extraClass) el.classList.add(extraClass);
   if (id === 'ma') { buildMATable(); calcEMA(); }
+  // scroll to top on mobile
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ──────────────────────────────────────────────────────────────
-// LAB INNER TABS
-// ──────────────────────────────────────────────────────────────
+// ── LAB INNER TABS ──
 function openLabTab(id, el) {
   document.querySelectorAll('.lab-section').forEach(s => s.classList.remove('show'));
   document.querySelectorAll('.lab-tab').forEach(t => t.classList.remove('active'));
@@ -1089,9 +1254,7 @@ function openLabTab(id, el) {
   el.classList.add('active');
 }
 
-// ──────────────────────────────────────────────────────────────
-// AR CALCULATOR
-// ──────────────────────────────────────────────────────────────
+// ── AR CALCULATOR ──
 function calcAR() {
   const y1 = parseFloat(document.getElementById('ar_y1').value) || 0;
   const y2 = parseFloat(document.getElementById('ar_y2').value) || 0;
@@ -1099,28 +1262,23 @@ function calcAR() {
   const p2 = parseFloat(document.getElementById('ar_p2').value) || 0;
   const pred = p1 * y1 + p2 * y2;
   const stable = Math.abs(p1 + p2) < 1 && Math.abs(p2) < 1;
-
   document.getElementById('ar_result').innerHTML =
     `<span style="color:var(--muted)">Formula: Ŷ = φ₁ × Y_{t-1} + φ₂ × Y_{t-2}</span>\n` +
-    `Step 1: φ₁ × Y_{t-1} = ${p1} × ${y1} = ${(p1 * y1).toFixed(4)}\n` +
-    `Step 2: φ₂ × Y_{t-2} = ${p2} × ${y2} = ${(p2 * y2).toFixed(4)}\n` +
-    `Step 3: <strong>Ŷ = ${(p1 * y1).toFixed(4)} + ${(p2 * y2).toFixed(4)} = ${pred.toFixed(4)}</strong>`;
-
+    `Step 1: φ₁ × Y_{t-1} = ${p1} × ${y1} = ${(p1*y1).toFixed(4)}\n` +
+    `Step 2: φ₂ × Y_{t-2} = ${p2} × ${y2} = ${(p2*y2).toFixed(4)}\n` +
+    `Step 3: <strong>Ŷ = ${(p1*y1).toFixed(4)} + ${(p2*y2).toFixed(4)} = ${pred.toFixed(4)}</strong>`;
   const stab = document.getElementById('ar_stability');
   stab.innerHTML = stable
     ? `<div class="success-box"><strong>✅ Stability Check:</strong> |φ₁+φ₂| = ${Math.abs(p1+p2).toFixed(3)} &lt; 1. AR(2) model is <strong>stationary</strong> with these coefficients.</div>`
     : `<div class="warn-box"><strong>⚠️ Stability Warning:</strong> |φ₁+φ₂| = ${Math.abs(p1+p2).toFixed(3)} ≥ 1. These coefficients produce a <strong>non-stationary</strong> AR(2) model — forecasts may diverge.</div>`;
 }
 
-// ──────────────────────────────────────────────────────────────
-// MA TABLE
-// ──────────────────────────────────────────────────────────────
+// ── MA TABLE ──
 function buildMATable() {
   const t = [32, 35, 30, 33, 36, 34, 38];
   const alpha = 0.5;
   const ema = [t[0]];
   for (let i = 1; i < t.length; i++) ema.push(alpha * t[i] + (1 - alpha) * ema[i - 1]);
-  
   let maeTotalSMA = 0, maeTotalEMA = 0, countSMA = 0;
   let rows = '';
   for (let i = 0; i < t.length; i++) {
@@ -1140,19 +1298,16 @@ function buildMATable() {
   }
   const tbody = document.getElementById('ma_table_body');
   if (tbody) tbody.innerHTML = rows;
-
   const summ = document.getElementById('ma_mae_summary');
   if (summ && countSMA > 0) {
     const avgSMA = (maeTotalSMA / countSMA).toFixed(2);
     const avgEMA = (maeTotalEMA / countSMA).toFixed(2);
     const winner = avgSMA < avgEMA ? 'SMA' : 'EMA';
-    summ.innerHTML = `<div class="info-box"><strong>Summary (Days 3–7):</strong> MAE(SMA) = ${avgSMA} | MAE(EMA) = ${avgEMA} → <strong>${winner}</strong> performed better on this dataset. EMA Day 8 forecast = <strong>37.02°C</strong> | SMA Day 8 forecast = <strong>36.00°C</strong></div>`;
+    summ.innerHTML = `<div class="info-box"><strong>Summary (Days 3–7):</strong> MAE(SMA) = ${avgSMA} | MAE(EMA) = ${avgEMA} → <strong>${winner}</strong> performed better. EMA Day 8 = <strong>37.02°C</strong> | SMA Day 8 = <strong>36.00°C</strong></div>`;
   }
 }
 
-// ──────────────────────────────────────────────────────────────
-// EMA CALCULATOR
-// ──────────────────────────────────────────────────────────────
+// ── EMA CALCULATOR ──
 function calcEMA() {
   const y = parseFloat(document.getElementById('ema_y').value) || 0;
   const prev = parseFloat(document.getElementById('ema_prev').value) || 0;
@@ -1160,16 +1315,14 @@ function calcEMA() {
   const alpha = 2 / (n + 1);
   const result = alpha * y + (1 - alpha) * prev;
   document.getElementById('ema_result').innerHTML =
-    `<span style="color:var(--muted)">α = 2 / (n+1) = 2 / (${n}+1) = ${alpha.toFixed(4)}</span>\n` +
-    `Step 1: α × Yₜ = ${alpha.toFixed(4)} × ${y} = ${(alpha * y).toFixed(4)}\n` +
+    `<span style="color:var(--muted)">α = 2/(n+1) = 2/(${n}+1) = ${alpha.toFixed(4)}</span>\n` +
+    `Step 1: α × Yₜ = ${alpha.toFixed(4)} × ${y} = ${(alpha*y).toFixed(4)}\n` +
     `Step 2: (1−α) × EMA_prev = ${(1-alpha).toFixed(4)} × ${prev} = ${((1-alpha)*prev).toFixed(4)}\n` +
     `Step 3: <strong>EMA = ${(alpha*y).toFixed(4)} + ${((1-alpha)*prev).toFixed(4)} = ${result.toFixed(4)}</strong>\n` +
     `<span style="color:var(--muted)">Effective memory ≈ 1/α = ${(1/alpha).toFixed(1)} periods</span>`;
 }
 
-// ──────────────────────────────────────────────────────────────
-// DATA LOADERS
-// ──────────────────────────────────────────────────────────────
+// ── DATA LOADERS ──
 function loadFile(e) {
   const reader = new FileReader();
   reader.onload = x => {
@@ -1185,31 +1338,22 @@ function loadSample(type) {
   let vals = [], name = '';
   if (type === 'trend') {
     for (let i = 0; i < 72; i++) {
-      const tr = 100 + i * 0.9;
-      const sea = 14 * Math.sin(2 * Math.PI * i / 12);
-      const n = (Math.random() - 0.5) * 7;
-      vals.push({ Month: 'M' + (i+1), Value: +(tr + sea + n).toFixed(2) });
+      vals.push({ Month: 'M'+(i+1), Value: +(100 + i*0.9 + 14*Math.sin(2*Math.PI*i/12) + (Math.random()-0.5)*7).toFixed(2) });
     }
-    headers = ['Month', 'Value'];
-    name = 'Trend + Seasonal (72 pts)';
+    headers = ['Month','Value']; name = 'Trend + Seasonal (72 pts)';
   } else if (type === 'stock') {
     const base = [105,108,112,110,114,117,113,119,122,118,124,121,126,130,128,133,129,135,138,134,140,143,139,145,148,144,150,153,149,155];
-    vals = base.map((v, i) => ({ Day: 'D'+(i+1), Price: v }));
-    headers = ['Day', 'Price'];
-    name = 'Stock Prices (30 pts)';
+    vals = base.map((v,i) => ({ Day:'D'+(i+1), Price:v }));
+    headers = ['Day','Price']; name = 'Stock Prices (30 pts)';
   } else if (type === 'sales') {
     const sales = [200,220,215,235,230,250,262,258,275,270,290,285,300,310,305,325,320,340];
-    vals = sales.map((v, i) => ({ Month: 'M'+(i+1), Sales: v }));
-    headers = ['Month', 'Sales'];
-    name = 'Monthly Sales (18 pts)';
+    vals = sales.map((v,i) => ({ Month:'M'+(i+1), Sales:v }));
+    headers = ['Month','Sales']; name = 'Monthly Sales (18 pts)';
   } else {
     for (let i = 0; i < 60; i++) {
-      const base2 = 50 + 3 * Math.sin(2 * Math.PI * i / 6);
-      const noise = (Math.random() - 0.5) * 20;
-      vals.push({ T: 'T'+(i+1), Val: +(base2 + noise).toFixed(2) });
+      vals.push({ T:'T'+(i+1), Val: +(50 + 3*Math.sin(2*Math.PI*i/6) + (Math.random()-0.5)*20).toFixed(2) });
     }
-    headers = ['T', 'Val'];
-    name = 'Volatile + Noisy (60 pts)';
+    headers = ['T','Val']; name = 'Volatile + Noisy (60 pts)';
   }
   rawData = [headers, ...vals.map(v => Object.values(v))];
   showDataLoaded(name, vals.length);
@@ -1219,8 +1363,7 @@ function showDataLoaded(name, count) {
   document.getElementById('dataLoadInfo').style.display = 'block';
   document.getElementById('configCard').style.display = 'block';
   document.getElementById('dataInfoBox').innerHTML =
-    `<strong>✅ Dataset Loaded:</strong> <em>${name}</em> — ${count} data points, ${headers.length} column(s): ${headers.map(h => `<strong>${h}</strong>`).join(', ')}`;
-  
+    `<strong>✅ Dataset Loaded:</strong> <em>${name}</em> — ${count} data points, ${headers.length} column(s): ${headers.map(h=>`<strong>${h}</strong>`).join(', ')}`;
   const pills = document.getElementById('colPills');
   pills.innerHTML = '';
   headers.slice(1).forEach((h, i) => {
@@ -1238,21 +1381,19 @@ function showDataLoaded(name, count) {
   selectedCol = 1;
 }
 
-// ──────────────────────────────────────────────────────────────
-// STATISTICS
-// ──────────────────────────────────────────────────────────────
+// ── STATISTICS ──
 function computeStats(v) {
   const n = v.length;
-  const mean = v.reduce((a, b) => a + b, 0) / n;
-  const sorted = [...v].sort((a, b) => a - b);
-  const median = n % 2 === 0 ? (sorted[n/2-1] + sorted[n/2]) / 2 : sorted[Math.floor(n/2)];
-  const variance = v.reduce((a, b) => a + (b - mean) ** 2, 0) / n;
+  const mean = v.reduce((a,b)=>a+b,0)/n;
+  const sorted = [...v].sort((a,b)=>a-b);
+  const median = n%2===0 ? (sorted[n/2-1]+sorted[n/2])/2 : sorted[Math.floor(n/2)];
+  const variance = v.reduce((a,b)=>a+(b-mean)**2,0)/n;
   const std = Math.sqrt(variance);
   const min = sorted[0], max = sorted[n-1];
-  const xm = (n-1) / 2;
-  const slope = v.reduce((a, _, i) => a + (i - xm) * (v[i] - mean), 0) / v.reduce((a, _, i) => a + (i - xm) ** 2, 0);
-  const cv = std / Math.abs(mean) * 100;
-  const skew = v.reduce((a, b) => a + ((b - mean) / std) ** 3, 0) / n;
+  const xm = (n-1)/2;
+  const slope = v.reduce((a,_,i)=>a+(i-xm)*(v[i]-mean),0) / v.reduce((a,_,i)=>a+(i-xm)**2,0);
+  const cv = std/Math.abs(mean)*100;
+  const skew = v.reduce((a,b)=>a+((b-mean)/std)**3,0)/n;
   return { n, mean, median, std, min, max, slope, cv, skew };
 }
 
@@ -1281,9 +1422,7 @@ function renderStats(s) {
   document.getElementById('statsPanel').style.display = 'block';
 }
 
-// ──────────────────────────────────────────────────────────────
-// ACF
-// ──────────────────────────────────────────────────────────────
+// ── ACF ──
 function computeACF(v, maxLag) {
   const n = v.length, mean = v.reduce((a,b)=>a+b,0)/n;
   const denom = v.reduce((a,x)=>a+(x-mean)**2,0);
@@ -1291,17 +1430,17 @@ function computeACF(v, maxLag) {
   for (let k = 1; k <= maxLag; k++) {
     let num = 0;
     for (let i = k; i < n; i++) num += (v[i]-mean)*(v[i-k]-mean);
-    acf.push(num / denom);
+    acf.push(num/denom);
   }
   return acf;
 }
 
 function renderACF(v) {
-  const maxLag = Math.min(20, Math.floor(v.length / 4));
+  const maxLag = Math.min(20, Math.floor(v.length/4));
   const acf = computeACF(v, maxLag);
-  const ci = 1.96 / Math.sqrt(v.length);
-  const labels = acf.map((_, i) => 'L'+i);
-  const colors = acf.map((_, i) => i===0 ? 'rgba(43,92,230,0.85)' : Math.abs(acf[i])>ci ? 'rgba(192,57,43,0.75)' : 'rgba(43,92,230,0.45)');
+  const ci = 1.96/Math.sqrt(v.length);
+  const labels = acf.map((_,i) => 'L'+i);
+  const colors = acf.map((_,i) => i===0 ? 'rgba(43,92,230,0.85)' : Math.abs(acf[i])>ci ? 'rgba(192,57,43,0.75)' : 'rgba(43,92,230,0.45)');
   if (acfChartObj) acfChartObj.destroy();
   const ctx = document.getElementById('acfChart').getContext('2d');
   acfChartObj = new Chart(ctx, {
@@ -1315,10 +1454,10 @@ function renderACF(v) {
       ]
     },
     options: {
-      responsive: true,
+      responsive: true, maintainAspectRatio: true,
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${(+c.raw).toFixed(3)}` } } },
       scales: {
-        x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#8c8479', font: { size: 9, family: 'DM Mono' } } },
+        x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#8c8479', font: { size: 9, family: 'DM Mono' }, maxRotation: 0 } },
         y: { grid: { color: 'rgba(0,0,0,0.05)' }, min: -1, max: 1, ticks: { color: '#8c8479', font: { size: 9, family: 'DM Mono' } } }
       }
     }
@@ -1334,9 +1473,7 @@ function renderACF(v) {
   document.getElementById('acfCard').style.display = 'block';
 }
 
-// ──────────────────────────────────────────────────────────────
-// DECOMPOSITION
-// ──────────────────────────────────────────────────────────────
+// ── DECOMPOSITION ──
 function renderDecomp(v) {
   const n = v.length;
   const wn = Math.min(5, Math.floor(n/3));
@@ -1363,10 +1500,10 @@ function renderDecomp(v) {
       ]
     },
     options: {
-      responsive: true,
+      responsive: true, maintainAspectRatio: true,
       plugins: { legend: { labels: { color: '#3d3830', font: { size: 11, family: 'DM Sans' }, boxWidth: 14, usePointStyle: true } } },
       scales: {
-        x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: '#8c8479', font: { size: 9, family: 'DM Mono' }, maxTicksLimit: 15 } },
+        x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: '#8c8479', font: { size: 9, family: 'DM Mono' }, maxTicksLimit: 12 } },
         y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: '#8c8479', font: { size: 9, family: 'DM Mono' } } }
       }
     }
@@ -1374,14 +1511,10 @@ function renderDecomp(v) {
   document.getElementById('decompCard').style.display = 'block';
 }
 
-// ──────────────────────────────────────────────────────────────
-// MODEL IMPLEMENTATIONS
-// ──────────────────────────────────────────────────────────────
+// ── MODEL IMPLEMENTATIONS ──
 function modelSMA(d, n) {
   const r = [];
-  for (let i = n-1; i < d.length; i++) {
-    let s = 0; for (let j = 0; j < n; j++) s += d[i-j]; r.push(s/n);
-  }
+  for (let i = n-1; i < d.length; i++) { let s = 0; for (let j = 0; j < n; j++) s += d[i-j]; r.push(s/n); }
   return r;
 }
 function modelEMA(d, n) {
@@ -1391,9 +1524,7 @@ function modelEMA(d, n) {
 }
 function modelAR(d, p) {
   const r = [];
-  for (let i = p; i < d.length; i++) {
-    let s = 0; for (let j = 1; j <= p; j++) s += d[i-j]; r.push(s/p);
-  }
+  for (let i = p; i < d.length; i++) { let s = 0; for (let j = 1; j <= p; j++) s += d[i-j]; r.push(s/p); }
   return r;
 }
 function modelARIMA(d, p, dif, q) {
@@ -1401,44 +1532,36 @@ function modelARIMA(d, p, dif, q) {
   const history = [series];
   for (let k = 0; k < dif; k++) {
     const dd = [];
-    for (let i = 1; i < series.length; i++) dd.push(series[i] - series[i-1]);
+    for (let i = 1; i < series.length; i++) dd.push(series[i]-series[i-1]);
     history.push(dd); series = dd;
   }
   const pp = Math.max(p, 1);
   const preds = modelAR(series, pp);
-  let recon = [...series.slice(0, pp), ...preds];
+  let recon = [...series.slice(0,pp), ...preds];
   for (let k = dif-1; k >= 0; k--) {
     const orig = history[k];
     const inv = [orig[0]];
-    for (let i = 1; i < recon.length; i++) inv.push(inv[i-1] + recon[i]);
+    for (let i = 1; i < recon.length; i++) inv.push(inv[i-1]+recon[i]);
     recon = inv;
   }
-  return recon.slice(pp + dif);
+  return recon.slice(pp+dif);
 }
 
-// ──────────────────────────────────────────────────────────────
-// FORECASTING
-// ──────────────────────────────────────────────────────────────
+// ── FORECASTING ──
 function forecastAR(d, p, h) {
   const buf = [...d.slice(-p)], f = [];
-  for (let i = 0; i < h; i++) {
-    const v = buf.reduce((a,b)=>a+b,0)/p;
-    f.push(v); buf.push(v); buf.shift();
-  }
+  for (let i = 0; i < h; i++) { const v = buf.reduce((a,b)=>a+b,0)/p; f.push(v); buf.push(v); buf.shift(); }
   return f;
 }
 function forecastSMA(d, n, h) {
   const buf = [...d.slice(-n)], f = [];
-  for (let i = 0; i < h; i++) {
-    const v = buf.reduce((a,b)=>a+b,0)/n;
-    f.push(v); buf.push(v); buf.shift();
-  }
+  for (let i = 0; i < h; i++) { const v = buf.reduce((a,b)=>a+b,0)/n; f.push(v); buf.push(v); buf.shift(); }
   return f;
 }
 function forecastEMA(d, n, h) {
   const a = 2/(n+1);
   let el = modelEMA(d, n).slice(-1)[0];
-  return Array.from({length:h}, () => { el = a*el + (1-a)*el; return el; });
+  return Array.from({length:h}, () => { el = a*el+(1-a)*el; return el; });
 }
 function forecastARIMA(d, p, dif, h) {
   let series = d;
@@ -1449,41 +1572,33 @@ function forecastARIMA(d, p, dif, h) {
   }
   const pp = Math.max(p, 1);
   const buf = [...series.slice(-pp)], df = [];
-  for (let i = 0; i < h; i++) {
-    const v = buf.reduce((a,b)=>a+b,0)/pp;
-    df.push(v); buf.push(v); buf.shift();
-  }
+  for (let i = 0; i < h; i++) { const v = buf.reduce((a,b)=>a+b,0)/pp; df.push(v); buf.push(v); buf.shift(); }
   let last = d[d.length-1];
   return df.map(v => { last += v; return last; });
 }
 
-// ──────────────────────────────────────────────────────────────
-// METRICS
-// ──────────────────────────────────────────────────────────────
+// ── METRICS ──
 function residStd(a, p) {
-  const n = Math.min(a.length, p.length);
-  const res = Array.from({length:n}, (_,i)=>a[i]-p[i]);
+  const n = Math.min(a.length,p.length);
+  const res = Array.from({length:n},(_,i)=>a[i]-p[i]);
   const m = res.reduce((a,b)=>a+b,0)/n;
   return Math.sqrt(res.reduce((a,b)=>a+(b-m)**2,0)/n);
 }
-function mae(a, p) { const n = Math.min(a.length,p.length); return a.slice(0,n).reduce((s,v,i)=>s+Math.abs(v-p[i]),0)/n; }
-function rmse(a, p) { const n = Math.min(a.length,p.length); return Math.sqrt(a.slice(0,n).reduce((s,v,i)=>s+(v-p[i])**2,0)/n); }
-function mape(a, p) { const n = Math.min(a.length,p.length); return a.slice(0,n).reduce((s,v,i)=>s+(Math.abs(v-p[i])/Math.abs(v||1)),0)/n*100; }
+function mae(a, p) { const n=Math.min(a.length,p.length); return a.slice(0,n).reduce((s,v,i)=>s+Math.abs(v-p[i]),0)/n; }
+function rmse(a, p) { const n=Math.min(a.length,p.length); return Math.sqrt(a.slice(0,n).reduce((s,v,i)=>s+(v-p[i])**2,0)/n); }
+function mape(a, p) { const n=Math.min(a.length,p.length); return a.slice(0,n).reduce((s,v,i)=>s+(Math.abs(v-p[i])/Math.abs(v||1)),0)/n*100; }
 function r2(a, p) {
-  const n = Math.min(a.length, p.length), mean = a.slice(0,n).reduce((x,y)=>x+y,0)/n;
-  const ss_tot = a.slice(0,n).reduce((s,v)=>s+(v-mean)**2,0);
-  const ss_res = a.slice(0,n).reduce((s,v,i)=>s+(v-p[i])**2,0);
-  return 1 - ss_res/ss_tot;
+  const n=Math.min(a.length,p.length), mean=a.slice(0,n).reduce((x,y)=>x+y,0)/n;
+  const ss_tot=a.slice(0,n).reduce((s,v)=>s+(v-mean)**2,0);
+  const ss_res=a.slice(0,n).reduce((s,v,i)=>s+(v-p[i])**2,0);
+  return 1-ss_res/ss_tot;
 }
 
-// ──────────────────────────────────────────────────────────────
-// RUN LAB
-// ──────────────────────────────────────────────────────────────
+// ── RUN LAB ──
 function runLab(modelType) {
   if (!rawData.length) { alert('Please load a dataset first.'); return; }
   dataVals = rawData.slice(1).map(r => parseFloat(r[selectedCol])).filter(x => !isNaN(x));
   if (dataVals.length < 6) { alert('Need at least 6 data points.'); return; }
-
   const N = dataVals.length;
   let fitPred = [], foreVals = [], offset = 0, ciZ = 1.96, modelLabel = '';
 
@@ -1491,77 +1606,73 @@ function runLab(modelType) {
     const p = parseInt(document.getElementById('lab_ar_p').value);
     const h = parseInt(document.getElementById('ar_horizon').value);
     ciZ = parseFloat(document.getElementById('ar_ci').value);
-    fitPred = modelAR(dataVals, p);
-    offset = p;
+    fitPred = modelAR(dataVals, p); offset = p;
     foreVals = forecastAR(dataVals, p, h);
     modelLabel = 'AR(' + p + ')';
-    document.getElementById('modelBadge').textContent = modelLabel;
   } else if (modelType === 'MA') {
     const n = parseInt(document.getElementById('lab_ma_n').value);
     const type = document.getElementById('lab_ma_type').value;
     const h = parseInt(document.getElementById('ma_horizon').value);
-    ciZ = 1.96;
-    if (type === 'EMA' || type === 'BOTH') { fitPred = modelEMA(dataVals, n); offset = 0; } 
+    if (type === 'EMA' || type === 'BOTH') { fitPred = modelEMA(dataVals, n); offset = 0; }
     else { fitPred = modelSMA(dataVals, n); offset = n - 1; }
     foreVals = type === 'EMA' ? forecastEMA(dataVals, n, h) : forecastSMA(dataVals, n, h);
     modelLabel = 'MA-' + type + '(' + n + ')';
-    document.getElementById('modelBadge').textContent = modelLabel;
   } else {
     const p = parseInt(document.getElementById('lab_ar_pp').value);
     const d = parseInt(document.getElementById('lab_ar_d').value);
     const q = parseInt(document.getElementById('lab_ar_q').value);
     const h = parseInt(document.getElementById('arima_horizon').value);
-    ciZ = 1.96;
     fitPred = modelARIMA(dataVals, p, d, q);
     offset = N - fitPred.length;
     foreVals = forecastARIMA(dataVals, p, d, h);
     modelLabel = 'ARIMA(' + p + ',' + d + ',' + q + ')';
-    document.getElementById('modelBadge').textContent = modelLabel;
   }
+  document.getElementById('modelBadge').textContent = modelLabel;
 
   const aAligned = dataVals.slice(offset);
   const n = Math.min(aAligned.length, fitPred.length);
-  const aSlice = aAligned.slice(0, n), pSlice = fitPred.slice(0, n);
+  const aSlice = aAligned.slice(0,n), pSlice = fitPred.slice(0,n);
   const rStd = residStd(aSlice, pSlice);
   const maeV = mae(aSlice, pSlice);
   const rmseV = rmse(aSlice, pSlice);
   const mapeV = mape(aSlice, pSlice);
   const r2V = r2(aSlice, pSlice);
 
-  // Stats
   renderStats(computeStats(dataVals));
   renderACF(dataVals);
   renderDecomp(dataVals);
 
-  // Prediction panel
   const nextFore = foreVals[0];
   const lastActual = dataVals[N-1];
   const change = nextFore - lastActual;
   const ciLow = nextFore - ciZ * rStd;
   const ciHigh = nextFore + ciZ * rStd;
   document.getElementById('predValueDisplay').innerHTML = `
-    <div class="pred-value">${nextFore.toFixed(4)} <span style="font-size:1rem;color:${change>=0?'var(--green)':'var(--red)'};">${change>=0?'↑':' ↓'} ${Math.abs(change).toFixed(4)}</span></div>
-    <div class="pred-ci">${(ciZ===1.96?'95%':ciZ===1.645?'90%':'99%')} CI: [${ciLow.toFixed(4)},  ${ciHigh.toFixed(4)}] &nbsp;|&nbsp; CI Width: ±${(ciZ*rStd).toFixed(4)}</div>
-    <div style="margin-top:8px;font-size:0.82rem;color:var(--muted);">Model: <strong>${modelLabel}</strong> &nbsp;|&nbsp; Last actual: ${lastActual} &nbsp;|&nbsp; Residual σ = ${rStd.toFixed(4)}</div>
+    <div class="pred-value">${nextFore.toFixed(4)} <span style="font-size:1rem;color:${change>=0?'var(--green)':'var(--red)'};">${change>=0?'↑':'↓'} ${Math.abs(change).toFixed(4)}</span></div>
+    <div class="pred-ci">${(ciZ===1.96?'95%':ciZ===1.645?'90%':'99%')} CI: [${ciLow.toFixed(4)}, ${ciHigh.toFixed(4)}] | Width: ±${(ciZ*rStd).toFixed(4)}</div>
+    <div style="margin-top:8px;font-size:0.82rem;color:var(--muted);">Model: <strong>${modelLabel}</strong> | Last actual: ${lastActual} | Residual σ = ${rStd.toFixed(4)}</div>
   `;
   document.getElementById('predPanel').style.display = 'block';
 
-  // Chart data
   const labels = [...dataVals.map((_,i)=>'T'+(i+1)), ...foreVals.map((_,i)=>'F'+(i+1))];
   const actExt = [...dataVals, ...Array(foreVals.length).fill(null)];
   const fitExt = [...Array(offset).fill(null), ...fitPred, ...Array(foreVals.length).fill(null)];
   const foreExt = [...Array(N).fill(null), ...foreVals];
   const ciU = [...Array(N).fill(null), ...foreVals.map(v=>v+ciZ*rStd)];
-  const ciL = [...Array(N).fill(null), ...foreVals.map(v=>v-ciZ*rStd)];
+  const ciL2 = [...Array(N).fill(null), ...foreVals.map(v=>v-ciZ*rStd)];
 
-  drawMainChart(labels, actExt, fitExt, foreExt, ciU, ciL, modelLabel, modelType);
+  drawMainChart(labels, actExt, fitExt, foreExt, ciU, ciL2, modelLabel, modelType);
   buildForecastTable(foreVals, foreVals.map(v=>v-ciZ*rStd), foreVals.map(v=>v+ciZ*rStd), lastActual, ciZ, rStd);
   renderMetrics(maeV, rmseV, mapeV, r2V, rStd, N, modelLabel, ciZ);
+
+  // scroll to results on mobile
+  setTimeout(() => {
+    const panel = document.getElementById('predPanel');
+    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
 }
 
-// ──────────────────────────────────────────────────────────────
-// MAIN CHART
-// ──────────────────────────────────────────────────────────────
+// ── MAIN CHART ──
 function drawMainChart(labels, actual, fit, fore, ciU, ciL, modelName, modelType) {
   document.getElementById('chartWrap').style.display = 'block';
   if (mainChartObj) mainChartObj.destroy();
@@ -1572,15 +1683,15 @@ function drawMainChart(labels, actual, fit, fore, ciU, ciL, modelName, modelType
     data: {
       labels,
       datasets: [
-        { label: 'Actual', data: actual, borderColor: '#2b5ce6', backgroundColor: 'rgba(43,92,230,0.06)', borderWidth: 2, pointRadius: 2, tension: 0.35, fill: false, spanGaps: false },
+        { label: 'Actual', data: actual, borderColor: '#2b5ce6', backgroundColor: 'rgba(43,92,230,0.06)', borderWidth: 2, pointRadius: 1.5, tension: 0.35, fill: false, spanGaps: false },
         { label: modelName + ' Fit', data: fit, borderColor: fitColor, borderWidth: 2, borderDash: [6,4], pointRadius: 0, tension: 0.35, fill: false, spanGaps: false },
-        { label: 'Forecast', data: fore, borderColor: '#1a7a4a', borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: '#1a7a4a', tension: 0.35, fill: false, spanGaps: false },
+        { label: 'Forecast', data: fore, borderColor: '#1a7a4a', borderWidth: 2.5, pointRadius: 3, pointBackgroundColor: '#1a7a4a', tension: 0.35, fill: false, spanGaps: false },
         { label: 'CI Upper', data: ciU, borderColor: 'rgba(26,122,74,0.3)', borderWidth: 1, borderDash: [3,4], pointRadius: 0, fill: false, spanGaps: false },
         { label: 'CI Lower (95%)', data: ciL, borderColor: 'rgba(26,122,74,0.3)', borderWidth: 1, borderDash: [3,4], pointRadius: 0, backgroundColor: 'rgba(26,122,74,0.08)', fill: '-1', spanGaps: false }
       ]
     },
     options: {
-      responsive: true,
+      responsive: true, maintainAspectRatio: true,
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { labels: { color: '#3d3830', font: { family: 'DM Sans', size: 11 }, boxWidth: 14, usePointStyle: true } },
@@ -1591,23 +1702,20 @@ function drawMainChart(labels, actual, fit, fore, ciU, ciL, modelName, modelType
         }
       },
       scales: {
-        x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: '#8c8479', font: { family: 'DM Mono', size: 9 }, maxTicksLimit: 18 } },
+        x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: '#8c8479', font: { family: 'DM Mono', size: 9 }, maxTicksLimit: 14, maxRotation: 0 } },
         y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: '#8c8479', font: { family: 'DM Mono', size: 10 } } }
       }
     }
   });
 }
 
-// ──────────────────────────────────────────────────────────────
-// FORECAST TABLE
-// ──────────────────────────────────────────────────────────────
+// ── FORECAST TABLE ──
 function buildForecastTable(f, lo, hi, last, ciZ, rStd) {
   let rows = '';
   for (let i = 0; i < f.length; i++) {
-    const chg = i === 0 ? f[i] - last : f[i] - f[i-1];
-    const ciWidth = (ciZ * rStd * Math.sqrt(i + 1)).toFixed(4);
+    const chg = i === 0 ? f[i]-last : f[i]-f[i-1];
+    const ciWidth = (ciZ*rStd*Math.sqrt(i+1)).toFixed(4);
     const cls = chg >= 0 ? 'tg' : 'tr';
-    const dir = chg >= 0 ? '↑ Up' : '↓ Down';
     rows += `<tr>
       <td>+${i+1}</td>
       <td class="tg">${f[i].toFixed(4)}</td>
@@ -1615,16 +1723,14 @@ function buildForecastTable(f, lo, hi, last, ciZ, rStd) {
       <td class="tm">${hi[i].toFixed(4)}</td>
       <td class="tm">±${(hi[i]-lo[i]).toFixed(4)}</td>
       <td class="${cls}">${(chg>=0?'+':'')+chg.toFixed(4)}</td>
-      <td class="${cls}">${dir}</td>
+      <td class="${cls}">${chg>=0?'↑ Up':'↓ Down'}</td>
     </tr>`;
   }
   document.getElementById('forecastBody').innerHTML = rows;
   document.getElementById('forecastCard').style.display = 'block';
 }
 
-// ──────────────────────────────────────────────────────────────
-// METRICS
-// ──────────────────────────────────────────────────────────────
+// ── METRICS ──
 function renderMetrics(maeV, rmseV, mapeV, r2V, rStd, n, modelName, ciZ) {
   const q = mapeV < 5 ? 'Excellent' : mapeV < 15 ? 'Good' : mapeV < 30 ? 'Moderate' : 'Weak';
   const qc = mapeV < 5 ? 'val-green' : mapeV < 15 ? 'val-blue' : mapeV < 30 ? 'val-orange' : 'val-red';
@@ -1640,19 +1746,17 @@ function renderMetrics(maeV, rmseV, mapeV, r2V, rStd, n, modelName, ciZ) {
   `;
   document.getElementById('metricsInfo').innerHTML = `<div class="info-box">
     <strong>${modelName}</strong> achieves <strong style="color:var(--blue)">MAPE = ${mapeV.toFixed(2)}%</strong> and <strong>R² = ${r2V.toFixed(3)}</strong> (fit quality: <strong>${q}</strong>).
-    95% CI on each forecast step = ±${(ciZ*rStd).toFixed(4)} (= ${ciZ} × σ_residual).
-    <br><strong>Interpreting metrics:</strong>
-    MAE = average absolute error (same units as data, not penalising outliers).
-    RMSE = root mean squared error (penalises large errors heavily). RMSE > MAE always.
-    MAPE = percentage error — scale-free, useful for comparison across datasets. MAPE &lt; 10% = good forecasting.
-    R² = proportion of variance explained (1 = perfect, 0 = no better than mean).
+    95% CI on each step = ±${(ciZ*rStd).toFixed(4)} (= ${ciZ} × σ_residual).
+    <br><strong>Metrics:</strong>
+    MAE = average absolute error (same units as data).
+    RMSE = root mean squared error (penalises large errors).
+    MAPE = percentage error — scale-free; &lt;10% = good.
+    R² = variance explained (1 = perfect, 0 = no better than mean).
   </div>`;
   document.getElementById('metricsCard').style.display = 'block';
 }
 
-// ──────────────────────────────────────────────────────────────
-// CLEAR
-// ──────────────────────────────────────────────────────────────
+// ── CLEAR ──
 function clearLab() {
   if (mainChartObj) { mainChartObj.destroy(); mainChartObj = null; }
   if (acfChartObj) { acfChartObj.destroy(); acfChartObj = null; }
@@ -1662,9 +1766,7 @@ function clearLab() {
   });
 }
 
-// ──────────────────────────────────────────────────────────────
-// INIT
-// ──────────────────────────────────────────────────────────────
+// ── INIT ──
 calcAR();
 calcEMA();
 buildMATable();
